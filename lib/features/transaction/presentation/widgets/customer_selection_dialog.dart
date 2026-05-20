@@ -25,7 +25,7 @@ class CustomerSelectionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420, maxHeight: 560),
         child: Column(
@@ -33,14 +33,14 @@ class CustomerSelectionDialog extends StatelessWidget {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
+              padding: const EdgeInsets.fromLTRB(24, 24, 16, 0),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: _C.primaryLight,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       Icons.people_alt_rounded,
@@ -100,7 +100,7 @@ class CustomerSelectionDialog extends StatelessWidget {
             // Pelanggan Umum
             ListTile(
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
+                horizontal: 24,
                 vertical: 4,
               ),
               leading: Container(
@@ -134,7 +134,7 @@ class CustomerSelectionDialog extends StatelessWidget {
               },
             ),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
                   Expanded(child: Divider(color: _C.border)),
@@ -179,7 +179,7 @@ class CustomerSelectionDialog extends StatelessWidget {
                             posState.selectedCustomer?.id == c.id;
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
+                            horizontal: 24,
                             vertical: 2,
                           ),
                           leading: Container(
@@ -287,12 +287,12 @@ class _QuickAddCustomerDialogState extends State<QuickAddCustomerDialog> {
         builder: (blocCtx, state) {
           return Dialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(24),
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -303,7 +303,7 @@ class _QuickAddCustomerDialogState extends State<QuickAddCustomerDialog> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: _C.primaryLight,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
                             Icons.person_add_alt_1_rounded,
@@ -343,6 +343,12 @@ class _QuickAddCustomerDialogState extends State<QuickAddCustomerDialog> {
                           onPressed: state is QuickCustomerLoading
                               ? null
                               : () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                           child: const Text(
                             'Batal',
                             style: TextStyle(
@@ -366,12 +372,13 @@ class _QuickAddCustomerDialogState extends State<QuickAddCustomerDialog> {
                             backgroundColor: _C.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
+                              horizontal: 24,
                               vertical: 12,
                             ),
+                            elevation: 0,
                           ),
                           child: state is QuickCustomerLoading
                               ? const SizedBox(

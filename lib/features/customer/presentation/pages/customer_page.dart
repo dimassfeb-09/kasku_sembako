@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/customer_bloc.dart';
 import '../bloc/customer_event_state.dart';
-import '../bloc/debt_bloc.dart';
-import '../bloc/debt_event_state.dart';
+import '../../../debt/presentation/bloc/debt_bloc.dart';
+import '../../../debt/presentation/bloc/debt_event_state.dart';
 import '../widgets/customer_list_item.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -33,24 +33,32 @@ class _CustomerPageState extends State<CustomerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background, // Slate 50 Background
       appBar: AppBar(
-        title: const Text('Manajemen Pelanggan'),
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              icon: const Icon(Icons.add_rounded, size: 24),
-              onPressed: () {
-                context.push('/customers/add').then((_) {
-                  context.read<CustomerBloc>().add(LoadCustomersEvent());
-                });
-              },
-              tooltip: 'Tambah Pelanggan',
-            ),
+        title: const Text(
+          'Manajemen Pelanggan',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
           ),
-        ],
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onPressed: () {
+          context.push('/customers/add').then((_) {
+            context.read<CustomerBloc>().add(LoadCustomersEvent());
+          });
+        },
+        tooltip: 'Tambah Pelanggan',
+        child: const Icon(Icons.add_rounded, size: 28),
       ),
       body: MultiBlocListener(
         listeners: [
@@ -118,12 +126,15 @@ class _CustomerPageState extends State<CustomerPage> {
               return Column(
                 children: [
                   // Search Input Header
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    color: AppColors.white,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: TextField(
                       controller: _searchController,
                       onChanged: (value) => setState(() {}),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Cari nama atau nomor HP pelanggan...',
                         hintStyle: const TextStyle(
@@ -149,21 +160,21 @@ class _CustomerPageState extends State<CustomerPage> {
                               )
                             : null,
                         filled: true,
-                        fillColor: AppColors.surface,
+                        fillColor: AppColors.surface, // White textfield fill
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 10,
+                          vertical: 12,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
                             color: AppColors.primary,
                             width: 1.5,
@@ -172,28 +183,40 @@ class _CustomerPageState extends State<CustomerPage> {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, color: AppColors.border),
                   Expanded(
                     child: customers.isEmpty
                         ? Center(
                             child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(24),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Icon(
                                     Icons.people_outline_rounded,
-                                    size: 48,
+                                    size: 64,
                                     color: AppColors.textMuted,
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 16),
                                   Text(
                                     _searchController.text.isNotEmpty
-                                        ? 'Pelanggan tidak ditemukan'
-                                        : 'Belum ada pelanggan',
+                                        ? 'Pelanggan Tidak Ditemukan'
+                                        : 'Belum Ada Pelanggan',
+                                    style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    _searchController.text.isNotEmpty
+                                        ? 'Coba cari dengan kata kunci lain.'
+                                        : 'Tambahkan data pelanggan untuk mencatat transaksi dan riwayat hutang piutang.',
                                     style: const TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 13,
                                     ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
@@ -202,7 +225,7 @@ class _CustomerPageState extends State<CustomerPage> {
                         : ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 10,
+                              vertical: 4,
                             ),
                             itemCount: customers.length,
                             itemBuilder: (context, index) {

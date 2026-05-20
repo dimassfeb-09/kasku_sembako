@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../customer/domain/entities/customer_entity.dart';
-import '../../../product/domain/entities/category_entity.dart';
 import '../../../product/presentation/bloc/product_bloc.dart';
 import '../../../product/presentation/bloc/product_event.dart';
-import '../../../product/presentation/bloc/product_state.dart';
 import '../bloc/pos_bloc.dart';
 import '../bloc/pos_event_state.dart';
 import '../bloc/pos_setup_cubit.dart';
-import '../widgets/customer_bar.dart';
-import '../widgets/cart_item.dart' as mod_cart;
-import '../widgets/cart_summary.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../widgets/pos_dialogs.dart';
-import '../widgets/product_card.dart';
 import '../widgets/pos_product_catalog_pane.dart';
 import '../widgets/pos_cart_pane.dart';
 
@@ -154,31 +148,108 @@ class _PosPageState extends State<PosPage> {
       builder: (context, setupState) {
         if (setupState is PosSetupLoading) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator(color: _C.primary)),
-          );
-        }
-        if (setupState is PosSetupError) {
-          return Scaffold(
+            backgroundColor: _C.background,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Gagal memuat POS: ${setupState.message}',
-                    style: const TextStyle(color: _C.danger),
+                  Icon(
+                    Icons.point_of_sale_rounded,
+                    color: _C.primary,
+                    size: 64,
                   ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () => context.read<PosSetupCubit>().load(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _C.primary,
+                  SizedBox(height: 24),
+                  Text(
+                    'Menyiapkan Kasir...',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: _C.textPrimary,
                     ),
-                    child: const Text(
-                      'Coba Lagi',
-                      style: TextStyle(color: Colors.white),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Sedang memuat data produk dan pelanggan. Harap tunggu...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: _C.textSecondary,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      color: _C.primary,
+                      strokeWidth: 3,
                     ),
                   ),
                 ],
+              ),
+            ),
+          );
+        }
+        if (setupState is PosSetupError) {
+          return Scaffold(
+            backgroundColor: _C.background,
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.wifi_off_rounded,
+                      size: 64,
+                      color: _C.danger,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Gagal Menyiapkan Kasir',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Terjadi kesalahan saat memuat data: ${setupState.message}.\nSilakan periksa koneksi internet Anda atau coba lagi.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: _C.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => context.read<PosSetupCubit>().load(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _C.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Coba Memuat Lagi',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -188,7 +259,7 @@ class _PosPageState extends State<PosPage> {
           final customers = setupState.customers;
 
           return Scaffold(
-            backgroundColor: _C.surface,
+            backgroundColor: _C.background,
             appBar: AppBar(
               backgroundColor: _C.white,
               elevation: 0,
@@ -197,35 +268,49 @@ class _PosPageState extends State<PosPage> {
               title: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: _C.primaryLight,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.point_of_sale_rounded,
                       color: _C.primary,
-                      size: 18,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Kasir POS',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: _C.textPrimary,
-                    ),
+                  const SizedBox(width: 12),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Mesin Kasir',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: _C.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Siap melayani transaksi',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: _C.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               actions: [
                 Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.only(right: 12),
                   child: TextButton.icon(
                     onPressed: () => _showClearCartDialog(context),
                     icon: const Icon(
-                      Icons.delete_sweep_rounded,
+                      Icons.delete_outline_rounded,
                       size: 16,
                       color: _C.danger,
                     ),
@@ -241,7 +326,10 @@ class _PosPageState extends State<PosPage> {
                       backgroundColor: _C.dangerLight,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
-                        vertical: 6,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
@@ -260,7 +348,7 @@ class _PosPageState extends State<PosPage> {
                       backgroundColor: _C.danger,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   );
@@ -272,9 +360,7 @@ class _PosPageState extends State<PosPage> {
                       children: [
                         Expanded(
                           flex: 3,
-                          child: PosProductCatalogPane(
-                            categories: categories,
-                          ),
+                          child: PosProductCatalogPane(categories: categories),
                         ),
                         Container(width: 1, color: _C.border),
                         Expanded(
@@ -301,15 +387,18 @@ class _PosPageState extends State<PosPage> {
                         ),
                         decoration: BoxDecoration(
                           color: _C.white,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withOpacity(0.06),
                               blurRadius: 16,
                               offset: const Offset(0, -4),
                             ),
                           ],
                           border: const Border(
-                            top: BorderSide(color: _C.border),
+                            top: BorderSide(color: _C.borderLight, width: 1),
                           ),
                         ),
                         child: SafeArea(
@@ -321,18 +410,18 @@ class _PosPageState extends State<PosPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '$totalItems Item Terpilih',
+                                      '$totalItems Barang Terpilih',
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: _C.textSecondary,
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 4),
                                     Text(
                                       state.total.toRupiah(),
                                       style: const TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.w800,
                                         color: _C.primary,
                                       ),
@@ -346,7 +435,7 @@ class _PosPageState extends State<PosPage> {
                                   customers,
                                 ),
                                 icon: const Icon(
-                                  Icons.shopping_cart_checkout_rounded,
+                                  Icons.shopping_cart_rounded,
                                   size: 18,
                                 ),
                                 label: const Text(
@@ -364,7 +453,7 @@ class _PosPageState extends State<PosPage> {
                                     vertical: 12,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                   elevation: 0,
                                 ),

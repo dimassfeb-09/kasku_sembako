@@ -99,7 +99,7 @@ class _CheckoutBottomSheetContentState
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: _C.primaryLight,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -172,12 +172,20 @@ class _CheckoutBottomSheetContentState
                     decoration: InputDecoration(
                       labelText: 'Uang Diterima',
                       prefixText: 'Rp ',
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: _C.border),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: _C.primary, width: 1.5),
                       ),
                     ),
                     keyboardType: TextInputType.number,
@@ -217,7 +225,7 @@ class _CheckoutBottomSheetContentState
                                   width: 1,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -248,7 +256,7 @@ class _CheckoutBottomSheetContentState
                       color: cashReceived >= state.total
                           ? _C.successLight
                           : _C.dangerLight,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -296,7 +304,7 @@ class _CheckoutBottomSheetContentState
                       ),
                       decoration: BoxDecoration(
                         color: _C.successLight,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _C.success.withOpacity(0.3),
                           width: 1.5,
@@ -370,7 +378,7 @@ class _CheckoutBottomSheetContentState
                               ),
                               backgroundColor: _C.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                                 side: const BorderSide(color: _C.success),
                               ),
                             ),
@@ -391,7 +399,7 @@ class _CheckoutBottomSheetContentState
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: _C.dangerLight,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _C.danger.withOpacity(0.3),
                           width: 1.5,
@@ -463,7 +471,7 @@ class _CheckoutBottomSheetContentState
                                   vertical: 10,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
                             ),

@@ -12,11 +12,11 @@ import '../features/auth/data/datasources/auth_local_datasource.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/usecases/auth_usecases.dart';
-import '../features/auth/data/datasources/permission_local_datasource.dart';
-import '../features/auth/domain/repositories/permission_repository.dart';
-import '../features/auth/data/repositories/permission_repository_impl.dart';
-import '../features/auth/domain/usecases/get_user_permission_usecase.dart';
-import '../features/auth/presentation/bloc/permission_cubit.dart';
+import '../features/user_management/data/datasources/permission_local_datasource.dart';
+import '../features/user_management/domain/repositories/permission_repository.dart';
+import '../features/user_management/data/repositories/permission_repository_impl.dart';
+import '../features/user_management/domain/usecases/get_user_permission_usecase.dart';
+import '../features/user_management/presentation/bloc/permission_cubit.dart';
 
 import '../features/product/data/datasources/product_local_datasource.dart';
 import '../features/product/domain/repositories/product_repository.dart';
@@ -24,17 +24,17 @@ import '../features/product/data/repositories/product_repository_impl.dart';
 import '../features/product/domain/usecases/product_usecases.dart';
 import '../features/product/presentation/bloc/product_bloc.dart';
 
-import '../features/product/data/datasources/category_local_datasource.dart';
-import '../features/product/domain/repositories/category_repository.dart';
-import '../features/product/data/repositories/category_repository_impl.dart';
-import '../features/product/domain/usecases/category_usecases.dart';
-import '../features/product/presentation/bloc/category_bloc.dart';
+import '../features/category/data/datasources/category_local_datasource.dart';
+import '../features/category/domain/repositories/category_repository.dart';
+import '../features/category/data/repositories/category_repository_impl.dart';
+import '../features/category/domain/usecases/category_usecases.dart';
+import '../features/category/presentation/bloc/category_bloc.dart';
 
-import '../features/product/data/datasources/wholesale_price_local_datasource.dart';
-import '../features/product/domain/repositories/wholesale_price_repository.dart';
-import '../features/product/data/repositories/wholesale_price_repository_impl.dart';
-import '../features/product/domain/usecases/wholesale_price_usecases.dart';
-import '../features/product/presentation/bloc/wholesale_price_bloc.dart';
+import '../features/wholesale_price/data/datasources/wholesale_price_local_datasource.dart';
+import '../features/wholesale_price/domain/repositories/wholesale_price_repository.dart';
+import '../features/wholesale_price/data/repositories/wholesale_price_repository_impl.dart';
+import '../features/wholesale_price/domain/usecases/wholesale_price_usecases.dart';
+import '../features/wholesale_price/presentation/bloc/wholesale_price_bloc.dart';
 
 import '../features/stock/data/datasources/stock_local_datasource.dart';
 import '../features/stock/domain/repositories/stock_repository.dart';
@@ -48,17 +48,17 @@ import '../features/customer/data/datasources/customer_local_datasource.dart';
 import '../features/customer/domain/repositories/customer_repository.dart';
 import '../features/customer/data/repositories/customer_repository_impl.dart';
 import '../features/customer/domain/usecases/customer_usecases.dart';
-import '../features/customer/domain/usecases/debt_usecases.dart';
+import '../features/debt/domain/usecases/debt_usecases.dart';
 import '../features/customer/presentation/bloc/customer_bloc.dart';
 
-import '../features/customer/presentation/bloc/debt_bloc.dart';
+import '../features/debt/presentation/bloc/debt_bloc.dart';
 
 import '../features/transaction/data/repositories/transaction_repository_impl.dart';
 import '../features/transaction/domain/usecases/checkout_usecase.dart';
 import '../features/transaction/domain/usecases/get_transactions_usecase.dart';
 import '../features/transaction/domain/usecases/void_transaction_usecase.dart';
 import '../features/transaction/presentation/bloc/pos_bloc.dart';
-import '../features/transaction/presentation/bloc/report_bloc.dart';
+import '../features/report/presentation/bloc/report_bloc.dart';
 import '../features/transaction/presentation/bloc/quick_customer_cubit.dart';
 import '../features/transaction/presentation/bloc/pos_setup_cubit.dart';
 

@@ -18,13 +18,27 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade100),
+    // Generate soft pastel background color from the provided icon color
+    final Color pastelBgColor = color.withOpacity(0.1);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFF1F5F9), // Slate 100
+          width: 1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000), // Very soft ambient shadow
+            offset: Offset(0, 4),
+            blurRadius: 12,
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -38,15 +52,28 @@ class MetricCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      color: Color(0xFF64748B), // Slate 500
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                Icon(icon, color: color, size: 18),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: pastelBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 16,
+                  ),
+                ),
               ],
             ),
+            const SizedBox(height: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,19 +82,21 @@ class MetricCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: color == Colors.grey ? Colors.black87 : color,
+                    color: color == Colors.grey ? const Color(0xFF0F172A) : color,
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle ?? '',
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w600,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 11,
+                      color: Color(0xFF94A3B8), // Slate 400
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -79,3 +108,4 @@ class MetricCard extends StatelessWidget {
     );
   }
 }
+

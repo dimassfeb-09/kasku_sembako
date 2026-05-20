@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../../../features/product/domain/entities/product_entity.dart';
-import '../../../../features/product/domain/entities/wholesale_price_entity.dart';
+import '../../../../features/wholesale_price/domain/entities/wholesale_price_entity.dart';
 
 class CartItemEntity extends Equatable {
   final ProductEntity product;

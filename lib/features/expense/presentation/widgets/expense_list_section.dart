@@ -12,24 +12,25 @@ class ExpenseListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+      color: Colors.transparent,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
             'Riwayat Pengeluaran',
             style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
+              color: AppColors.textPrimary,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
           ),
           Text(
             '$groupedDays hari',
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -43,38 +44,37 @@ class ExpenseEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Icon(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
               Icons.money_off_rounded,
-              color: AppColors.textSecondary,
-              size: 36,
+              color: Color(0xFF94A3B8), // Slate 400 minimal stroke
+              size: 64,
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Belum ada pengeluaran',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: 16),
+            const Text(
+              'Belum Ada Pengeluaran',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Tap tombol Tambah untuk mencatat\npengeluaran operasional toko',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.5),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 6),
+            const Text(
+              'Catat pengeluaran operasional toko Anda di sini untuk memantau arus kas secara berkala.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -111,18 +111,18 @@ class ExpenseGroupedList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    dateKey,
+                    dateKey.toUpperCase(),
                     style: const TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.3,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   Text(
                     dayTotal.toRupiah(),
                     style: const TextStyle(
-                      color: AppColors.error,
+                      color: Color(0xFFEF4444), // Red 500
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
@@ -147,26 +147,52 @@ class ExpenseTile extends StatelessWidget {
 
   const ExpenseTile({required this.exp, required this.onDelete});
 
-  IconData _categoryIcon(String category) {
+  // Returns category icon and colors (bgColor, iconColor)
+  (IconData, Color, Color) _categoryConfig(String category) {
     switch (category.toLowerCase()) {
       case 'listrik':
-        return Icons.bolt_rounded;
+        return (
+          Icons.bolt_rounded,
+          const Color(0xFFFFFBEB),
+          const Color(0xFFD97706),
+        ); // Amber
       case 'air':
-        return Icons.water_drop_rounded;
+        return (
+          Icons.water_drop_rounded,
+          const Color(0xFFEFF6FF),
+          const Color(0xFF2563EB),
+        ); // Blue
       case 'gaji':
-        return Icons.people_rounded;
+        return (
+          Icons.people_rounded,
+          const Color(0xFFF0FDFA),
+          const Color(0xFF0D9488),
+        ); // Teal
       case 'sewa':
-        return Icons.home_rounded;
+        return (
+          Icons.home_rounded,
+          const Color(0xFFEEF2FF),
+          const Color(0xFF4F46E5),
+        ); // Indigo
       case 'transport':
-        return Icons.local_shipping_rounded;
+        return (
+          Icons.local_shipping_rounded,
+          const Color(0xFFFFF7ED),
+          const Color(0xFFEA580C),
+        ); // Orange
       default:
-        return Icons.receipt_outlined;
+        return (
+          Icons.receipt_outlined,
+          const Color(0xFFF8FAFC),
+          const Color(0xFF64748B),
+        ); // Slate (Default)
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final timeStr = DateFormat('HH:mm').format(exp.date);
+    final (icon, bgColor, iconColor) = _categoryConfig(exp.category);
 
     return Dismissible(
       key: Key(exp.id),
@@ -175,15 +201,15 @@ class ExpenseTile extends StatelessWidget {
       background: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.error.withOpacity(0.1),
+          color: const Color(0xFFFEF2F2), // Red 50
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.error.withOpacity(0.2)),
+          border: Border.all(color: const Color(0xFFFEE2E2)),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         child: const Icon(
           Icons.delete_outline_rounded,
-          color: AppColors.error,
+          color: Color(0xFFEF4444), // Red 500
           size: 22,
         ),
       ),
@@ -195,32 +221,27 @@ class ExpenseTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
+          color: Colors.white, // Surface white Card
+          borderRadius: BorderRadius.circular(16), // 16px corner radius
+          border: Border.all(
+            color: const Color(0xFFF1F5F9),
+          ), // Slate 100 border
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withOpacity(0.01),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Color(0x05000000), // Soft ambient shadow
+              blurRadius: 16,
+              offset: Offset(0, 4),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Icon
+            // Category Icon container with custom styled background
             Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _categoryIcon(exp.category),
-                color: AppColors.error,
-                size: 20,
-              ),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
             const SizedBox(width: 14),
             // Info
@@ -233,7 +254,7 @@ class ExpenseTile extends StatelessWidget {
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -282,16 +303,16 @@ class ExpenseTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Amount + delete
+            // Amount + delete button
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   exp.amount.toRupiah(),
                   style: const TextStyle(
-                    color: AppColors.error,
+                    color: Color(0xFFEF4444), // Red 500
                     fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -299,13 +320,12 @@ class ExpenseTile extends StatelessWidget {
                   icon: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: const Color(0xFFFEF2F2), // Red 50
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.border),
                     ),
                     child: const Icon(
                       Icons.delete_outline_rounded,
-                      color: AppColors.textSecondary,
+                      color: Color(0xFFEF4444), // Red 500
                       size: 16,
                     ),
                   ),
@@ -322,4 +342,3 @@ class ExpenseTile extends StatelessWidget {
     );
   }
 }
-

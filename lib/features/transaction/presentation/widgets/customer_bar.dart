@@ -71,6 +71,9 @@ class CustomerBar extends StatelessWidget {
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               backgroundColor: PosColors.primaryLight,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: Text(
               hasCustomer ? 'Ganti' : 'Pilih',

@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/customer_entity.dart';
-import '../../domain/entities/debt_payment_entity.dart';
+import '../../../debt/domain/entities/debt_payment_entity.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../datasources/customer_local_datasource.dart';
 import '../models/customer_model.dart';
-import '../models/debt_payment_model.dart';
+import '../../../debt/data/models/debt_payment_model.dart';
 
 class CustomerRepositoryImpl implements CustomerRepository {
   final CustomerLocalDataSource localDataSource;

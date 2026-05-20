@@ -121,8 +121,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Dialog(
-        child: Padding(
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: const Padding(
           padding: EdgeInsets.all(24.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -139,7 +140,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
     final rawReceipt = _generateMonospaceReceipt();
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: ConstrainedBox(
@@ -153,7 +154,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFFDFBF7), // Off-white premium
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.15),
@@ -163,7 +164,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -213,7 +214,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: const Color(0xFFF0EDE4)),
                             ),
                             child: Column(
@@ -271,7 +272,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         side: const BorderSide(color: Colors.white24),
                       ),
                     ),
@@ -297,9 +298,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 4,
+                      elevation: 0,
                     ),
                   ),
                 ),

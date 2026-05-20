@@ -50,9 +50,9 @@ class PosDialogs {
       context: context,
       barrierDismissible: true,
       builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -92,10 +92,16 @@ class PosDialogs {
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: _C.border),
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text(
                         'Batal',
-                        style: TextStyle(color: _C.textSecondary),
+                        style: TextStyle(
+                          color: _C.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -110,8 +116,15 @@ class PosDialogs {
                         backgroundColor: _C.danger,
                         foregroundColor: _C.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Kosongkan'),
+                      child: const Text(
+                        'Kosongkan',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
                 ],
@@ -188,7 +201,7 @@ class PosDialogs {
       context: context,
       barrierDismissible: true,
       builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -222,8 +235,8 @@ class PosDialogs {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: _C.surface,
-                  borderRadius: BorderRadius.circular(8),
+                  color: _C.background,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   'No. Struk: ${state.transaction.receiptNumber}',
@@ -248,10 +261,16 @@ class PosDialogs {
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: _C.border),
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text(
                         'Nanti',
-                        style: TextStyle(color: _C.textSecondary),
+                        style: TextStyle(
+                          color: _C.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -274,6 +293,10 @@ class PosDialogs {
                         backgroundColor: _C.primary,
                         foregroundColor: _C.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),

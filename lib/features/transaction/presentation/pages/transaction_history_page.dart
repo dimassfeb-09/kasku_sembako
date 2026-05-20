@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../auth/presentation/bloc/permission_cubit.dart';
-import '../bloc/report_bloc.dart';
+import '../../../user_management/presentation/bloc/permission_cubit.dart';
+import '../../../report/presentation/bloc/report_bloc.dart';
 import '../../domain/entities/transaction_entity.dart';
-import '../bloc/report_event_state.dart';
+import '../../../report/presentation/bloc/report_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/transaction_detail_bottom_sheet.dart';
 import '../widgets/transaction_history_filter_header.dart';
@@ -106,13 +106,23 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                             children: [
                               Icon(
                                 Icons.receipt_long_outlined,
-                                size: 48,
+                                size: 64,
                                 color: AppColors.textMuted,
                               ),
-                              SizedBox(height: 8),
+                              SizedBox(height: 12),
+                              Text(
+                                'Riwayat Transaksi Kosong',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 4),
                               Text(
                                 'Tidak ada transaksi pada periode ini.',
                                 style: TextStyle(
+                                  fontSize: 14,
                                   color: AppColors.textSecondary,
                                 ),
                               ),
@@ -150,7 +160,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       isScrollControlled: true,
       backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
         return TransactionDetailBottomSheet(

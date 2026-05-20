@@ -7,16 +7,16 @@ import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/auth_event.dart';
 import '../features/auth/presentation/bloc/auth_state.dart';
 import '../features/product/presentation/bloc/product_bloc.dart';
-import '../features/product/presentation/bloc/category_bloc.dart';
-import '../features/product/presentation/bloc/wholesale_price_bloc.dart';
+import '../features/category/presentation/bloc/category_bloc.dart';
+import '../features/wholesale_price/presentation/bloc/wholesale_price_bloc.dart';
 import '../features/customer/presentation/bloc/customer_bloc.dart';
-import '../features/customer/presentation/bloc/debt_bloc.dart';
+import '../features/debt/presentation/bloc/debt_bloc.dart';
 import '../features/stock/presentation/bloc/stock_bloc.dart';
 import '../features/transaction/presentation/bloc/pos_bloc.dart';
-import '../features/transaction/presentation/bloc/report_bloc.dart';
+import '../features/report/presentation/bloc/report_bloc.dart';
 import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/settings/presentation/bloc/printer_bloc.dart';
-import '../features/auth/presentation/bloc/permission_cubit.dart';
+import '../features/user_management/presentation/bloc/permission_cubit.dart';
 import '../features/expense/presentation/bloc/expense_bloc.dart';
 
 class App extends StatelessWidget {

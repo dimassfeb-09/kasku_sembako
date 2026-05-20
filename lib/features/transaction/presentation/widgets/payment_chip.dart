@@ -24,10 +24,11 @@ class PaymentChip extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? PosColors.primary : PosColors.surface,
-            borderRadius: BorderRadius.circular(10),
+            color: selected ? PosColors.primaryLight : PosColors.background,
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected ? PosColors.primary : PosColors.border,
+              width: selected ? 1.5 : 1.0,
             ),
           ),
           child: Column(
@@ -36,7 +37,7 @@ class PaymentChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 18,
-                color: selected ? PosColors.white : PosColors.textSecondary,
+                color: selected ? PosColors.primary : PosColors.textSecondary,
               ),
               const SizedBox(height: 4),
               Text(
@@ -44,7 +45,7 @@ class PaymentChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: selected ? PosColors.white : PosColors.textSecondary,
+                  color: selected ? PosColors.primary : PosColors.textSecondary,
                 ),
               ),
             ],

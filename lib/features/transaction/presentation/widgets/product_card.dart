@@ -195,114 +195,114 @@ class _ProductCardState extends State<ProductCard>
                             ),
                           )
                         : widget.currentQty > 0
-                            ? Container(
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: PosColors.primaryLight,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: PosColors.primary.withOpacity(0.15),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: InkWell(
-                                        onTap: widget.onDecrement == null
-                                            ? null
-                                            : _handleDecrement,
-                                        borderRadius: const BorderRadius.horizontal(
-                                          left: Radius.circular(8),
-                                        ),
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          child: Icon(
-                                            Icons.remove_rounded,
-                                            size: 18,
-                                            color: widget.onDecrement == null
-                                                ? PosColors.textMuted
-                                                : PosColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          '${widget.currentQty}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 13,
-                                            color: PosColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: InkWell(
-                                        onTap: widget.onIncrement == null
-                                            ? null
-                                            : _handleIncrement,
-                                        borderRadius: const BorderRadius.horizontal(
-                                          right: Radius.circular(8),
-                                        ),
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          child: Icon(
-                                            Icons.add_rounded,
-                                            size: 18,
-                                            color: widget.onIncrement == null
-                                                ? PosColors.textMuted
-                                                : PosColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : InkWell(
-                                onTap: _handleTap,
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: PosColors.primary,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: PosColors.primary.withOpacity(0.15),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.add_rounded,
-                                        size: 16,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Tambah',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                        ? Container(
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: PosColors.primaryLight,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: PosColors.primary.withOpacity(0.15),
+                                width: 0.8,
                               ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: InkWell(
+                                    onTap: widget.onDecrement == null
+                                        ? null
+                                        : _handleDecrement,
+                                    borderRadius: const BorderRadius.horizontal(
+                                      left: Radius.circular(8),
+                                    ),
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Icon(
+                                        Icons.remove_rounded,
+                                        size: 18,
+                                        color: widget.onDecrement == null
+                                            ? PosColors.textMuted
+                                            : PosColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${widget.currentQty}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 13,
+                                        color: PosColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 3,
+                                  child: InkWell(
+                                    onTap: widget.onIncrement == null
+                                        ? null
+                                        : _handleIncrement,
+                                    borderRadius: const BorderRadius.horizontal(
+                                      right: Radius.circular(8),
+                                    ),
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Icon(
+                                        Icons.add_rounded,
+                                        size: 18,
+                                        color: widget.onIncrement == null
+                                            ? PosColors.textMuted
+                                            : PosColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : InkWell(
+                            onTap: _handleTap,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: PosColors.primary,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: PosColors.primary.withOpacity(0.15),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Tambah',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                   ),
                 ],
               ),

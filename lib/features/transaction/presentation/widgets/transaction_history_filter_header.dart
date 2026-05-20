@@ -28,7 +28,7 @@ class TransactionHistoryFilterHeader extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: onTapFilterDate,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -36,7 +36,7 @@ class TransactionHistoryFilterHeader extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Row(
@@ -87,7 +87,7 @@ class TransactionHistoryFilterHeader extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

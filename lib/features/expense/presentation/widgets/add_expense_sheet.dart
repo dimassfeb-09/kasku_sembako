@@ -10,6 +10,7 @@ class AddExpenseSheet extends StatefulWidget {
   final VoidCallback onCancel;
 
   const AddExpenseSheet({
+    super.key,
     required this.categoryController,
     required this.amountController,
     required this.notesController,
@@ -31,6 +32,7 @@ class ExpenseDarkTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
 
   const ExpenseDarkTextField({
+    super.key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -48,8 +50,8 @@ class ExpenseDarkTextField extends StatelessWidget {
           label.toUpperCase(),
           style: const TextStyle(
             color: AppColors.textSecondary,
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
           ),
         ),
@@ -61,7 +63,7 @@ class ExpenseDarkTextField extends StatelessWidget {
           style: const TextStyle(
             color: AppColors.textPrimary,
             fontSize: 14,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: hint,
@@ -71,18 +73,18 @@ class ExpenseDarkTextField extends StatelessWidget {
             ),
             prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 18),
             filled: true,
-            fillColor: AppColors.surface,
+            fillColor: const Color(0xFFF8FAFC), // Slate 50 Background fill
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
-              vertical: 14,
+              vertical: 12,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderRadius: BorderRadius.circular(12), // 12px corners
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)), // Slate 200 border
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -113,8 +115,8 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: Colors.white, // Surface White
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)), // 24px top corner radius
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
@@ -129,7 +131,7 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: const Color(0xFFE2E8F0), // Slate 200
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -141,18 +143,18 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
               style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 20),
             // Quick category chips
             const Text(
-              'PILIH KATEGORI',
+              'PILIH KATEGORI CEPAT',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 10),
@@ -170,12 +172,12 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary : AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
+                      color: isSelected ? AppColors.primary : const Color(0xFFF8FAFC), // Teal or Slate 50
+                      borderRadius: BorderRadius.circular(20), // Pill chip
                       border: Border.all(
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.border,
+                            : const Color(0xFFE2E8F0), // Slate 200
                       ),
                     ),
                     child: Row(
@@ -239,17 +241,17 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                   child: OutlinedButton(
                     onPressed: widget.onCancel,
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)), // Slate 200
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12), // 12px corners
                       ),
                     ),
                     child: const Text(
                       'Batal',
                       style: TextStyle(
                         color: AppColors.textSecondary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
                     ),
@@ -261,18 +263,18 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                   child: ElevatedButton(
                     onPressed: widget.onSave,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: AppColors.primary, // Teal
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12), // 12px corners
                       ),
                     ),
                     child: const Text(
                       'Simpan Pengeluaran',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
                     ),

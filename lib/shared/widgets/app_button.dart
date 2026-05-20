@@ -25,28 +25,30 @@ class AppButton extends StatelessWidget {
       return OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          minimumSize: Size(buttonWidth, 50),
-          side: BorderSide(color: theme.colorScheme.primary),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: Size(buttonWidth, 44),
+          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+          foregroundColor: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
         ),
         child: isLoading 
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-            : Text(text),
+            : Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
       );
     }
 
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        minimumSize: Size(buttonWidth, 50),
+        minimumSize: Size(buttonWidth, 44),
         backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
       child: isLoading 
           ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-          : Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+          : Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
     );
   }
 }

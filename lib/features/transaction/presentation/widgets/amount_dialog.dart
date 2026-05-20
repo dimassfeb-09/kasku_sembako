@@ -25,9 +25,9 @@ class AmountDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,10 +35,10 @@ class AmountDialog extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: iconBg,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: iconColor, size: 18),
                 ),
@@ -53,13 +53,13 @@ class AmountDialog extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             AppInput(
               label: 'Jumlah (Rp)',
               controller: controller,
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
@@ -68,10 +68,13 @@ class AmountDialog extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: _C.border),
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text(
                       'Batal',
-                      style: TextStyle(color: _C.textSecondary),
+                      style: TextStyle(color: _C.textSecondary, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -86,8 +89,15 @@ class AmountDialog extends StatelessWidget {
                       backgroundColor: _C.primary,
                       foregroundColor: _C.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('Terapkan'),
+                    child: const Text(
+                      'Terapkan',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ],

@@ -25,12 +25,12 @@ class TransactionHistoryItem extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.01),
-            blurRadius: 6,
+            color: AppColors.black.withOpacity(0.04),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -68,17 +68,17 @@ class TransactionHistoryItem extends StatelessWidget {
             if (isVoided)
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
+                  horizontal: 8,
+                  vertical: 3,
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.dangerLight,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   'VOID',
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 9,
                     color: AppColors.danger,
                     fontWeight: FontWeight.w800,
                   ),
@@ -122,12 +122,12 @@ class TransactionHistoryItem extends StatelessWidget {
             const SizedBox(height: 4),
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 6,
+                horizontal: 8,
                 vertical: 2,
               ),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(4),
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: AppColors.border,
                   width: 0.5,

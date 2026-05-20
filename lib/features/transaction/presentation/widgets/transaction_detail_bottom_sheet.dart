@@ -36,14 +36,14 @@ class TransactionDetailBottomSheet extends StatelessWidget {
         return Container(
           decoration: const BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
               const SizedBox(height: 8),
               Container(
-                width: 36,
+                width: 40,
                 height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.border,
@@ -70,7 +70,7 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: AppColors.border),
                       ),
                       child: Column(
@@ -100,16 +100,16 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              Container(
+                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
+                                  horizontal: 10,
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: isVoided
                                       ? AppColors.dangerLight
                                       : AppColors.successLight,
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   isVoided ? 'BATAL (VOID)' : 'SUKSES',
@@ -245,10 +245,10 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
@@ -265,9 +265,9 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.danger,
                             side: const BorderSide(color: AppColors.danger),
-                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         )

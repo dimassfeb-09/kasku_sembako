@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../product/domain/entities/category_entity.dart';
-import '../../../product/presentation/bloc/product_bloc.dart';
-import '../../../product/presentation/bloc/product_event.dart';
-import '../../../product/presentation/bloc/product_state.dart';
-import '../bloc/pos_bloc.dart';
-import '../bloc/pos_event_state.dart';
+import 'package:kasirku_sembako/features/category/domain/entities/category_entity.dart';
+import 'package:kasirku_sembako/features/product/presentation/bloc/product_bloc.dart';
+import 'package:kasirku_sembako/features/product/presentation/bloc/product_state.dart';
+import 'package:kasirku_sembako/features/transaction/presentation/bloc/pos_bloc.dart';
+import 'package:kasirku_sembako/features/transaction/presentation/bloc/pos_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'product_card.dart';
 
@@ -14,10 +13,7 @@ typedef _C = AppColors;
 class PosProductCatalogPane extends StatefulWidget {
   final List<CategoryEntity> categories;
 
-  const PosProductCatalogPane({
-    super.key,
-    required this.categories,
-  });
+  const PosProductCatalogPane({super.key, required this.categories});
 
   @override
   State<PosProductCatalogPane> createState() => _PosProductCatalogPaneState();
@@ -25,11 +21,24 @@ class PosProductCatalogPane extends StatefulWidget {
 
 class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   String? _selectedCategoryId;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchFocusNode.addListener(_onSearchFocusChange);
+  }
+
+  void _onSearchFocusChange() {
+    setState(() {});
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.removeListener(_onSearchFocusChange);
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -74,6 +83,8 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
 
   @override
   Widget build(BuildContext context) {
+    final isSearchFocused = _searchFocusNode.hasFocus;
+
     return Column(
       children: [
         // Search bar
@@ -81,6 +92,7 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: TextField(
             controller: _searchController,
+            focusNode: _searchFocusNode,
             decoration: InputDecoration(
               hintText: 'Cari produk atau scan barcode...',
               hintStyle: const TextStyle(color: _C.textMuted, fontSize: 14),
@@ -99,7 +111,7 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
                     )
                   : null,
               filled: true,
-              fillColor: _C.white,
+              fillColor: isSearchFocused ? _C.white : const Color(0xFFF8FAFC),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
@@ -141,33 +153,27 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
                     _selectedCategoryId = isAll ? null : category!.id;
                   }),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 150),
                     curve: Curves.easeInOut,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? _C.primary : _C.white,
-                      borderRadius: BorderRadius.circular(10),
+                      color: isSelected ? _C.white : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: _C.primary.withOpacity(0.22),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ]
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.02),
+                                color: Colors.black.withOpacity(0.05),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
-                            ],
+                            ]
+                          : null,
                       border: Border.all(
-                        color: isSelected ? _C.primary : _C.border,
-                        width: 1,
+                        color: isSelected ? _C.primary : _C.borderLight,
+                        width: isSelected ? 1.5 : 1,
                       ),
                     ),
                     child: Row(
@@ -176,7 +182,7 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
                         Icon(
                           _getCategoryIcon(isAll ? null : category!.name),
                           size: 14,
-                          color: isSelected ? _C.white : _C.textSecondary,
+                          color: isSelected ? _C.primary : _C.textSecondary,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -186,7 +192,7 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
                             fontWeight: isSelected
                                 ? FontWeight.w800
                                 : FontWeight.w600,
-                            color: isSelected ? _C.white : _C.textPrimary,
+                            color: isSelected ? _C.primary : _C.textSecondary,
                           ),
                         ),
                       ],
@@ -288,13 +294,13 @@ class _PosProductCatalogPaneState extends State<PosProductCatalogPane> {
                           onTap: isMaxStockReached
                               ? null
                               : () => context.read<PosBloc>().add(
-                                    AddToCartEvent(product),
-                                  ),
+                                  AddToCartEvent(product),
+                                ),
                           onIncrement: isMaxStockReached
                               ? null
                               : () => context.read<PosBloc>().add(
-                                    AddToCartEvent(product),
-                                  ),
+                                  AddToCartEvent(product),
+                                ),
                           onDecrement: !isInCart
                               ? null
                               : () {

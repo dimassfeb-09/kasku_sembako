@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../../product/domain/entities/category_entity.dart';
+import '../../../category/domain/entities/category_entity.dart';
 import '../../../customer/domain/entities/customer_entity.dart';
-import '../../../product/domain/usecases/category_usecases.dart';
+import '../../../category/domain/usecases/category_usecases.dart';
 import '../../../customer/domain/usecases/customer_usecases.dart';
 
 abstract class PosSetupState extends Equatable {

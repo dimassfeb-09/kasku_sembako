@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import '../../../product/domain/entities/product_entity.dart';
-import '../../../product/domain/entities/wholesale_price_entity.dart';
+import '../../../wholesale_price/domain/entities/wholesale_price_entity.dart';
 import '../bloc/pos_bloc.dart';
 import '../bloc/pos_event_state.dart';
 
@@ -14,10 +14,7 @@ typedef _C = AppColors;
 class QtyEditDialog extends StatefulWidget {
   final CartItemEntity item;
 
-  const QtyEditDialog({
-    super.key,
-    required this.item,
-  });
+  const QtyEditDialog({super.key, required this.item});
 
   @override
   State<QtyEditDialog> createState() => _QtyEditDialogState();
@@ -79,13 +76,11 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
     final isExceedingStock = currentQty > product.stock;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 340),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -148,9 +143,7 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                       Wrap(
                         spacing: 4,
                         runSpacing: 4,
-                        children: widget.item.wholesalePrices.map<Widget>((
-                          wp,
-                        ) {
+                        children: widget.item.wholesalePrices.map<Widget>((wp) {
                           final isActive = currentQty >= wp.minQty;
                           return Container(
                             padding: const EdgeInsets.symmetric(
@@ -198,21 +191,26 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              constraints: const BoxConstraints(),
-                              padding: const EdgeInsets.all(4),
-                              icon: const Icon(
-                                Icons.remove_circle_outline_rounded,
-                                color: _C.danger,
-                                size: 26,
-                              ),
-                              onPressed: () {
+                            GestureDetector(
+                              onTap: () {
                                 if (currentQty > 0) {
                                   controller.text = (currentQty - 1).toString();
                                 }
                               },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: _C.border),
+                                ),
+                                child: const Icon(
+                                  Icons.remove,
+                                  size: 16,
+                                  color: _C.textPrimary,
+                                ),
+                              ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 12),
                             SizedBox(
                               width: 60,
                               child: TextField(
@@ -223,7 +221,9 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w800,
-                                  color: isExceedingStock ? _C.danger : _C.primary,
+                                  color: isExceedingStock
+                                      ? _C.danger
+                                      : _C.primary,
                                 ),
                                 decoration: const InputDecoration(
                                   isDense: true,
@@ -238,20 +238,25 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              constraints: const BoxConstraints(),
-                              padding: const EdgeInsets.all(4),
-                              icon: const Icon(
-                                Icons.add_circle_outline_rounded,
-                                color: _C.success,
-                                size: 26,
-                              ),
-                              onPressed: () {
+                            const SizedBox(width: 12),
+                            GestureDetector(
+                              onTap: () {
                                 if (currentQty < product.stock) {
                                   controller.text = (currentQty + 1).toString();
                                 }
                               },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: _C.primary,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 16,
+                                  color: _C.white,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -298,11 +303,13 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                                   children: [
                                     if (isWholesaleApplied) ...[
                                       Text(
-                                        (product.sellingPrice as num).toRupiah(),
+                                        (product.sellingPrice as num)
+                                            .toRupiah(),
                                         style: const TextStyle(
                                           fontSize: 11,
                                           color: _C.textMuted,
-                                          decoration: TextDecoration.lineThrough,
+                                          decoration:
+                                              TextDecoration.lineThrough,
                                         ),
                                       ),
                                       const SizedBox(width: 6),
@@ -425,13 +432,13 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
 
                   return Material(
                     color: _C.white,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     child: InkWell(
                       onTap: callback,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: _C.border),
                         ),
                         child: Center(child: childChild),
@@ -451,12 +458,15 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                         side: const BorderSide(color: _C.border),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       child: const Text(
                         'Batal',
-                        style: TextStyle(color: _C.textSecondary),
+                        style: TextStyle(
+                          color: _C.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -472,10 +482,7 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                                 );
                               } else {
                                 context.read<PosBloc>().add(
-                                  UpdateCartItemQtyEvent(
-                                    product,
-                                    currentQty,
-                                  ),
+                                  UpdateCartItemQtyEvent(product, currentQty),
                                 );
                               }
                               Navigator.pop(context);
@@ -485,7 +492,7 @@ class _QtyEditDialogState extends State<QtyEditDialog> {
                         foregroundColor: _C.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 0,
                       ),

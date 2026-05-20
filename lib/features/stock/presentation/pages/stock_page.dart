@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../product/presentation/bloc/category_bloc.dart';
-import '../../../product/presentation/bloc/category_event_state.dart';
+import '../../../category/presentation/bloc/category_bloc.dart';
+import '../../../category/presentation/bloc/category_event_state.dart';
 import '../../../product/presentation/bloc/product_bloc.dart';
 import '../../../product/presentation/bloc/product_event.dart';
 import '../../../product/presentation/bloc/product_state.dart';

@@ -73,17 +73,17 @@ class CartSummary extends StatelessWidget {
               Expanded(
                 child: Material(
                   color: hasDiscount ? PosColors.dangerLight : PosColors.surface,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: onDiscountTap,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: hasDiscount
                               ? PosColors.danger.withOpacity(0.3)
@@ -153,17 +153,17 @@ class CartSummary extends StatelessWidget {
               Expanded(
                 child: Material(
                   color: hasTax ? PosColors.successLight : PosColors.surface,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: onTaxTap,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: hasTax
                               ? PosColors.success.withOpacity(0.3)
@@ -237,7 +237,7 @@ class CartSummary extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: PosColors.primaryLight,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

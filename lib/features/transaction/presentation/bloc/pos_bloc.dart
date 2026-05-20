@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import '../../domain/usecases/checkout_usecase.dart';
-import '../../../product/domain/usecases/wholesale_price_usecases.dart';
+import '../../../wholesale_price/domain/usecases/wholesale_price_usecases.dart';
 import 'pos_event_state.dart';
 
 class PosBloc extends Bloc<PosEvent, PosState> {

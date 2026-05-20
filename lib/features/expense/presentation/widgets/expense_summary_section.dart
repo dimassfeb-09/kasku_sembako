@@ -19,28 +19,18 @@ class ExpenseSummarySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: Colors.transparent, // Blends into Slate 50 background
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Total all-time
+          // Total all-time (Red 50 / Red 100 soft themed container)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.error.withOpacity(0.08),
-                  AppColors.error.withOpacity(0.02),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.error.withOpacity(0.15)),
+              color: const Color(0xFFFEF2F2), // Red 50
+              borderRadius: BorderRadius.circular(16), // 16px corners
+              border: Border.all(color: const Color(0xFFFEE2E2), width: 1), // Red 100 border
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -51,10 +41,10 @@ class ExpenseSummarySection extends StatelessWidget {
                     const Text(
                       'TOTAL PENGELUARAN',
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: Color(0xFFB91C1C), // Red 700
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -71,9 +61,9 @@ class ExpenseSummarySection extends StatelessWidget {
                 Text(
                   totalAll.toRupiah(),
                   style: const TextStyle(
-                    color: AppColors.error,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
+                    color: Color(0xFFDC2626), // Red 600
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -88,21 +78,24 @@ class ExpenseSummarySection extends StatelessWidget {
                 label: 'Hari Ini',
                 value: totalToday.toRupiah(),
                 icon: Icons.today_rounded,
-                color: AppColors.warning,
+                color: const Color(0xFFF59E0B), // Amber 500
+                bgColor: const Color(0xFFFFFBEB), // Amber 50
               ),
               const SizedBox(width: 8),
               ExpenseMiniMetric(
                 label: 'Bulan Ini',
                 value: totalThisMonth.toRupiah(),
                 icon: Icons.calendar_month_rounded,
-                color: AppColors.primary,
+                color: AppColors.primary, // Teal
+                bgColor: const Color(0xFFF0FDFA), // Teal 50
               ),
               const SizedBox(width: 8),
               ExpenseMiniMetric(
                 label: 'Catatan',
                 value: '$itemCount Item',
                 icon: Icons.receipt_long_rounded,
-                color: AppColors.success,
+                color: const Color(0xFF10B981), // Green 500
+                bgColor: const Color(0xFFECFDF5), // Green 50
               ),
             ],
           ),
@@ -117,12 +110,14 @@ class ExpenseMiniMetric extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final Color bgColor;
 
   const ExpenseMiniMetric({
     required this.label,
     required this.value,
     required this.icon,
     required this.color,
+    required this.bgColor,
   });
 
   @override
@@ -131,9 +126,16 @@ class ExpenseMiniMetric extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Colors.white, // Surface white Card
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: const Color(0xFFF1F5F9)), // Slate 100 border
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x05000000), // Soft ambient shadow
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +145,7 @@ class ExpenseMiniMetric extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: bgColor, // Custom light background
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: color, size: 10),
@@ -155,7 +157,7 @@ class ExpenseMiniMetric extends StatelessWidget {
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -168,8 +170,8 @@ class ExpenseMiniMetric extends StatelessWidget {
               value,
               style: const TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
                 letterSpacing: -0.2,
               ),
               maxLines: 1,

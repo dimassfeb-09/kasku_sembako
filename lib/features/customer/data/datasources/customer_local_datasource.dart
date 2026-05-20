@@ -5,7 +5,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../models/customer_model.dart';
-import '../models/debt_payment_model.dart';
+import '../../../debt/data/models/debt_payment_model.dart';
 
 abstract class CustomerLocalDataSource {
   Future<List<CustomerModel>> getCustomers();

@@ -32,15 +32,15 @@ class AppTheme {
         elevation: 0,
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(color: AppColors.border, width: 1),
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.borderLight, width: 1),
         ),
       ),
       dialogTheme: DialogThemeData(
         elevation: 0,
         backgroundColor: AppColors.background,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           side: const BorderSide(color: AppColors.border, width: 1),
         ),
       ),
@@ -49,7 +49,7 @@ class AppTheme {
           elevation: 0,
           foregroundColor: Colors.white,
           backgroundColor: AppColors.primary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
@@ -62,7 +62,7 @@ class AppTheme {
           elevation: 0,
           foregroundColor: AppColors.textPrimary,
           side: const BorderSide(color: AppColors.border, width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,

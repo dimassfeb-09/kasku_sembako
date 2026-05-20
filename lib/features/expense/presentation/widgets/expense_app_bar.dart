@@ -8,7 +8,7 @@ class ExpenseAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: const Icon(
@@ -26,7 +26,7 @@ class ExpenseAppBar extends StatelessWidget implements PreferredSizeWidget {
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 16,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               letterSpacing: -0.3,
             ),
           ),
@@ -39,10 +39,6 @@ class ExpenseAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ],
-      ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: AppColors.border),
       ),
     );
   }
@@ -62,13 +58,13 @@ class ExpenseFAB extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          color: AppColors.primary, // Teal
+          borderRadius: BorderRadius.circular(12), // 12px soft rounded corners
+          boxShadow: const [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: Color(0x330D9488), // Ambient teal shadow
+              blurRadius: 16,
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -81,7 +77,7 @@ class ExpenseFAB extends StatelessWidget {
               'Catat Pengeluaran',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
             ),

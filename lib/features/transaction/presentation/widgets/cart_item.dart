@@ -59,15 +59,15 @@ class CartItem extends StatelessWidget {
                   ],
                 ),
                 if (item.unitPrice < item.product.sellingPrice) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
+                      horizontal: 8,
+                      vertical: 3,
                     ),
                     decoration: BoxDecoration(
                       color: PosColors.successLight,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -119,18 +119,33 @@ class CartItem extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _QtyButton(
-                    icon: Icons.remove_rounded,
+                  InkWell(
                     onTap: onDecrement,
-                    iconColor: PosColors.danger,
-                    bgColor: PosColors.dangerLight,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: PosColors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: PosColors.border,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.remove_rounded,
+                        size: 16,
+                        color: PosColors.textPrimary,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   GestureDetector(
                     onTap: onQtyTap,
                     child: Container(
-                      width: 48,
-                      height: 36,
+                      width: 44,
+                      height: 32,
                       decoration: BoxDecoration(
                         color: PosColors.surface,
                         borderRadius: BorderRadius.circular(8),
@@ -143,18 +158,18 @@ class CartItem extends StatelessWidget {
                             child: Text(
                               '${item.quantity}',
                               style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
                                 color: PosColors.textPrimary,
                               ),
                             ),
                           ),
                           Positioned(
-                            right: 4,
-                            bottom: 4,
+                            right: 3,
+                            bottom: 3,
                             child: Icon(
                               Icons.edit_rounded,
-                              size: 10,
+                              size: 8,
                               color: PosColors.textSecondary.withOpacity(0.5),
                             ),
                           ),
@@ -162,50 +177,29 @@ class CartItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  _QtyButton(
-                    icon: Icons.add_rounded,
+                  const SizedBox(width: 6),
+                  InkWell(
                     onTap: onIncrement,
-                    iconColor: PosColors.success,
-                    bgColor: PosColors.successLight,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: PosColors.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _QtyButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color iconColor;
-  final Color bgColor;
-
-  const _QtyButton({
-    required this.icon,
-    required this.onTap,
-    required this.iconColor,
-    required this.bgColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: bgColor,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: Container(
-          width: 36,
-          height: 36,
-          alignment: Alignment.center,
-          child: Icon(icon, size: 18, color: iconColor),
-        ),
       ),
     );
   }
@@ -218,29 +212,36 @@ class EmptyCart extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.shopping_bag_outlined,
-              size: 36,
-              color: PosColors.textMuted,
-            ),
-            SizedBox(height: 6),
-            Text(
-              'Keranjang masih kosong',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: PosColors.textSecondary,
-                fontSize: 12,
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.shopping_bag_outlined,
+                size: 64,
+                color: PosColors.textMuted,
               ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              'Tap produk untuk menambahkan',
-              style: TextStyle(fontSize: 11, color: PosColors.textMuted),
-            ),
-          ],
+              SizedBox(height: 12),
+              Text(
+                'Keranjang Masih Kosong',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: PosColors.textPrimary,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Tap produk di katalog untuk menambahkan',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: PosColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

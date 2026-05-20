@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/customer_entity.dart';
-import '../entities/debt_payment_entity.dart';
+import '../../../debt/domain/entities/debt_payment_entity.dart';
 
 abstract class CustomerRepository {
   Future<Either<Failure, List<CustomerEntity>>> getCustomers();
