@@ -177,10 +177,12 @@ class PosBloc extends Bloc<PosEvent, PosState> {
     // Validasi stok terlebih dahulu sebelum memproses checkout
     for (var item in state.cartItems) {
       if (item.quantity > item.product.stock) {
-        emit(PosError(
-          'Stok produk "${item.product.name}" tidak mencukupi (Tersedia: ${item.product.stock}, Diminta: ${item.quantity}).',
-          state,
-        ));
+        emit(
+          PosError(
+            'Stok produk "${item.product.name}" tidak mencukupi (Tersedia: ${item.product.stock}, Diminta: ${item.quantity}).',
+            state,
+          ),
+        );
         return;
       }
     }

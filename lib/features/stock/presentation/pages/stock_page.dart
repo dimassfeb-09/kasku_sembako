@@ -34,8 +34,6 @@ class _StockPageState extends State<StockPage> {
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

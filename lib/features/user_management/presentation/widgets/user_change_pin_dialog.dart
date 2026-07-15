@@ -42,9 +42,7 @@ class _UserChangePinDialogState extends State<UserChangePinDialog> {
 
     if (!PinUtils.isValidPin(pin)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('PIN harus berupa angka dan minimal 4 digit'),
-        ),
+        const SnackBar(content: Text('PIN harus berupa 6 digit angka')),
       );
       return;
     }
@@ -52,9 +50,18 @@ class _UserChangePinDialogState extends State<UserChangePinDialog> {
     setState(() => _isSaving = true);
 
     try {
-      await (widget.db.update(widget.db.users)
-            ..where((u) => u.id.equals(widget.user.id)))
-          .write(UsersCompanion(pinHash: Value(PinUtils.hashPin(pin))));
+      final salt = PinUtils.generateSalt();
+      await (widget.db.update(
+        widget.db.users,
+      )..where((u) => u.id.equals(widget.user.id))).write(
+        UsersCompanion(
+          pinHash: Value(PinUtils.hashPinWithSalt(pin, salt)),
+          pinSalt: Value(salt),
+          // Reset any lockout when an admin manually sets a new PIN.
+          failedPinAttempts: const Value(0),
+          lockedUntil: const Value(null),
+        ),
+      );
 
       if (mounted) {
         Navigator.pop(context);

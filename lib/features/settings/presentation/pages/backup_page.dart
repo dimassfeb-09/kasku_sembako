@@ -25,13 +25,10 @@ class BackupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<BackupBloc>(create: (_) => sl<BackupBloc>()),
-        BlocProvider<SubscriptionCubit>(
-          create: (_) => sl<SubscriptionCubit>()..loadStatus(),
-        ),
-      ],
+    // SubscriptionCubit is provided app-wide (see app.dart); only BackupBloc is
+    // page-scoped here.
+    return BlocProvider<BackupBloc>(
+      create: (_) => sl<BackupBloc>(),
       child: const _BackupPageBody(),
     );
   }
@@ -180,6 +177,8 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
 
     if (confirm != true) return;
 
+    if (!await _confirmAdminAccountChanges(json)) return;
+
     try {
       await sl<ActivityLogService>().log(
         action: 'RESTORE',
@@ -211,6 +210,54 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal memulihkan data: $e')));
     }
+  }
+
+  /// Warns explicitly, by username, if restoring [json] would introduce an
+  /// admin account this device doesn't currently recognize (a brand-new
+  /// username, or an existing username being promoted to admin) — a backup
+  /// file is otherwise trusted and applied silently, which is exactly what
+  /// a hand-crafted malicious backup would rely on to plant a backdoor
+  /// admin account. Returns true if it's safe to proceed (no such accounts,
+  /// or the admin explicitly acknowledged them).
+  Future<bool> _confirmAdminAccountChanges(Map<String, dynamic> json) async {
+    final incomingAdmins = DatabaseJsonCodec.adminUsernamesIn(json);
+    if (incomingAdmins.isEmpty) return true;
+
+    final currentAdmins =
+        (await (sl<AppDatabase>().select(
+              sl<AppDatabase>().users,
+            )..where((u) => u.role.equals('admin'))).get())
+            .map((u) => u.username)
+            .toSet();
+
+    final newOrChangedAdmins = incomingAdmins.difference(currentAdmins);
+    if (newOrChangedAdmins.isEmpty) return true;
+
+    if (!mounted) return false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Peringatan: Akun Admin Baru Terdeteksi'),
+        content: Text(
+          'Berkas ini akan menambahkan atau menaikkan akun berikut menjadi ADMIN, '
+          'yang tidak dikenali sebagai admin pada data Anda saat ini:\n\n'
+          '${newOrChangedAdmins.map((u) => '• $u').join('\n')}\n\n'
+          'Hanya lanjutkan jika Anda mengenali dan mempercayai sumber berkas ini.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Saya Mengerti, Lanjutkan'),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
   }
 
   @override

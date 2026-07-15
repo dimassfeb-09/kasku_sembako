@@ -21,9 +21,21 @@ type Dependencies struct {
 }
 
 func NewRouter(deps Dependencies) *fiber.App {
-	app := fiber.New(fiber.Config{
+	fiberConfig := fiber.Config{
 		BodyLimit: int(deps.Config.BackupMaxSizeBytes),
-	})
+	}
+	// Only trust X-Forwarded-For from an explicitly configured reverse
+	// proxy. Left unset (the default), c.IP()/the rate limiter's key
+	// function fall back to the direct TCP peer - safe, but means every
+	// request behind an unconfigured reverse proxy collapses onto the
+	// proxy's own IP for rate-limiting purposes. Set TRUSTED_PROXIES once
+	// this is actually deployed behind one.
+	if len(deps.Config.TrustedProxies) > 0 {
+		fiberConfig.EnableTrustedProxyCheck = true
+		fiberConfig.TrustedProxies = deps.Config.TrustedProxies
+		fiberConfig.ProxyHeader = fiber.HeaderXForwardedFor
+	}
+	app := fiber.New(fiberConfig)
 
 	app.Use(recover.New())
 	app.Use(logger.New())

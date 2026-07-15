@@ -39,7 +39,7 @@ class PermissionCubit extends Cubit<PermissionState> {
   final GetUserPermissionUseCase getUserPermissionUseCase;
 
   PermissionCubit({required this.getUserPermissionUseCase})
-      : super(PermissionInitial());
+    : super(PermissionInitial());
 
   Future<void> checkPermissions({
     required String role,
@@ -54,7 +54,8 @@ class PermissionCubit extends Cubit<PermissionState> {
     final result = await getUserPermissionUseCase(userId);
     result.fold(
       (failure) => emit(PermissionError(failure.message)),
-      (permission) => emit(PermissionLoaded(permission: permission, isAdmin: false)),
+      (permission) =>
+          emit(PermissionLoaded(permission: permission, isAdmin: false)),
     );
   }
 }

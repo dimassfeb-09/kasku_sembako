@@ -30,16 +30,16 @@ class TransactionEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        receiptNumber,
-        cashierId,
-        customerId,
-        totalAmount,
-        discount,
-        tax,
-        paymentMethod,
-        status,
-        createdAt,
-        items,
-      ];
+    id,
+    receiptNumber,
+    cashierId,
+    customerId,
+    totalAmount,
+    discount,
+    tax,
+    paymentMethod,
+    status,
+    createdAt,
+    items,
+  ];
 }

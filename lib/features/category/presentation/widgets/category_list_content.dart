@@ -9,10 +9,7 @@ import 'category_list_item.dart';
 class CategoryListContent extends StatefulWidget {
   final List<CategoryEntity> categories;
 
-  const CategoryListContent({
-    super.key,
-    required this.categories,
-  });
+  const CategoryListContent({super.key, required this.categories});
 
   @override
   State<CategoryListContent> createState() => _CategoryListContentState();
@@ -132,7 +129,9 @@ class _CategoryListContentState extends State<CategoryListContent> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            query.isNotEmpty ? 'Kategori Tidak Ditemukan' : 'Belum Ada Kategori',
+                            query.isNotEmpty
+                                ? 'Kategori Tidak Ditemukan'
+                                : 'Belum Ada Kategori',
                             style: const TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 16,
@@ -160,7 +159,8 @@ class _CategoryListContentState extends State<CategoryListContent> {
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: filteredCategories.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       return CategoryListItem(
                         category: filteredCategories[index],

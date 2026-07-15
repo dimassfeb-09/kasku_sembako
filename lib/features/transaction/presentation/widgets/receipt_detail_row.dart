@@ -5,11 +5,7 @@ class ReceiptDetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const ReceiptDetailRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const ReceiptDetailRow({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

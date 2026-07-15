@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -31,7 +32,12 @@ func (h *BackupHandler) Upload(c *fiber.Ctx) error {
 
 	backup, err := h.backups.Upload(c.Context(), userID, json.RawMessage(body))
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		// Only validation errors are safe to echo back verbatim - anything
+		// else (e.g. a storage-layer failure) could leak internal details.
+		if errors.Is(err, usecase.ErrInvalidBackupPayload) {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to upload backup")
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{

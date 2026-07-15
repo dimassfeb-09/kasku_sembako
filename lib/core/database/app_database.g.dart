@@ -40,6 +40,17 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pinSaltMeta = const VerificationMeta(
+    'pinSalt',
+  );
+  @override
+  late final GeneratedColumn<String> pinSalt = GeneratedColumn<String>(
+    'pin_salt',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _roleMeta = const VerificationMeta('role');
   @override
   late final GeneratedColumn<String> role = GeneratedColumn<String>(
@@ -64,8 +75,40 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _failedPinAttemptsMeta = const VerificationMeta(
+    'failedPinAttempts',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, username, pinHash, role, isActive];
+  late final GeneratedColumn<int> failedPinAttempts = GeneratedColumn<int>(
+    'failed_pin_attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lockedUntilMeta = const VerificationMeta(
+    'lockedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lockedUntil = GeneratedColumn<DateTime>(
+    'locked_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    username,
+    pinHash,
+    pinSalt,
+    role,
+    isActive,
+    failedPinAttempts,
+    lockedUntil,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -99,6 +142,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     } else if (isInserting) {
       context.missing(_pinHashMeta);
     }
+    if (data.containsKey('pin_salt')) {
+      context.handle(
+        _pinSaltMeta,
+        pinSalt.isAcceptableOrUnknown(data['pin_salt']!, _pinSaltMeta),
+      );
+    }
     if (data.containsKey('role')) {
       context.handle(
         _roleMeta,
@@ -111,6 +160,24 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       context.handle(
         _isActiveMeta,
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('failed_pin_attempts')) {
+      context.handle(
+        _failedPinAttemptsMeta,
+        failedPinAttempts.isAcceptableOrUnknown(
+          data['failed_pin_attempts']!,
+          _failedPinAttemptsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('locked_until')) {
+      context.handle(
+        _lockedUntilMeta,
+        lockedUntil.isAcceptableOrUnknown(
+          data['locked_until']!,
+          _lockedUntilMeta,
+        ),
       );
     }
     return context;
@@ -134,6 +201,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}pin_hash'],
       )!,
+      pinSalt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pin_salt'],
+      ),
       role: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}role'],
@@ -142,6 +213,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      failedPinAttempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}failed_pin_attempts'],
+      )!,
+      lockedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}locked_until'],
+      ),
     );
   }
 
@@ -155,14 +234,20 @@ class User extends DataClass implements Insertable<User> {
   final String id;
   final String username;
   final String pinHash;
+  final String? pinSalt;
   final String role;
   final bool isActive;
+  final int failedPinAttempts;
+  final DateTime? lockedUntil;
   const User({
     required this.id,
     required this.username,
     required this.pinHash,
+    this.pinSalt,
     required this.role,
     required this.isActive,
+    required this.failedPinAttempts,
+    this.lockedUntil,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -170,8 +255,15 @@ class User extends DataClass implements Insertable<User> {
     map['id'] = Variable<String>(id);
     map['username'] = Variable<String>(username);
     map['pin_hash'] = Variable<String>(pinHash);
+    if (!nullToAbsent || pinSalt != null) {
+      map['pin_salt'] = Variable<String>(pinSalt);
+    }
     map['role'] = Variable<String>(role);
     map['is_active'] = Variable<bool>(isActive);
+    map['failed_pin_attempts'] = Variable<int>(failedPinAttempts);
+    if (!nullToAbsent || lockedUntil != null) {
+      map['locked_until'] = Variable<DateTime>(lockedUntil);
+    }
     return map;
   }
 
@@ -180,8 +272,15 @@ class User extends DataClass implements Insertable<User> {
       id: Value(id),
       username: Value(username),
       pinHash: Value(pinHash),
+      pinSalt: pinSalt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinSalt),
       role: Value(role),
       isActive: Value(isActive),
+      failedPinAttempts: Value(failedPinAttempts),
+      lockedUntil: lockedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockedUntil),
     );
   }
 
@@ -194,8 +293,11 @@ class User extends DataClass implements Insertable<User> {
       id: serializer.fromJson<String>(json['id']),
       username: serializer.fromJson<String>(json['username']),
       pinHash: serializer.fromJson<String>(json['pinHash']),
+      pinSalt: serializer.fromJson<String?>(json['pinSalt']),
       role: serializer.fromJson<String>(json['role']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      failedPinAttempts: serializer.fromJson<int>(json['failedPinAttempts']),
+      lockedUntil: serializer.fromJson<DateTime?>(json['lockedUntil']),
     );
   }
   @override
@@ -205,8 +307,11 @@ class User extends DataClass implements Insertable<User> {
       'id': serializer.toJson<String>(id),
       'username': serializer.toJson<String>(username),
       'pinHash': serializer.toJson<String>(pinHash),
+      'pinSalt': serializer.toJson<String?>(pinSalt),
       'role': serializer.toJson<String>(role),
       'isActive': serializer.toJson<bool>(isActive),
+      'failedPinAttempts': serializer.toJson<int>(failedPinAttempts),
+      'lockedUntil': serializer.toJson<DateTime?>(lockedUntil),
     };
   }
 
@@ -214,22 +319,35 @@ class User extends DataClass implements Insertable<User> {
     String? id,
     String? username,
     String? pinHash,
+    Value<String?> pinSalt = const Value.absent(),
     String? role,
     bool? isActive,
+    int? failedPinAttempts,
+    Value<DateTime?> lockedUntil = const Value.absent(),
   }) => User(
     id: id ?? this.id,
     username: username ?? this.username,
     pinHash: pinHash ?? this.pinHash,
+    pinSalt: pinSalt.present ? pinSalt.value : this.pinSalt,
     role: role ?? this.role,
     isActive: isActive ?? this.isActive,
+    failedPinAttempts: failedPinAttempts ?? this.failedPinAttempts,
+    lockedUntil: lockedUntil.present ? lockedUntil.value : this.lockedUntil,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
       id: data.id.present ? data.id.value : this.id,
       username: data.username.present ? data.username.value : this.username,
       pinHash: data.pinHash.present ? data.pinHash.value : this.pinHash,
+      pinSalt: data.pinSalt.present ? data.pinSalt.value : this.pinSalt,
       role: data.role.present ? data.role.value : this.role,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      failedPinAttempts: data.failedPinAttempts.present
+          ? data.failedPinAttempts.value
+          : this.failedPinAttempts,
+      lockedUntil: data.lockedUntil.present
+          ? data.lockedUntil.value
+          : this.lockedUntil,
     );
   }
 
@@ -239,14 +357,26 @@ class User extends DataClass implements Insertable<User> {
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('pinHash: $pinHash, ')
+          ..write('pinSalt: $pinSalt, ')
           ..write('role: $role, ')
-          ..write('isActive: $isActive')
+          ..write('isActive: $isActive, ')
+          ..write('failedPinAttempts: $failedPinAttempts, ')
+          ..write('lockedUntil: $lockedUntil')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, username, pinHash, role, isActive);
+  int get hashCode => Object.hash(
+    id,
+    username,
+    pinHash,
+    pinSalt,
+    role,
+    isActive,
+    failedPinAttempts,
+    lockedUntil,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -254,31 +384,43 @@ class User extends DataClass implements Insertable<User> {
           other.id == this.id &&
           other.username == this.username &&
           other.pinHash == this.pinHash &&
+          other.pinSalt == this.pinSalt &&
           other.role == this.role &&
-          other.isActive == this.isActive);
+          other.isActive == this.isActive &&
+          other.failedPinAttempts == this.failedPinAttempts &&
+          other.lockedUntil == this.lockedUntil);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> id;
   final Value<String> username;
   final Value<String> pinHash;
+  final Value<String?> pinSalt;
   final Value<String> role;
   final Value<bool> isActive;
+  final Value<int> failedPinAttempts;
+  final Value<DateTime?> lockedUntil;
   final Value<int> rowid;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.username = const Value.absent(),
     this.pinHash = const Value.absent(),
+    this.pinSalt = const Value.absent(),
     this.role = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.failedPinAttempts = const Value.absent(),
+    this.lockedUntil = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
     required String id,
     required String username,
     required String pinHash,
+    this.pinSalt = const Value.absent(),
     required String role,
     this.isActive = const Value.absent(),
+    this.failedPinAttempts = const Value.absent(),
+    this.lockedUntil = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        username = Value(username),
@@ -288,16 +430,22 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? id,
     Expression<String>? username,
     Expression<String>? pinHash,
+    Expression<String>? pinSalt,
     Expression<String>? role,
     Expression<bool>? isActive,
+    Expression<int>? failedPinAttempts,
+    Expression<DateTime>? lockedUntil,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (username != null) 'username': username,
       if (pinHash != null) 'pin_hash': pinHash,
+      if (pinSalt != null) 'pin_salt': pinSalt,
       if (role != null) 'role': role,
       if (isActive != null) 'is_active': isActive,
+      if (failedPinAttempts != null) 'failed_pin_attempts': failedPinAttempts,
+      if (lockedUntil != null) 'locked_until': lockedUntil,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -306,16 +454,22 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String>? id,
     Value<String>? username,
     Value<String>? pinHash,
+    Value<String?>? pinSalt,
     Value<String>? role,
     Value<bool>? isActive,
+    Value<int>? failedPinAttempts,
+    Value<DateTime?>? lockedUntil,
     Value<int>? rowid,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
       username: username ?? this.username,
       pinHash: pinHash ?? this.pinHash,
+      pinSalt: pinSalt ?? this.pinSalt,
       role: role ?? this.role,
       isActive: isActive ?? this.isActive,
+      failedPinAttempts: failedPinAttempts ?? this.failedPinAttempts,
+      lockedUntil: lockedUntil ?? this.lockedUntil,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -332,11 +486,20 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (pinHash.present) {
       map['pin_hash'] = Variable<String>(pinHash.value);
     }
+    if (pinSalt.present) {
+      map['pin_salt'] = Variable<String>(pinSalt.value);
+    }
     if (role.present) {
       map['role'] = Variable<String>(role.value);
     }
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (failedPinAttempts.present) {
+      map['failed_pin_attempts'] = Variable<int>(failedPinAttempts.value);
+    }
+    if (lockedUntil.present) {
+      map['locked_until'] = Variable<DateTime>(lockedUntil.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -350,8 +513,11 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('id: $id, ')
           ..write('username: $username, ')
           ..write('pinHash: $pinHash, ')
+          ..write('pinSalt: $pinSalt, ')
           ..write('role: $role, ')
           ..write('isActive: $isActive, ')
+          ..write('failedPinAttempts: $failedPinAttempts, ')
+          ..write('lockedUntil: $lockedUntil, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5639,8 +5805,11 @@ typedef $$UsersTableCreateCompanionBuilder =
       required String id,
       required String username,
       required String pinHash,
+      Value<String?> pinSalt,
       required String role,
       Value<bool> isActive,
+      Value<int> failedPinAttempts,
+      Value<DateTime?> lockedUntil,
       Value<int> rowid,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
@@ -5648,8 +5817,11 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> username,
       Value<String> pinHash,
+      Value<String?> pinSalt,
       Value<String> role,
       Value<bool> isActive,
+      Value<int> failedPinAttempts,
+      Value<DateTime?> lockedUntil,
       Value<int> rowid,
     });
 
@@ -5771,6 +5943,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get pinSalt => $composableBuilder(
+    column: $table.pinSalt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get role => $composableBuilder(
     column: $table.role,
     builder: (column) => ColumnFilters(column),
@@ -5778,6 +5955,16 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get failedPinAttempts => $composableBuilder(
+    column: $table.failedPinAttempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lockedUntil => $composableBuilder(
+    column: $table.lockedUntil,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5931,6 +6118,11 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get pinSalt => $composableBuilder(
+    column: $table.pinSalt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get role => $composableBuilder(
     column: $table.role,
     builder: (column) => ColumnOrderings(column),
@@ -5938,6 +6130,16 @@ class $$UsersTableOrderingComposer
 
   ColumnOrderings<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get failedPinAttempts => $composableBuilder(
+    column: $table.failedPinAttempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lockedUntil => $composableBuilder(
+    column: $table.lockedUntil,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -5960,11 +6162,24 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<String> get pinHash =>
       $composableBuilder(column: $table.pinHash, builder: (column) => column);
 
+  GeneratedColumn<String> get pinSalt =>
+      $composableBuilder(column: $table.pinSalt, builder: (column) => column);
+
   GeneratedColumn<String> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<int> get failedPinAttempts => $composableBuilder(
+    column: $table.failedPinAttempts,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lockedUntil => $composableBuilder(
+    column: $table.lockedUntil,
+    builder: (column) => column,
+  );
 
   Expression<T> permissionsRefs<T extends Object>(
     Expression<T> Function($$PermissionsTableAnnotationComposer a) f,
@@ -6129,15 +6344,21 @@ class $$UsersTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> username = const Value.absent(),
                 Value<String> pinHash = const Value.absent(),
+                Value<String?> pinSalt = const Value.absent(),
                 Value<String> role = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<int> failedPinAttempts = const Value.absent(),
+                Value<DateTime?> lockedUntil = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 username: username,
                 pinHash: pinHash,
+                pinSalt: pinSalt,
                 role: role,
                 isActive: isActive,
+                failedPinAttempts: failedPinAttempts,
+                lockedUntil: lockedUntil,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6145,15 +6366,21 @@ class $$UsersTableTableManager
                 required String id,
                 required String username,
                 required String pinHash,
+                Value<String?> pinSalt = const Value.absent(),
                 required String role,
                 Value<bool> isActive = const Value.absent(),
+                Value<int> failedPinAttempts = const Value.absent(),
+                Value<DateTime?> lockedUntil = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 username: username,
                 pinHash: pinHash,
+                pinSalt: pinSalt,
                 role: role,
                 isActive: isActive,
+                failedPinAttempts: failedPinAttempts,
+                lockedUntil: lockedUntil,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

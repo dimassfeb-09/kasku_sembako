@@ -8,7 +8,10 @@ class GetExpensesUseCase {
 
   GetExpensesUseCase(this.repository);
 
-  Future<Either<Failure, List<ExpenseEntity>>> call(DateTime startDate, DateTime endDate) async {
+  Future<Either<Failure, List<ExpenseEntity>>> call(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     return await repository.getExpenses(startDate, endDate);
   }
 }

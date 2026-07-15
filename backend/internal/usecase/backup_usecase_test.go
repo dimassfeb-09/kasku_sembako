@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -99,6 +100,12 @@ func TestUpload_MalformedJSONFailsAndNeverCallsCreate(t *testing.T) {
 	_, err := uc.Upload(context.Background(), "user-1", []byte(`not json`))
 	if err == nil {
 		t.Fatal("expected an error for malformed JSON, got nil")
+	}
+	// Validation failures must wrap ErrInvalidBackupPayload — this is what
+	// lets the HTTP handler safely echo the message back to the client
+	// (only for this sentinel, never for an arbitrary internal error).
+	if !errors.Is(err, ErrInvalidBackupPayload) {
+		t.Fatalf("expected err to wrap ErrInvalidBackupPayload, got %v", err)
 	}
 	if repo.createCalls != 0 {
 		t.Fatalf("expected Create not to be called, got %d calls", repo.createCalls)

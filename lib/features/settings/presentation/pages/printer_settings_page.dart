@@ -14,6 +14,7 @@ import '../widgets/connected_device_section.dart';
 import '../widgets/no_connected_device_section.dart';
 import '../widgets/printer_devices_list_section.dart';
 import '../widgets/store_profile_section.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 
 typedef _C = AppColors;
 
@@ -62,6 +63,11 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
   }
 
   Future<void> _pickLogo() async {
+    // Custom receipt logo is a Pro feature; basic store profile stays free.
+    if (!isProEntitled(context)) {
+      await showProUpsell(context, fitur: 'Logo struk kustom');
+      return;
+    }
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(

@@ -80,7 +80,9 @@ class ExpenseDarkTextField extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12), // 12px corners
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)), // Slate 200 border
+              borderSide: const BorderSide(
+                color: Color(0xFFE2E8F0),
+              ), // Slate 200 border
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -116,7 +118,9 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
       ),
       decoration: const BoxDecoration(
         color: Colors.white, // Surface White
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)), // 24px top corner radius
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24),
+        ), // 24px top corner radius
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
@@ -172,7 +176,9 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary : const Color(0xFFF8FAFC), // Teal or Slate 50
+                      color: isSelected
+                          ? AppColors.primary
+                          : const Color(0xFFF8FAFC), // Teal or Slate 50
                       borderRadius: BorderRadius.circular(20), // Pill chip
                       border: Border.all(
                         color: isSelected
@@ -242,7 +248,9 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                     onPressed: widget.onCancel,
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: const BorderSide(color: Color(0xFFE2E8F0)), // Slate 200
+                      side: const BorderSide(
+                        color: Color(0xFFE2E8F0),
+                      ), // Slate 200
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12), // 12px corners
                       ),

@@ -34,6 +34,7 @@ import '../../features/account/presentation/pages/account_register_page.dart';
 import '../../features/account/presentation/pages/account_home_page.dart';
 import '../../features/subscription/presentation/pages/subscription_upgrade_page.dart';
 import '../../features/subscription/presentation/cubit/subscription_cubit.dart';
+import '../../features/subscription/presentation/cubit/subscription_state.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,6 +63,23 @@ class AppRouter {
     '/account/login',
     '/account/register',
     '/subscription/upgrade',
+  ];
+
+  /// Routes whose home-menu card shows a PRO badge for non-entitled users.
+  /// Backup keeps its badge but is intentionally NOT in [proRedirectRoutes] —
+  /// its page has its own informative, server-enforced in-page gate.
+  static const List<String> proBadgeRoutes = [
+    '/backup',
+    '/logs',
+    '/wholesale-management',
+  ];
+
+  /// Pro-only routes that a non-entitled user is hard-redirected away from
+  /// (backstop for deep links / direct navigation). Client-side gate only —
+  /// these are local features with no server enforcement.
+  static const List<String> proRedirectRoutes = [
+    '/logs',
+    '/wholesale-management',
   ];
 
   static final router = GoRouter(
@@ -102,6 +120,19 @@ class AppRouter {
           )) {
             return '/home';
           }
+        }
+
+        // Pro backstop: block direct navigation / deep links to Pro-only
+        // routes for non-entitled users. UX-level gate (menu badge) lives in
+        // HomeMenuCard; this closes the in-app navigation path.
+        final subState = context.read<SubscriptionCubit>().state;
+        final isPro =
+            subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+        if (!isPro &&
+            proRedirectRoutes.any(
+              (route) => state.matchedLocation.startsWith(route),
+            )) {
+          return '/subscription/upgrade';
         }
       }
       return null;

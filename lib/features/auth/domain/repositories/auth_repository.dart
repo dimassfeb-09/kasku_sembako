@@ -7,5 +7,8 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, UserEntity?>> getCachedSession();
   Future<Either<Failure, bool>> hasUsers();
-  Future<Either<Failure, UserEntity>> registerFirstAdmin(String username, String pin);
+  Future<Either<Failure, UserEntity>> registerFirstAdmin(
+    String username,
+    String pin,
+  );
 }

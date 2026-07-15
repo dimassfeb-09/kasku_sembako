@@ -50,7 +50,9 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
     double tax,
     String? customerId,
   ) async {
-    final cashierId = await secureStorage.read(key: AppConstants.currentUserIdKey);
+    final cashierId = await secureStorage.read(
+      key: AppConstants.currentUserIdKey,
+    );
     if (cashierId == null) {
       throw Exception('Sesi kasir tidak aktif. Silakan masuk kembali.');
     }
@@ -112,21 +114,21 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
           ..where((p) => p.id.equals(cartItem.product.id));
         final productData = await productQuery.getSingleOrNull();
         if (productData == null) {
-          throw Exception('Produk "${cartItem.product.name}" tidak ditemukan di database.');
+          throw Exception(
+            'Produk "${cartItem.product.name}" tidak ditemukan di database.',
+          );
         }
 
         final newStock = productData.stock - cartItem.quantity;
         if (newStock < 0) {
-          throw Exception('Stok produk "${cartItem.product.name}" tidak mencukupi (Tersedia: ${productData.stock}, Diminta: ${cartItem.quantity}).');
+          throw Exception(
+            'Stok produk "${cartItem.product.name}" tidak mencukupi (Tersedia: ${productData.stock}, Diminta: ${cartItem.quantity}).',
+          );
         }
 
-        await (db.update(
-          db.products,
-        )..where((p) => p.id.equals(cartItem.product.id))).write(
-          ProductsCompanion(
-            stock: Value(newStock),
-          ),
-        );
+        await (db.update(db.products)
+              ..where((p) => p.id.equals(cartItem.product.id)))
+            .write(ProductsCompanion(stock: Value(newStock)));
 
         // Add Stock History
         await db
@@ -177,7 +179,8 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
       // Log checkout sukses
       await logService.log(
         action: 'CREATE_TRANSACTION',
-        description: 'Membuat transaksi $receiptNumber sebesar ${finalTotalAmount.toRupiah()} dengan metode $paymentMethod.',
+        description:
+            'Membuat transaksi $receiptNumber sebesar ${finalTotalAmount.toRupiah()} dengan metode $paymentMethod.',
         userId: cashierId,
       );
 
@@ -210,7 +213,9 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
 
     final query = db.select(db.transactions)
       ..where((t) => t.createdAt.isBetweenValues(start, end))
-      ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]);
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc),
+      ]);
 
     final trxResults = await query.get();
 
@@ -220,66 +225,79 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
         ..where((i) => i.transactionId.equals(trx.id));
       final itemResults = await itemsQuery.get();
 
-      final items = itemResults.map((i) => TransactionItemEntity(
-        id: i.id,
-        transactionId: i.transactionId,
-        productId: i.productId,
-        productName: i.productName,
-        qty: i.qty,
-        price: i.price,
-        purchasePrice: i.purchasePrice,
-        discount: i.discount,
-        subtotal: i.subtotal,
-      )).toList();
+      final items = itemResults
+          .map(
+            (i) => TransactionItemEntity(
+              id: i.id,
+              transactionId: i.transactionId,
+              productId: i.productId,
+              productName: i.productName,
+              qty: i.qty,
+              price: i.price,
+              purchasePrice: i.purchasePrice,
+              discount: i.discount,
+              subtotal: i.subtotal,
+            ),
+          )
+          .toList();
 
-      result.add(TransactionEntity(
-        id: trx.id,
-        receiptNumber: trx.receiptNumber,
-        cashierId: trx.cashierId,
-        customerId: trx.customerId,
-        totalAmount: trx.totalAmount,
-        discount: trx.discount,
-        tax: trx.tax,
-        paymentMethod: trx.paymentMethod,
-        status: trx.status,
-        createdAt: trx.createdAt,
-        items: items,
-      ));
+      result.add(
+        TransactionEntity(
+          id: trx.id,
+          receiptNumber: trx.receiptNumber,
+          cashierId: trx.cashierId,
+          customerId: trx.customerId,
+          totalAmount: trx.totalAmount,
+          discount: trx.discount,
+          tax: trx.tax,
+          paymentMethod: trx.paymentMethod,
+          status: trx.status,
+          createdAt: trx.createdAt,
+          items: items,
+        ),
+      );
     }
     return result;
   }
 
   @override
   Future<void> voidTransaction(String transactionId) async {
-    final cashierId = await secureStorage.read(key: AppConstants.currentUserIdKey) ?? 'admin_id';
+    final cashierId =
+        await secureStorage.read(key: AppConstants.currentUserIdKey) ??
+        'admin_id';
 
     await db.transaction(() async {
       // 1. Get Transaction
-      final trxQuery = db.select(db.transactions)..where((t) => t.id.equals(transactionId));
+      final trxQuery = db.select(db.transactions)
+        ..where((t) => t.id.equals(transactionId));
       final trx = await trxQuery.getSingle();
 
       if (trx.status == 'VOID') return; // Sudah di-void sebelumnya
 
       // 2. Update status to VOID
-      await (db.update(db.transactions)..where((t) => t.id.equals(transactionId))).write(
-        const TransactionsCompanion(status: Value('VOID')),
-      );
+      await (db.update(db.transactions)
+            ..where((t) => t.id.equals(transactionId)))
+          .write(const TransactionsCompanion(status: Value('VOID')));
 
       // 3. Get Items to restore stock
-      final itemsQuery = db.select(db.transactionItems)..where((i) => i.transactionId.equals(transactionId));
+      final itemsQuery = db.select(db.transactionItems)
+        ..where((i) => i.transactionId.equals(transactionId));
       final items = await itemsQuery.get();
 
       for (var item in items) {
         // Restore stock
-        final productQuery = db.select(db.products)..where((p) => p.id.equals(item.productId));
+        final productQuery = db.select(db.products)
+          ..where((p) => p.id.equals(item.productId));
         final product = await productQuery.getSingle();
 
-        await (db.update(db.products)..where((p) => p.id.equals(item.productId))).write(
-          ProductsCompanion(stock: Value(product.stock + item.qty)),
-        );
+        await (db.update(db.products)
+              ..where((p) => p.id.equals(item.productId)))
+            .write(ProductsCompanion(stock: Value(product.stock + item.qty)));
 
         // Record stock history IN
-        await db.into(db.stockHistories).insert(
+        await db
+            .into(db.stockHistories)
+            .insert(
               StockHistoriesCompanion.insert(
                 id: const Uuid().v4(),
                 productId: item.productId,
@@ -293,12 +311,16 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
       }
 
       // 4. Update customer debt if payment was 'HUTANG'
-      if (trx.paymentMethod.toUpperCase() == 'HUTANG' && trx.customerId != null) {
-        final custQuery = db.select(db.customers)..where((c) => c.id.equals(trx.customerId!));
+      if (trx.paymentMethod.toUpperCase() == 'HUTANG' &&
+          trx.customerId != null) {
+        final custQuery = db.select(db.customers)
+          ..where((c) => c.id.equals(trx.customerId!));
         final customer = await custQuery.getSingleOrNull();
         if (customer != null) {
           final newDebt = customer.debtAmount - trx.totalAmount;
-          await (db.update(db.customers)..where((c) => c.id.equals(trx.customerId!))).write(
+          await (db.update(
+            db.customers,
+          )..where((c) => c.id.equals(trx.customerId!))).write(
             CustomersCompanion(debtAmount: Value(newDebt >= 0 ? newDebt : 0.0)),
           );
         }

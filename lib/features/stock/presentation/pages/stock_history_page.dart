@@ -23,9 +23,7 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Riwayat Stok: ${widget.product.name}'),
-      ),
+      appBar: AppBar(title: Text('Riwayat Stok: ${widget.product.name}')),
       body: BlocBuilder<StockBloc, StockState>(
         builder: (context, state) {
           if (state is StockLoading) {
@@ -44,7 +42,8 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final history = histories[index];
-                final isAddition = history.type == 'IN' || history.type == 'ADJUSTMENT_ADD';
+                final isAddition =
+                    history.type == 'IN' || history.type == 'ADJUSTMENT_ADD';
                 final color = isAddition ? AppColors.success : AppColors.danger;
                 final sign = isAddition ? '+' : '-';
 
@@ -62,7 +61,10 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
                     ],
                   ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     leading: CircleAvatar(
                       backgroundColor: color.withOpacity(0.1),
                       child: Icon(
@@ -70,8 +72,18 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
                         color: color,
                       ),
                     ),
-                    title: Text('${history.type} ($sign${history.quantity})', style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-                    subtitle: Text(history.notes.isNotEmpty ? history.notes : 'Tanpa catatan'),
+                    title: Text(
+                      '${history.type} ($sign${history.quantity})',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    subtitle: Text(
+                      history.notes.isNotEmpty
+                          ? history.notes
+                          : 'Tanpa catatan',
+                    ),
                     trailing: Text(
                       '${history.createdAt.day}/${history.createdAt.month}/${history.createdAt.year}',
                       style: const TextStyle(fontSize: 12),
@@ -81,7 +93,12 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
               },
             );
           } else if (state is StockError) {
-            return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
           return const SizedBox.shrink();
         },

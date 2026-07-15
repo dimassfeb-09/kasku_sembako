@@ -2,11 +2,22 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/domain"
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/platform/playdeveloper"
 )
+
+// staleFallbackCeiling bounds how long GetStatus will keep serving a cached
+// subscription row when live re-verification against Play keeps failing.
+// Without this, a subscription that's actually lapsed (or a sustained Play
+// outage/misconfiguration) would grant Pro access forever, since every
+// failed re-verification attempt would just re-trigger the same fallback
+// indefinitely. This is independent of and larger than the normal
+// stalenessTTL (which governs how often re-verification is even attempted)
+// — it's a hard ceiling on the fallback itself, not the retry cadence.
+const staleFallbackCeiling = 7 * 24 * time.Hour
 
 // PlayClient is the subset of playdeveloper.Client this usecase depends on,
 // defined here (consumer side) so tests can substitute a fake without
@@ -94,7 +105,13 @@ func (u *SubscriptionUsecase) GetStatus(ctx context.Context, userID string) (*do
 	if err != nil {
 		// Play API unreachable or errored: serve the stale cache rather than
 		// failing the request outright, so a transient Play outage doesn't
-		// lock out an actually-still-paying subscriber.
+		// lock out an actually-still-paying subscriber — but only up to
+		// staleFallbackCeiling. Beyond that, fail closed instead of granting
+		// indefinite access on a status we haven't been able to confirm in
+		// over a week.
+		if sub.StatusStaleness(time.Now()) > staleFallbackCeiling {
+			return nil, fmt.Errorf("%w: could not re-verify and cached status is too stale to trust: %v", domain.ErrSubscriptionNotPro, err)
+		}
 		return sub, nil
 	}
 

@@ -9,7 +9,8 @@ import '../../../../core/theme/app_colors.dart';
 class StockProductListItem extends StatelessWidget {
   final ProductEntity product;
 
-  const StockProductListItem({Key? key, required this.product}) : super(key: key);
+  const StockProductListItem({Key? key, required this.product})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,10 @@ class StockProductListItem extends StatelessWidget {
           backgroundColor: AppColors.primaryLight,
           child: const Icon(Icons.warehouse, color: AppColors.primary),
         ),
-        title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          product.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Text('Stok Saat Ini: ${product.stock} ${product.unit}'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -48,7 +52,10 @@ class StockProductListItem extends StatelessWidget {
               icon: const Icon(Icons.edit_note, color: AppColors.primary),
               tooltip: 'Sesuaikan Stok',
               onPressed: () async {
-                final result = await context.push('/stock/adjust', extra: product);
+                final result = await context.push(
+                  '/stock/adjust',
+                  extra: product,
+                );
                 if (result == true && context.mounted) {
                   // Refresh product list so new stock reflects
                   context.read<ProductBloc>().add(LoadProductsEvent());

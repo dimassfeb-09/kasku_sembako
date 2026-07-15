@@ -72,7 +72,9 @@ class CartSummary extends StatelessWidget {
               // Discount Button (Lebih Besar)
               Expanded(
                 child: Material(
-                  color: hasDiscount ? PosColors.dangerLight : PosColors.surface,
+                  color: hasDiscount
+                      ? PosColors.dangerLight
+                      : PosColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: onDiscountTap,

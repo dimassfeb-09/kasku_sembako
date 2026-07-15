@@ -125,8 +125,8 @@ class WholesalePriceListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final savings = retailPrice - price.price;
-    final savingsPercent = retailPrice > 0 
-        ? (savings / retailPrice * 100).toStringAsFixed(0) 
+    final savingsPercent = retailPrice > 0
+        ? (savings / retailPrice * 100).toStringAsFixed(0)
         : '0';
 
     return Container(
@@ -178,7 +178,10 @@ class WholesalePriceListItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.successLight,
                         borderRadius: BorderRadius.circular(20),

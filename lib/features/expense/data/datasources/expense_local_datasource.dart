@@ -13,10 +13,15 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
   ExpenseLocalDataSourceImpl(this.db);
 
   @override
-  Future<List<Expense>> getExpenses(DateTime startDate, DateTime endDate) async {
+  Future<List<Expense>> getExpenses(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     return await (db.select(db.expenses)
           ..where((e) => e.date.isBetweenValues(startDate, endDate))
-          ..orderBy([(e) => OrderingTerm(expression: e.date, mode: OrderingMode.desc)]))
+          ..orderBy([
+            (e) => OrderingTerm(expression: e.date, mode: OrderingMode.desc),
+          ]))
         .get();
   }
 

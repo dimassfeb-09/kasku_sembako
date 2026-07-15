@@ -41,9 +41,7 @@ class _UserAddDialogState extends State<UserAddDialog> {
 
     if (!PinUtils.isValidPin(pin)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('PIN harus berupa angka dan minimal 4 digit'),
-        ),
+        const SnackBar(content: Text('PIN harus berupa 6 digit angka')),
       );
       return;
     }
@@ -67,12 +65,15 @@ class _UserAddDialogState extends State<UserAddDialog> {
       }
 
       final userId = const Uuid().v4();
+      final salt = PinUtils.generateSalt();
       final newUser = User(
         id: userId,
         username: username,
-        pinHash: PinUtils.hashPin(pin),
+        pinHash: PinUtils.hashPinWithSalt(pin, salt),
+        pinSalt: salt,
         role: _selectedRole,
         isActive: true,
+        failedPinAttempts: 0,
       );
 
       await widget.db.into(widget.db.users).insert(newUser);

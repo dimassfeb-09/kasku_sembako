@@ -7,6 +7,7 @@ import '../../../../di/injection.dart';
 import '../widgets/user_add_dialog.dart';
 import '../widgets/user_change_pin_dialog.dart';
 import '../widgets/user_permissions_bottom_sheet.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 
 typedef _C = AppColors;
 
@@ -71,6 +72,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
   }
 
   void _showAddUserDialog() {
+    // Multi-user is a Pro feature: the first admin is created at setup, so any
+    // employee added here requires Pro.
+    if (!isProEntitled(context)) {
+      showProUpsell(context, fitur: 'Menambah pengguna (karyawan)');
+      return;
+    }
     showDialog(
       context: context,
       builder: (ctx) => UserAddDialog(db: _db, onSuccess: _loadData),

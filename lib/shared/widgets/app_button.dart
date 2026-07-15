@@ -20,7 +20,7 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final buttonWidth = width ?? double.infinity;
-    
+
     if (isOutline) {
       return OutlinedButton(
         onPressed: isLoading ? null : onPressed,
@@ -28,12 +28,24 @@ class AppButton extends StatelessWidget {
           minimumSize: Size(buttonWidth, 44),
           side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
           foregroundColor: const Color(0xFF0F172A),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 0,
         ),
-        child: isLoading 
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-            : Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
       );
     }
 
@@ -46,9 +58,19 @@ class AppButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
-      child: isLoading 
-          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-          : Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+      child: isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
     );
   }
 }

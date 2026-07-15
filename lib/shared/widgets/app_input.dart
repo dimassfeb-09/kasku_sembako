@@ -59,16 +59,15 @@ class AppInput extends StatelessWidget {
               color: AppColors.textMuted,
             ),
             prefixIcon: prefixIcon != null
-                ? Icon(
-                    prefixIcon,
-                    size: 18,
-                    color: AppColors.textSecondary,
-                  )
+                ? Icon(prefixIcon, size: 18, color: AppColors.textSecondary)
                 : null,
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: const Color(0xFFF8FAFC), // Slate 50 background fill
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
@@ -79,7 +78,10 @@ class AppInput extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
             ),
           ),
         ),

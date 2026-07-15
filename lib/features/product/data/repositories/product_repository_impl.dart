@@ -22,7 +22,9 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Either<Failure, ProductEntity>> getProductByBarcode(String barcode) async {
+  Future<Either<Failure, ProductEntity>> getProductByBarcode(
+    String barcode,
+  ) async {
     try {
       final product = await localDataSource.getProductByBarcode(barcode);
       return Right(product);
@@ -37,11 +39,17 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Either<Failure, void>> insertProduct(ProductEntity product) async {
     try {
       try {
-        final existing = await localDataSource.getProductByBarcode(product.barcode);
+        final existing = await localDataSource.getProductByBarcode(
+          product.barcode,
+        );
         if (existing.isActive) {
-          return const Left(DatabaseFailure('Barcode sudah terdaftar untuk produk lain'));
+          return const Left(
+            DatabaseFailure('Barcode sudah terdaftar untuk produk lain'),
+          );
         } else {
-          return const Left(DatabaseFailure('Barcode sudah terdaftar untuk produk non-aktif'));
+          return const Left(
+            DatabaseFailure('Barcode sudah terdaftar untuk produk non-aktif'),
+          );
         }
       } catch (_) {
         // Expected if not found
@@ -70,9 +78,13 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Either<Failure, void>> updateProduct(ProductEntity product) async {
     try {
       try {
-        final existing = await localDataSource.getProductByBarcode(product.barcode);
+        final existing = await localDataSource.getProductByBarcode(
+          product.barcode,
+        );
         if (existing.id != product.id) {
-          return const Left(DatabaseFailure('Barcode sudah terdaftar untuk produk lain'));
+          return const Left(
+            DatabaseFailure('Barcode sudah terdaftar untuk produk lain'),
+          );
         }
       } catch (_) {
         // Expected if not found

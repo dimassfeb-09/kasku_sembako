@@ -27,7 +27,9 @@ void main() {
           UsersCompanion.insert(
             id: 'user-1',
             username: 'admin',
-            pinHash: 'hash',
+            pinHash:
+                'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            pinSalt: const Value('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'),
             role: 'admin',
           ),
         );
@@ -253,4 +255,123 @@ void main() {
       );
     },
   );
+
+  group('malicious users-row rejection (backdoor-admin-injection defense)', () {
+    Map<String, dynamic> payloadWithUserRow(Map<String, dynamic> userRow) => {
+      'schemaVersion': db.schemaVersion,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'tables': {
+        'users': [userRow],
+      },
+    };
+
+    const validHash =
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const validSalt = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+
+    test('rejects a role outside the admin/cashier allow-list', () async {
+      final badJson = payloadWithUserRow({
+        'id': 'attacker-1',
+        'username': 'attacker',
+        'pinHash': validHash,
+        'pinSalt': validSalt,
+        'role': 'superadmin', // not a real role — should be rejected
+        'isActive': true,
+        'failedPinAttempts': 0,
+      });
+
+      expect(
+        () => DatabaseJsonCodec.importFromJson(db, badJson),
+        throwsA(isA<InvalidBackupFormatException>()),
+      );
+      expect(await db.select(db.users).get(), isEmpty);
+    });
+
+    test('rejects a pinHash that is not a 64-char hex string', () async {
+      final badJson = payloadWithUserRow({
+        'id': 'attacker-1',
+        'username': 'attacker',
+        'pinHash': 'not-a-real-hash',
+        'role': 'admin',
+        'isActive': true,
+        'failedPinAttempts': 0,
+      });
+
+      expect(
+        () => DatabaseJsonCodec.importFromJson(db, badJson),
+        throwsA(isA<InvalidBackupFormatException>()),
+      );
+      expect(await db.select(db.users).get(), isEmpty);
+    });
+
+    test('rejects a pinSalt that is not a 32-char hex string', () async {
+      final badJson = payloadWithUserRow({
+        'id': 'attacker-1',
+        'username': 'attacker',
+        'pinHash': validHash,
+        'pinSalt': 'too-short',
+        'role': 'admin',
+        'isActive': true,
+        'failedPinAttempts': 0,
+      });
+
+      expect(
+        () => DatabaseJsonCodec.importFromJson(db, badJson),
+        throwsA(isA<InvalidBackupFormatException>()),
+      );
+      expect(await db.select(db.users).get(), isEmpty);
+    });
+
+    test(
+      'accepts a well-formed admin row with a null pinSalt (legacy-format row)',
+      () async {
+        final okJson = payloadWithUserRow({
+          'id': 'user-1',
+          'username': 'legacyadmin',
+          'pinHash': validHash,
+          'role': 'admin',
+          'isActive': true,
+          'failedPinAttempts': 0,
+        });
+
+        await DatabaseJsonCodec.importFromJson(db, okJson);
+        final users = await db.select(db.users).get();
+        expect(users, hasLength(1));
+        expect(users.single.pinSalt, null);
+      },
+    );
+  });
+
+  group('adminUsernamesIn', () {
+    test('returns usernames of admin-role rows only', () {
+      final json = {
+        'tables': {
+          'users': [
+            {'username': 'alice', 'role': 'admin'},
+            {'username': 'bob', 'role': 'cashier'},
+            {'username': 'carol', 'role': 'admin'},
+          ],
+        },
+      };
+
+      expect(DatabaseJsonCodec.adminUsernamesIn(json), {'alice', 'carol'});
+    });
+
+    test(
+      'returns an empty set for malformed/missing shapes without throwing',
+      () {
+        expect(DatabaseJsonCodec.adminUsernamesIn({}), isEmpty);
+        expect(
+          DatabaseJsonCodec.adminUsernamesIn({'tables': 'not a map'}),
+          isEmpty,
+        );
+        expect(
+          DatabaseJsonCodec.adminUsernamesIn({
+            'tables': {'users': 'not a list'},
+          }),
+          isEmpty,
+        );
+      },
+    );
+  });
 }

@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../user_management/presentation/bloc/permission_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
+import '../../../subscription/presentation/widgets/pro_badge.dart';
 
 class HomeMenuCard extends StatelessWidget {
   final String title;
@@ -72,6 +75,15 @@ class HomeMenuCard extends StatelessWidget {
       }
     }
 
+    // Pro gate: routes in proBadgeRoutes get a PRO badge for non-entitled
+    // users, and tapping them routes to the upgrade page instead of the
+    // feature. Independent of (and stacks with) the role-based permission gate.
+    final subState = context.watch<SubscriptionCubit>().state;
+    final bool isEntitled =
+        subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+    final bool isProLocked =
+        AppRouter.proBadgeRoutes.contains(route) && !isEntitled;
+
     final Color routeColor = _getRouteColor(route);
     final Color primaryColor = hasPermission
         ? routeColor
@@ -109,6 +121,11 @@ class HomeMenuCard extends StatelessWidget {
                   backgroundColor: AppColors.danger,
                 ),
               );
+              return;
+            }
+
+            if (isProLocked) {
+              context.push('/subscription/upgrade');
               return;
             }
 
@@ -180,6 +197,8 @@ class HomeMenuCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                if (hasPermission && isProLocked)
+                  const Positioned(top: 8, right: 8, child: ProBadge()),
               ],
             ),
           ),

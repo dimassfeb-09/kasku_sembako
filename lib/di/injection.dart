@@ -104,8 +104,19 @@ Future<void> init() async {
   sl.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
   // Core Services
+  // Explicit iOS hardening rather than relying on the plugin's default
+  // Keychain accessibility: first_unlock_this_device excludes the item from
+  // unencrypted iTunes/Finder backups and requires the device to have been
+  // unlocked at least once since boot. (Android's flutter_secure_storage
+  // 10.x already encrypts automatically via platform ciphers - the
+  // AndroidOptions(encryptedSharedPreferences: true) flag is deprecated as
+  // of this version and intentionally omitted.)
   sl.registerLazySingleton<FlutterSecureStorage>(
-    () => const FlutterSecureStorage(),
+    () => const FlutterSecureStorage(
+      iOptions: IOSOptions(
+        accessibility: KeychainAccessibility.first_unlock_this_device,
+      ),
+    ),
   );
   sl.registerLazySingleton<PrinterService>(() => PrinterService());
   sl.registerLazySingleton<ExportService>(() => ExportService());

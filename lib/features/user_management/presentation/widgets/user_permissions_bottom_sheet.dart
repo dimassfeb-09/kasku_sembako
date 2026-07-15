@@ -56,7 +56,10 @@ class _UserPermissionsBottomSheetState
           SnackBar(
             content: const Text(
               'Hak akses pengguna berhasil diperbarui',
-              style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w600,
+              ),
             ),
             backgroundColor: const Color(0xFF0D9488), // Teal 600 Success
             behavior: SnackBarBehavior.floating,
@@ -158,7 +161,10 @@ class _UserPermissionsBottomSheetState
                       ),
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: widget.user.role.toLowerCase() == 'admin'
                               ? const Color(0xFFF0FDFA) // Teal 50
@@ -224,7 +230,8 @@ class _UserPermissionsBottomSheetState
           // Menu Report Permission Row
           PermissionSwitchTile(
             title: 'Melihat Laporan Keuangan',
-            subtitle: 'Akses data laporan laba rugi, omset penjualan harian & pengeluaran',
+            subtitle:
+                'Akses data laporan laba rugi, omset penjualan harian & pengeluaran',
             value: menuReport,
             isSaving: _isSaving,
             onChanged: (val) => setState(() => menuReport = val),
@@ -234,7 +241,8 @@ class _UserPermissionsBottomSheetState
           // Action Void Permission Row
           PermissionSwitchTile(
             title: 'Otorisasi Pembatalan (Void)',
-            subtitle: 'Membatalkan/menghapus struk transaksi yang telah dicetak',
+            subtitle:
+                'Membatalkan/menghapus struk transaksi yang telah dicetak',
             value: actionVoid,
             isSaving: _isSaving,
             onChanged: (val) => setState(() => actionVoid = val),
@@ -277,4 +285,3 @@ class _UserPermissionsBottomSheetState
     );
   }
 }
-

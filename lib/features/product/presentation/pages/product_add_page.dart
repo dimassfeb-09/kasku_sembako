@@ -83,14 +83,18 @@ class _ProductAddPageState extends State<ProductAddPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isError ? AppColors.dangerLight : AppColors.successLight,
+        backgroundColor: isError
+            ? AppColors.dangerLight
+            : AppColors.successLight,
         elevation: 0,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(
-              isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+              isError
+                  ? Icons.error_outline_rounded
+                  : Icons.check_circle_outline_rounded,
               color: isError ? AppColors.danger : AppColors.success,
               size: 20,
             ),
@@ -157,11 +161,19 @@ class _ProductAddPageState extends State<ProductAddPage> {
                       color: AppColors.primaryLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(
+                      Icons.photo_library_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
                   title: const Text(
                     'Pilih dari Galeri',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   onTap: () async {
                     Navigator.pop(context);
@@ -186,11 +198,19 @@ class _ProductAddPageState extends State<ProductAddPage> {
                       color: AppColors.primaryLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
                   title: const Text(
                     'Ambil Foto',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   onTap: () async {
                     Navigator.pop(context);
@@ -216,11 +236,20 @@ class _ProductAddPageState extends State<ProductAddPage> {
                         color: AppColors.dangerLight,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.delete_outline_rounded, color: AppColors.danger, size: 20),
+                      child: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: AppColors.danger,
+                        size: 20,
+                      ),
                     ),
                     title: const Text(
                       'Hapus Foto',
-                      style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppColors.danger, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: AppColors.danger,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -254,12 +283,18 @@ class _ProductAddPageState extends State<ProductAddPage> {
     }
 
     if (pPrice <= 0 || sPrice <= 0) {
-      _showStyledSnackBar('Harga beli dan harga jual harus lebih besar dari 0', isError: true);
+      _showStyledSnackBar(
+        'Harga beli dan harga jual harus lebih besar dari 0',
+        isError: true,
+      );
       return;
     }
 
     if (sPrice < pPrice) {
-      _showStyledSnackBar('Harga jual tidak boleh kurang dari harga beli', isError: true);
+      _showStyledSnackBar(
+        'Harga jual tidak boleh kurang dari harga beli',
+        isError: true,
+      );
       return;
     }
 

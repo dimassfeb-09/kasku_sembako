@@ -10,7 +10,9 @@ class PermissionRepositoryImpl implements PermissionRepository {
   PermissionRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<Either<Failure, PermissionEntity?>> getUserPermission(String userId) async {
+  Future<Either<Failure, PermissionEntity?>> getUserPermission(
+    String userId,
+  ) async {
     try {
       final permission = await localDataSource.getUserPermission(userId);
       return Right(permission);

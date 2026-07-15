@@ -116,14 +116,18 @@ class _ProductEditPageState extends State<ProductEditPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isError ? AppColors.dangerLight : AppColors.successLight,
+        backgroundColor: isError
+            ? AppColors.dangerLight
+            : AppColors.successLight,
         elevation: 0,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(
-              isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+              isError
+                  ? Icons.error_outline_rounded
+                  : Icons.check_circle_outline_rounded,
               color: isError ? AppColors.danger : AppColors.success,
               size: 20,
             ),
@@ -190,11 +194,19 @@ class _ProductEditPageState extends State<ProductEditPage> {
                       color: AppColors.primaryLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(
+                      Icons.photo_library_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
                   title: const Text(
                     'Pilih dari Galeri',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   onTap: () async {
                     Navigator.pop(context);
@@ -220,11 +232,19 @@ class _ProductEditPageState extends State<ProductEditPage> {
                       color: AppColors.primaryLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
                   title: const Text(
                     'Ambil Foto',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   onTap: () async {
                     Navigator.pop(context);
@@ -251,11 +271,20 @@ class _ProductEditPageState extends State<ProductEditPage> {
                         color: AppColors.dangerLight,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.delete_outline_rounded, color: AppColors.danger, size: 20),
+                      child: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: AppColors.danger,
+                        size: 20,
+                      ),
                     ),
                     title: const Text(
                       'Hapus Foto',
-                      style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppColors.danger, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: AppColors.danger,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -290,12 +319,18 @@ class _ProductEditPageState extends State<ProductEditPage> {
     }
 
     if (pPrice <= 0 || sPrice <= 0) {
-      _showStyledSnackBar('Harga beli dan harga jual harus lebih besar dari 0', isError: true);
+      _showStyledSnackBar(
+        'Harga beli dan harga jual harus lebih besar dari 0',
+        isError: true,
+      );
       return;
     }
 
     if (sPrice < pPrice) {
-      _showStyledSnackBar('Harga jual tidak boleh kurang dari harga beli', isError: true);
+      _showStyledSnackBar(
+        'Harga jual tidak boleh kurang dari harga beli',
+        isError: true,
+      );
       return;
     }
 
@@ -387,7 +422,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
                     child: _imagePath != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: _imagePath!.startsWith('/') ||
+                            child:
+                                _imagePath!.startsWith('/') ||
                                     _imagePath!.contains(':\\') ||
                                     _imagePath!.contains(':/')
                                 ? Image.file(
@@ -401,11 +437,13 @@ class _ProductEditPageState extends State<ProductEditPage> {
                                     width: 120,
                                     height: 120,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => const Icon(
-                                      Icons.image_not_supported_rounded,
-                                      size: 36,
-                                      color: AppColors.textMuted,
-                                    ),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.image_not_supported_rounded,
+                                              size: 36,
+                                              color: AppColors.textMuted,
+                                            ),
                                   ),
                           )
                         : Column(
@@ -508,12 +546,15 @@ class _ProductEditPageState extends State<ProductEditPage> {
                         );
                         if (result == true) {
                           final db = sl<AppDatabase>();
-                          final updatedProduct = await (db.select(db.products)
-                                ..where((tbl) => tbl.id.equals(widget.product.id)))
-                              .getSingleOrNull();
+                          final updatedProduct =
+                              await (db.select(db.products)..where(
+                                    (tbl) => tbl.id.equals(widget.product.id),
+                                  ))
+                                  .getSingleOrNull();
                           if (updatedProduct != null) {
                             setState(() {
-                              _stockController.text = updatedProduct.stock.toString();
+                              _stockController.text = updatedProduct.stock
+                                  .toString();
                             });
                           }
                         }

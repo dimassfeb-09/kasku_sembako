@@ -8,7 +8,10 @@ class GetTransactionsUseCase {
 
   GetTransactionsUseCase(this.repository);
 
-  Future<Either<Failure, List<TransactionEntity>>> call(DateTime startDate, DateTime endDate) async {
+  Future<Either<Failure, List<TransactionEntity>>> call(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     return await repository.getTransactions(startDate, endDate);
   }
 }

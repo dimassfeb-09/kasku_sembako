@@ -28,25 +28,100 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     required this.logService,
   });
 
+  /// Failed PIN attempts before a lockout starts.
+  static const int _lockoutThreshold = 5;
+
+  /// Lockout duration doubles each additional failure past the threshold,
+  /// capped at 30 minutes, so a shared-device PIN can't be brute-forced by
+  /// simple retry against the live login screen.
+  static const int _baseLockoutSeconds = 30;
+  static const int _maxLockoutSeconds = 1800;
+
   @override
   Future<UserModel> login(String username, String pin) async {
-    final hashedPin = PinUtils.hashPin(pin);
-
-    // Check if user exists
     final query = db.select(db.users)
-      ..where((u) => u.username.equals(username))
-      ..where((u) => u.pinHash.equals(hashedPin));
-
+      ..where((u) => u.username.equals(username));
     final userResult = await query.getSingleOrNull();
 
-    if (userResult != null) {
-      if (!userResult.isActive) {
-        throw const AuthException('Akun Anda tidak aktif.');
-      }
-      return UserModel.fromDrift(userResult);
-    } else {
-      throw const AuthException('Username atau PIN salah.');
+    // Same generic error for "no such user" and "wrong PIN" below, so the
+    // error message alone never reveals whether a username exists.
+    const invalidCredentials = AuthException('Username atau PIN salah.');
+
+    if (userResult == null) {
+      throw invalidCredentials;
     }
+
+    final now = DateTime.now();
+    if (userResult.lockedUntil != null &&
+        userResult.lockedUntil!.isAfter(now)) {
+      final remaining = userResult.lockedUntil!.difference(now).inSeconds;
+      throw AuthException(
+        'Terlalu banyak percobaan gagal. Coba lagi dalam $remaining detik.',
+      );
+    }
+
+    final pinMatches = await _verifyPin(userResult, pin);
+    if (!pinMatches) {
+      await _recordFailedAttempt(userResult);
+      throw invalidCredentials;
+    }
+
+    await _resetFailedAttempts(userResult);
+
+    if (!userResult.isActive) {
+      throw const AuthException('Akun Anda tidak aktif.');
+    }
+    return UserModel.fromDrift(userResult);
+  }
+
+  /// Verifies [pin] against [user]'s stored hash. Rows created before salted
+  /// hashing existed (schema v5) have a null `pinSalt` — those are verified
+  /// against the legacy unsalted SHA-256 hash and, on success, transparently
+  /// upgraded to a salted PBKDF2 hash so no PIN reset is ever required.
+  Future<bool> _verifyPin(User user, String pin) async {
+    if (user.pinSalt != null) {
+      final hashed = PinUtils.hashPinWithSalt(pin, user.pinSalt!);
+      return hashed == user.pinHash;
+    }
+
+    final legacyMatches = PinUtils.legacyHashPin(pin) == user.pinHash;
+    if (legacyMatches) {
+      final newSalt = PinUtils.generateSalt();
+      final newHash = PinUtils.hashPinWithSalt(pin, newSalt);
+      await (db.update(db.users)..where((u) => u.id.equals(user.id))).write(
+        UsersCompanion(pinHash: Value(newHash), pinSalt: Value(newSalt)),
+      );
+    }
+    return legacyMatches;
+  }
+
+  Future<void> _recordFailedAttempt(User user) async {
+    final attempts = user.failedPinAttempts + 1;
+    DateTime? lockedUntil;
+    if (attempts >= _lockoutThreshold) {
+      final lockSeconds =
+          (_baseLockoutSeconds * (1 << (attempts - _lockoutThreshold))).clamp(
+            _baseLockoutSeconds,
+            _maxLockoutSeconds,
+          );
+      lockedUntil = DateTime.now().add(Duration(seconds: lockSeconds));
+    }
+    await (db.update(db.users)..where((u) => u.id.equals(user.id))).write(
+      UsersCompanion(
+        failedPinAttempts: Value(attempts),
+        lockedUntil: Value(lockedUntil),
+      ),
+    );
+  }
+
+  Future<void> _resetFailedAttempts(User user) async {
+    if (user.failedPinAttempts == 0 && user.lockedUntil == null) return;
+    await (db.update(db.users)..where((u) => u.id.equals(user.id))).write(
+      const UsersCompanion(
+        failedPinAttempts: Value(0),
+        lockedUntil: Value(null),
+      ),
+    );
   }
 
   @override
@@ -119,12 +194,14 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<UserModel> registerFirstAdmin(String username, String pin) async {
-    final hashedPin = PinUtils.hashPin(pin);
+    final salt = PinUtils.generateSalt();
+    final hashedPin = PinUtils.hashPinWithSalt(pin, salt);
     final userId = const Uuid().v4();
     final newUser = UsersCompanion.insert(
       id: userId,
       username: username,
       pinHash: hashedPin,
+      pinSalt: Value(salt),
       role: 'admin',
       isActive: const Value(true),
     );

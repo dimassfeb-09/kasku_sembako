@@ -31,10 +31,7 @@ class ExportService {
           return [
             pw.Text(
               'Laporan Penjualan',
-              style: pw.TextStyle(
-                fontSize: 24,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
             ),
             pw.Text(
               'Periode: ${dateFormat.format(start)} - ${dateFormat.format(end)}',

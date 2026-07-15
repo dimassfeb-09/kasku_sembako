@@ -229,9 +229,7 @@ class CustomerSelectionDialog extends StatelessWidget {
                           selected: isSelected,
                           selectedTileColor: _C.primaryLight,
                           onTap: () {
-                            context.read<PosBloc>().add(
-                              SelectCustomerEvent(c),
-                            );
+                            context.read<PosBloc>().add(SelectCustomerEvent(c));
                             Navigator.pop(context);
                           },
                         );
@@ -344,7 +342,10 @@ class _QuickAddCustomerDialogState extends State<QuickAddCustomerDialog> {
                               ? null
                               : () => Navigator.pop(context),
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

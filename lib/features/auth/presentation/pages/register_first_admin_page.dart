@@ -44,7 +44,7 @@ class _RegisterFirstAdminPageState extends State<RegisterFirstAdminPage> {
 
     if (!PinUtils.isValidPin(pin)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PIN harus berupa angka dan minimal 4 digit')),
+        const SnackBar(content: Text('PIN harus berupa 6 digit angka')),
       );
       return;
     }
@@ -93,16 +93,16 @@ class _RegisterFirstAdminPageState extends State<RegisterFirstAdminPage> {
                   Text(
                     'Setup Super Admin',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Inisialisasi akun administrator pertama Anda untuk mulai menggunakan aplikasi Kasirku',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -139,7 +139,9 @@ class _RegisterFirstAdminPageState extends State<RegisterFirstAdminPage> {
                     prefixIcon: Icons.lock_clock_outlined,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureConfirmPin ? Icons.visibility_off : Icons.visibility,
+                        _obscureConfirmPin
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Colors.grey,
                       ),
                       onPressed: () {

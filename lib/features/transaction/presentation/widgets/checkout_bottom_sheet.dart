@@ -174,7 +174,10 @@ class _CheckoutBottomSheetContentState
                       prefixText: 'Rp ',
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -185,7 +188,10 @@ class _CheckoutBottomSheetContentState
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: _C.primary, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: _C.primary,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                     keyboardType: TextInputType.number,

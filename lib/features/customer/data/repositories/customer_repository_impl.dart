@@ -67,17 +67,23 @@ class CustomerRepositoryImpl implements CustomerRepository {
   }
 
   @override
-  Future<Either<Failure, List<DebtPaymentEntity>>> getDebtPayments(String? customerId) async {
+  Future<Either<Failure, List<DebtPaymentEntity>>> getDebtPayments(
+    String? customerId,
+  ) async {
     try {
       final results = await localDataSource.getDebtPayments(customerId);
       return Right(results);
     } catch (e) {
-      return const Left(DatabaseFailure('Gagal mengambil riwayat pembayaran cicilan'));
+      return const Left(
+        DatabaseFailure('Gagal mengambil riwayat pembayaran cicilan'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveDebtPayment(DebtPaymentEntity payment) async {
+  Future<Either<Failure, void>> saveDebtPayment(
+    DebtPaymentEntity payment,
+  ) async {
     try {
       final model = DebtPaymentModel.fromEntity(payment);
       await localDataSource.saveDebtPayment(model);

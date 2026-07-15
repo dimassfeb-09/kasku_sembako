@@ -30,7 +30,10 @@ class ExpenseSummarySection extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFFEF2F2), // Red 50
               borderRadius: BorderRadius.circular(16), // 16px corners
-              border: Border.all(color: const Color(0xFFFEE2E2), width: 1), // Red 100 border
+              border: Border.all(
+                color: const Color(0xFFFEE2E2),
+                width: 1,
+              ), // Red 100 border
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,7 +131,9 @@ class ExpenseMiniMetric extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white, // Surface white Card
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFF1F5F9)), // Slate 100 border
+          border: Border.all(
+            color: const Color(0xFFF1F5F9),
+          ), // Slate 100 border
           boxShadow: const [
             BoxShadow(
               color: Color(0x05000000), // Soft ambient shadow

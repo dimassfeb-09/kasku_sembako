@@ -10,7 +10,9 @@ class StockRepositoryImpl implements StockRepository {
   StockRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<Either<Failure, List<StockHistoryEntity>>> getStockHistory(String productId) async {
+  Future<Either<Failure, List<StockHistoryEntity>>> getStockHistory(
+    String productId,
+  ) async {
     try {
       final histories = await localDataSource.getStockHistory(productId);
       return Right(histories);
@@ -20,13 +22,22 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  Future<Either<Failure, void>> adjustStock(String productId, String type, int quantity, String notes) async {
+  Future<Either<Failure, void>> adjustStock(
+    String productId,
+    String type,
+    int quantity,
+    String notes,
+  ) async {
     try {
       await localDataSource.adjustStock(productId, type, quantity, notes);
       return const Right(null);
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
-      return Left(DatabaseFailure(msg.isNotEmpty ? msg : 'Gagal melakukan penyesuaian stok'));
+      return Left(
+        DatabaseFailure(
+          msg.isNotEmpty ? msg : 'Gagal melakukan penyesuaian stok',
+        ),
+      );
     }
   }
 }

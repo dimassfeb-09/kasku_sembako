@@ -8,6 +8,8 @@ abstract class CustomerRepository {
   Future<Either<Failure, void>> insertCustomer(CustomerEntity customer);
   Future<Either<Failure, void>> updateCustomer(CustomerEntity customer);
   Future<Either<Failure, void>> deleteCustomer(String id);
-  Future<Either<Failure, List<DebtPaymentEntity>>> getDebtPayments(String? customerId);
+  Future<Either<Failure, List<DebtPaymentEntity>>> getDebtPayments(
+    String? customerId,
+  );
   Future<Either<Failure, void>> saveDebtPayment(DebtPaymentEntity payment);
 }

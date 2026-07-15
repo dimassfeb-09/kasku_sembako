@@ -1,6 +1,7 @@
 package http
 
 import (
+	"net/mail"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -45,6 +46,9 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 	if req.Email == "" || len(req.Password) < 8 {
 		return fiber.NewError(fiber.StatusBadRequest, "email is required and password must be at least 8 characters")
+	}
+	if _, err := mail.ParseAddress(req.Email); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "email is not a valid address")
 	}
 
 	token, user, err := h.auth.Register(c.Context(), req.Email, req.Password)

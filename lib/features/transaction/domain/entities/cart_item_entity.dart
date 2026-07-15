@@ -15,11 +15,11 @@ class CartItemEntity extends Equatable {
 
   double get unitPrice {
     if (wholesalePrices.isEmpty) return product.sellingPrice;
-    
+
     // Temukan harga grosir yang memenuhi qty minimum, urutkan dari minQty terbesar
     final sortedPrices = List<WholesalePriceEntity>.from(wholesalePrices)
       ..sort((a, b) => b.minQty.compareTo(a.minQty));
-      
+
     for (var wp in sortedPrices) {
       if (quantity >= wp.minQty) {
         return wp.price;

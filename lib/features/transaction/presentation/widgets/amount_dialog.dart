@@ -74,7 +74,10 @@ class AmountDialog extends StatelessWidget {
                     ),
                     child: const Text(
                       'Batal',
-                      style: TextStyle(color: _C.textSecondary, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: _C.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),

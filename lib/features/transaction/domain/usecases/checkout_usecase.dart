@@ -19,7 +19,11 @@ class CheckoutUseCase {
   }) async {
     // Validasi HUTANG wajib customer
     if (paymentMethod == 'HUTANG' && customerId == null) {
-      return const Left(ValidationFailure('Pilih pelanggan terlebih dahulu untuk transaksi hutang.'));
+      return const Left(
+        ValidationFailure(
+          'Pilih pelanggan terlebih dahulu untuk transaksi hutang.',
+        ),
+      );
     }
 
     // Validasi CASH cukup
@@ -27,10 +31,18 @@ class CheckoutUseCase {
       final subtotal = cartItems.fold(0.0, (sum, item) => sum + item.subtotal);
       final total = subtotal - discount + tax;
       if (cashReceived < total) {
-        return const Left(ValidationFailure('Jumlah uang diterima kurang dari total belanja.'));
+        return const Left(
+          ValidationFailure('Jumlah uang diterima kurang dari total belanja.'),
+        );
       }
     }
 
-    return await repository.checkout(cartItems, paymentMethod, discount, tax, customerId);
+    return await repository.checkout(
+      cartItems,
+      paymentMethod,
+      discount,
+      tax,
+      customerId,
+    );
   }
 }

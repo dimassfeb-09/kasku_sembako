@@ -14,7 +14,10 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     on<AdjustStockEvent>(_onAdjustStock);
   }
 
-  Future<void> _onLoadStockHistory(LoadStockHistoryEvent event, Emitter<StockState> emit) async {
+  Future<void> _onLoadStockHistory(
+    LoadStockHistoryEvent event,
+    Emitter<StockState> emit,
+  ) async {
     emit(StockLoading());
     final result = await getStockHistoryUseCase(event.productId);
     result.fold(
@@ -23,12 +26,15 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     );
   }
 
-  Future<void> _onAdjustStock(AdjustStockEvent event, Emitter<StockState> emit) async {
+  Future<void> _onAdjustStock(
+    AdjustStockEvent event,
+    Emitter<StockState> emit,
+  ) async {
     emit(StockLoading());
     final result = await adjustStockUseCase(
-      event.productId, 
-      event.type, 
-      event.quantity, 
+      event.productId,
+      event.type,
+      event.quantity,
       event.notes,
     );
     result.fold(

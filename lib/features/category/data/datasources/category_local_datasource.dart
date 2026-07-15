@@ -22,18 +22,22 @@ class CategoryLocalDataSourceImpl implements CategoryLocalDataSource {
 
   @override
   Future<void> insertCategory(CategoryModel category) async {
-    await db.into(db.categories).insert(
-      CategoriesCompanion.insert(
-        id: category.id,
-        name: category.name,
-        color: Value(category.color),
-      ),
-    );
+    await db
+        .into(db.categories)
+        .insert(
+          CategoriesCompanion.insert(
+            id: category.id,
+            name: category.name,
+            color: Value(category.color),
+          ),
+        );
   }
 
   @override
   Future<void> updateCategory(CategoryModel category) async {
-    await (db.update(db.categories)..where((c) => c.id.equals(category.id))).write(
+    await (db.update(
+      db.categories,
+    )..where((c) => c.id.equals(category.id))).write(
       CategoriesCompanion(
         name: Value(category.name),
         color: Value(category.color),

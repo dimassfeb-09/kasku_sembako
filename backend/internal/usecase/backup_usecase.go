@@ -3,10 +3,20 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/domain"
 )
+
+// ErrInvalidBackupPayload wraps every validateBackupPayload failure so the
+// HTTP handler can safely echo its message back to the client (it never
+// contains anything beyond "your JSON is malformed"), while any other
+// error from Upload (e.g. a Postgres/pgx failure from the Create call)
+// does NOT match this sentinel and must get a generic message instead -
+// unlike a validation error, a raw storage-layer error could leak
+// SQL/internal details to the client.
+var ErrInvalidBackupPayload = errors.New("invalid backup payload")
 
 type BackupUsecase struct {
 	backups        domain.BackupRepository
@@ -44,10 +54,10 @@ func validateBackupPayload(payload json.RawMessage) error {
 		Tables map[string]json.RawMessage `json:"tables"`
 	}
 	if err := json.Unmarshal(payload, &shape); err != nil {
-		return fmt.Errorf("payload is not valid JSON: %w", err)
+		return fmt.Errorf("%w: payload is not valid JSON: %v", ErrInvalidBackupPayload, err)
 	}
 	if len(shape.Tables) == 0 {
-		return fmt.Errorf("payload missing a non-empty 'tables' object")
+		return fmt.Errorf("%w: payload missing a non-empty 'tables' object", ErrInvalidBackupPayload)
 	}
 	return nil
 }

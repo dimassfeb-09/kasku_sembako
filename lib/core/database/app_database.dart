@@ -35,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -52,6 +52,11 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 4) {
           await m.createTable(subscriptionCaches);
+        }
+        if (from < 5) {
+          await m.addColumn(users, users.pinSalt);
+          await m.addColumn(users, users.failedPinAttempts);
+          await m.addColumn(users, users.lockedUntil);
         }
       },
       beforeOpen: (details) async {

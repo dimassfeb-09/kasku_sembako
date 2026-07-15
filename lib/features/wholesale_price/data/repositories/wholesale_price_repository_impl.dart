@@ -11,9 +11,12 @@ class WholesalePriceRepositoryImpl implements WholesalePriceRepository {
   WholesalePriceRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<Either<Failure, List<WholesalePriceEntity>>> getWholesalePricesByProductId(String productId) async {
+  Future<Either<Failure, List<WholesalePriceEntity>>>
+  getWholesalePricesByProductId(String productId) async {
     try {
-      final prices = await localDataSource.getWholesalePricesByProductId(productId);
+      final prices = await localDataSource.getWholesalePricesByProductId(
+        productId,
+      );
       return Right(prices);
     } catch (e) {
       return const Left(DatabaseFailure('Gagal mengambil daftar harga grosir'));
@@ -21,7 +24,9 @@ class WholesalePriceRepositoryImpl implements WholesalePriceRepository {
   }
 
   @override
-  Future<Either<Failure, void>> insertWholesalePrice(WholesalePriceEntity price) async {
+  Future<Either<Failure, void>> insertWholesalePrice(
+    WholesalePriceEntity price,
+  ) async {
     try {
       final model = WholesalePriceModel(
         id: price.id,

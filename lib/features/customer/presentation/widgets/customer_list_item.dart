@@ -159,7 +159,9 @@ class CustomerListItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC), // Slate 50 background
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)), // Slate 200 border
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                      ), // Slate 200 border
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +210,10 @@ class CustomerListItem extends StatelessWidget {
                   TextField(
                     controller: textController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'JUMLAH PEMBAYARAN',
                       labelStyle: const TextStyle(
@@ -275,7 +280,8 @@ class CustomerListItem extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: payAmount <= 0 || payAmount > customer.debtAmount
+                          onPressed:
+                              payAmount <= 0 || payAmount > customer.debtAmount
                               ? null
                               : () {
                                   context.read<DebtBloc>().add(
@@ -331,7 +337,10 @@ class CustomerListItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface, // White Surface
         borderRadius: BorderRadius.circular(16), // 16px corners from DESIGN.md
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1), // Slate 100 border
+        border: Border.all(
+          color: const Color(0xFFF1F5F9),
+          width: 1,
+        ), // Slate 100 border
         boxShadow: const [
           BoxShadow(
             color: Color(0x05000000), // Very light diffuse ambient shadow
@@ -398,7 +407,9 @@ class CustomerListItem extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFBEB), // Amber 50 (Warning Light)
+                        color: const Color(
+                          0xFFFFFBEB,
+                        ), // Amber 50 (Warning Light)
                         borderRadius: BorderRadius.circular(20), // Pill chip
                         border: Border.all(
                           color: const Color(0xFFFDE68A), // Amber 200 border
@@ -446,7 +457,9 @@ class CustomerListItem extends StatelessWidget {
                       backgroundColor: const Color(0xFFECFDF5), // Green 50
                       padding: const EdgeInsets.all(8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10), // Rounded Square 10px
+                        borderRadius: BorderRadius.circular(
+                          10,
+                        ), // Rounded Square 10px
                       ),
                     ),
                   ),

@@ -20,7 +20,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<DeleteCategoryEvent>(_onDeleteCategory);
   }
 
-  Future<void> _onLoadCategories(LoadCategoriesEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onLoadCategories(
+    LoadCategoriesEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     emit(CategoryLoading());
     final result = await getCategoriesUseCase();
     result.fold(
@@ -29,25 +32,36 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     );
   }
 
-  Future<void> _onAddCategory(AddCategoryEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onAddCategory(
+    AddCategoryEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     emit(CategoryLoading());
     final result = await insertCategoryUseCase(event.category);
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
-      (_) => emit(const CategoryOperationSuccess('Kategori berhasil ditambahkan')),
+      (_) =>
+          emit(const CategoryOperationSuccess('Kategori berhasil ditambahkan')),
     );
   }
 
-  Future<void> _onUpdateCategory(UpdateCategoryEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onUpdateCategory(
+    UpdateCategoryEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     emit(CategoryLoading());
     final result = await updateCategoryUseCase(event.category);
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
-      (_) => emit(const CategoryOperationSuccess('Kategori berhasil diperbarui')),
+      (_) =>
+          emit(const CategoryOperationSuccess('Kategori berhasil diperbarui')),
     );
   }
 
-  Future<void> _onDeleteCategory(DeleteCategoryEvent event, Emitter<CategoryState> emit) async {
+  Future<void> _onDeleteCategory(
+    DeleteCategoryEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
     emit(CategoryLoading());
     final result = await deleteCategoryUseCase(event.id);
     result.fold(

@@ -12,7 +12,10 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   ExpenseRepositoryImpl(this.localDataSource);
 
   @override
-  Future<Either<Failure, List<ExpenseEntity>>> getExpenses(DateTime startDate, DateTime endDate) async {
+  Future<Either<Failure, List<ExpenseEntity>>> getExpenses(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     try {
       final expenses = await localDataSource.getExpenses(startDate, endDate);
       return Right(expenses.map((e) => _mapToEntity(e)).toList());
@@ -22,7 +25,9 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<Either<Failure, ExpenseEntity>> addExpense(ExpenseEntity expense) async {
+  Future<Either<Failure, ExpenseEntity>> addExpense(
+    ExpenseEntity expense,
+  ) async {
     try {
       final companion = ExpensesCompanion(
         id: Value(expense.id),

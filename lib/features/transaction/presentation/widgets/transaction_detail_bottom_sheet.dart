@@ -19,10 +19,6 @@ class TransactionDetailBottomSheet extends StatelessWidget {
     required this.onVoidPressed,
   });
 
-
-
-
-
   @override
   Widget build(BuildContext context) {
     final isVoided = transaction.status == 'VOID';
@@ -100,7 +96,7 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                               Container(
+                              Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 4,
@@ -125,7 +121,10 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const DashedDivider(color: AppColors.border, height: 1),
+                          const DashedDivider(
+                            color: AppColors.border,
+                            height: 1,
+                          ),
                           const SizedBox(height: 12),
                           ReceiptDetailRow(
                             label: 'Waktu',
@@ -134,14 +133,20 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                             ).format(transaction.createdAt),
                           ),
                           const SizedBox(height: 6),
-                          ReceiptDetailRow(label: 'Kasir', value: transaction.cashierId),
+                          ReceiptDetailRow(
+                            label: 'Kasir',
+                            value: transaction.cashierId,
+                          ),
                           const SizedBox(height: 6),
                           ReceiptDetailRow(
                             label: 'Metode Bayar',
                             value: transaction.paymentMethod,
                           ),
                           const SizedBox(height: 12),
-                          const DashedDivider(color: AppColors.border, height: 1),
+                          const DashedDivider(
+                            color: AppColors.border,
+                            height: 1,
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             'Daftar Item',
@@ -200,7 +205,10 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                             );
                           }).toList(),
                           const SizedBox(height: 12),
-                          const DashedDivider(color: AppColors.border, height: 1),
+                          const DashedDivider(
+                            color: AppColors.border,
+                            height: 1,
+                          ),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

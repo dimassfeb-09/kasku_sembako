@@ -69,10 +69,16 @@ class _ProductPageState extends State<ProductPage> {
                 backgroundColor: AppColors.successLight,
                 elevation: 0,
                 margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 content: Row(
                   children: [
-                    const Icon(Icons.check_circle_outline_rounded, color: AppColors.success, size: 20),
+                    const Icon(
+                      Icons.check_circle_outline_rounded,
+                      color: AppColors.success,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -97,10 +103,16 @@ class _ProductPageState extends State<ProductPage> {
                 backgroundColor: AppColors.dangerLight,
                 elevation: 0,
                 margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 content: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: AppColors.danger, size: 20),
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: AppColors.danger,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -119,7 +131,8 @@ class _ProductPageState extends State<ProductPage> {
             );
           }
         },
-        buildWhen: (previous, current) => current is ProductLoading || current is ProductLoaded,
+        buildWhen: (previous, current) =>
+            current is ProductLoading || current is ProductLoaded,
         builder: (context, state) {
           if (state is ProductLoading) {
             return const Center(
@@ -173,7 +186,9 @@ class _ProductPageState extends State<ProductPage> {
                       ElevatedButton.icon(
                         onPressed: () {
                           context.push('/products/add').then((_) {
-                            context.read<ProductBloc>().add(LoadProductsEvent());
+                            context.read<ProductBloc>().add(
+                              LoadProductsEvent(),
+                            );
                           });
                         },
                         icon: const Icon(Icons.add_rounded, size: 18),
@@ -182,7 +197,10 @@ class _ProductPageState extends State<ProductPage> {
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

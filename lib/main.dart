@@ -1,11 +1,25 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'app/app.dart';
+import 'core/constants/app_constants.dart';
 import 'di/injection.dart' as di;
 import 'features/subscription/domain/repositories/subscription_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Fail fast rather than silently shipping a release build that forgot
+  // --dart-define=API_BASE_URL=https://... and would otherwise send the
+  // account JWT/password over plain HTTP to whatever the dev default
+  // ("http://localhost:8080") resolves to on the user's device.
+  if (kReleaseMode && !AppConstants.isApiBaseUrlSafeForRelease) {
+    throw StateError(
+      'API_BASE_URL must be a real https:// endpoint in release builds '
+      '(got "${AppConstants.apiBaseUrl}"). Build with '
+      '--dart-define=API_BASE_URL=https://your-api-domain.com',
+    );
+  }
 
   await initializeDateFormatting('id', null);
   await di.init();

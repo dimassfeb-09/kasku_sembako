@@ -290,4 +290,3 @@ class ReportLabeledDot extends StatelessWidget {
     );
   }
 }
-

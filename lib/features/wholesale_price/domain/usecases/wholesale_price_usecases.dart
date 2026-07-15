@@ -6,7 +6,9 @@ import '../repositories/wholesale_price_repository.dart';
 class GetWholesalePricesUseCase {
   final WholesalePriceRepository repository;
   GetWholesalePricesUseCase(this.repository);
-  Future<Either<Failure, List<WholesalePriceEntity>>> call(String productId) async {
+  Future<Either<Failure, List<WholesalePriceEntity>>> call(
+    String productId,
+  ) async {
     return await repository.getWholesalePricesByProductId(productId);
   }
 }

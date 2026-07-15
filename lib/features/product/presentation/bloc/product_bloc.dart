@@ -24,7 +24,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<DeleteProductEvent>(_onDeleteProduct);
   }
 
-  Future<void> _onLoadProducts(LoadProductsEvent event, Emitter<ProductState> emit) async {
+  Future<void> _onLoadProducts(
+    LoadProductsEvent event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductLoading());
     final result = await getProductsUseCase();
     result.fold(
@@ -33,7 +36,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
-  Future<void> _onSearchProductByBarcode(SearchProductByBarcodeEvent event, Emitter<ProductState> emit) async {
+  Future<void> _onSearchProductByBarcode(
+    SearchProductByBarcodeEvent event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductLoading());
     final result = await getProductByBarcodeUseCase(event.barcode);
     result.fold(
@@ -42,7 +48,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
-  Future<void> _onAddProduct(AddProductEvent event, Emitter<ProductState> emit) async {
+  Future<void> _onAddProduct(
+    AddProductEvent event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductLoading());
     final result = await insertProductUseCase(event.product);
     result.fold(
@@ -51,7 +60,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
-  Future<void> _onUpdateProduct(UpdateProductEvent event, Emitter<ProductState> emit) async {
+  Future<void> _onUpdateProduct(
+    UpdateProductEvent event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductLoading());
     final result = await updateProductUseCase(event.product);
     result.fold(
@@ -60,7 +72,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
-  Future<void> _onDeleteProduct(DeleteProductEvent event, Emitter<ProductState> emit) async {
+  Future<void> _onDeleteProduct(
+    DeleteProductEvent event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductLoading());
     final result = await deleteProductUseCase(event.id);
     result.fold(

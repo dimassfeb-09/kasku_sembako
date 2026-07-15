@@ -20,6 +20,7 @@ import '../features/user_management/presentation/bloc/permission_cubit.dart';
 import '../features/expense/presentation/bloc/expense_bloc.dart';
 import '../features/account/presentation/bloc/account_bloc.dart';
 import '../features/account/presentation/bloc/account_event.dart';
+import '../features/subscription/presentation/cubit/subscription_cubit.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -44,6 +45,9 @@ class App extends StatelessWidget {
         BlocProvider<ReportBloc>(create: (_) => di.sl<ReportBloc>()),
         BlocProvider<HomeBloc>(create: (_) => di.sl<HomeBloc>()),
         BlocProvider<PermissionCubit>(create: (_) => di.sl<PermissionCubit>()),
+        BlocProvider<SubscriptionCubit>(
+          create: (_) => di.sl<SubscriptionCubit>(),
+        ),
         BlocProvider<ExpenseBloc>(create: (_) => di.sl<ExpenseBloc>()),
         BlocProvider<AccountBloc>(
           create: (_) => di.sl<AccountBloc>()..add(CheckAccountSessionEvent()),
@@ -56,6 +60,7 @@ class App extends StatelessWidget {
               role: state.user.role,
               userId: state.user.id,
             );
+            context.read<SubscriptionCubit>().loadStatus();
           }
         },
         child: MaterialApp.router(

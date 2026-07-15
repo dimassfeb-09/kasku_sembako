@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -72,7 +73,7 @@ func (h *SubscriptionHandler) Status(c *fiber.Ctx) error {
 
 	sub, err := h.subs.GetStatus(c.Context(), userID)
 	if err != nil {
-		if err == domain.ErrNotFound {
+		if err == domain.ErrNotFound || errors.Is(err, domain.ErrSubscriptionNotPro) {
 			return c.JSON(toStatusResponse(nil))
 		}
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to fetch subscription status")

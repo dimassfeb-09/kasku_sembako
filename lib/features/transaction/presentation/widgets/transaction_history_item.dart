@@ -19,10 +19,7 @@ class TransactionHistoryItem extends StatelessWidget {
     final isVoided = transaction.status == 'VOID';
 
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 6,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
@@ -36,10 +33,7 @@ class TransactionHistoryItem extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         onTap: onTap,
         leading: Container(
           padding: const EdgeInsets.all(10),
@@ -67,10 +61,7 @@ class TransactionHistoryItem extends StatelessWidget {
             const SizedBox(width: 6),
             if (isVoided)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.dangerLight,
                   borderRadius: BorderRadius.circular(20),
@@ -121,17 +112,11 @@ class TransactionHistoryItem extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: AppColors.border,
-                  width: 0.5,
-                ),
+                border: Border.all(color: AppColors.border, width: 0.5),
               ),
               child: Text(
                 transaction.paymentMethod,

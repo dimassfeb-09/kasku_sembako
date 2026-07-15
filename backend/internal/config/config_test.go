@@ -8,12 +8,12 @@ import (
 func setRequiredEnv(t *testing.T) {
 	t.Helper()
 	t.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/db")
-	t.Setenv("JWT_SECRET", "some-secret")
+	t.Setenv("JWT_SECRET", "this-is-a-sufficiently-long-test-secret-value")
 }
 
 func TestLoad_MissingDatabaseURLReturnsError(t *testing.T) {
 	t.Setenv("DATABASE_URL", "")
-	t.Setenv("JWT_SECRET", "some-secret")
+	t.Setenv("JWT_SECRET", "this-is-a-sufficiently-long-test-secret-value")
 
 	if _, err := Load(); err == nil {
 		t.Fatal("expected an error when DATABASE_URL is missing")
@@ -104,5 +104,46 @@ func TestLoad_InvalidBackupMaxSizeMBReturnsError(t *testing.T) {
 
 	if _, err := Load(); err == nil {
 		t.Fatal("expected an error for a non-numeric BACKUP_MAX_SIZE_MB")
+	}
+}
+
+func TestLoad_TooShortJWTSecretReturnsError(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/db")
+	t.Setenv("JWT_SECRET", "too-short")
+
+	if _, err := Load(); err == nil {
+		t.Fatal("expected an error for a JWT_SECRET shorter than the minimum length")
+	}
+}
+
+func TestLoad_TrustedProxiesUnsetByDefault(t *testing.T) {
+	setRequiredEnv(t)
+	t.Setenv("TRUSTED_PROXIES", "")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load failed: %v", err)
+	}
+	if len(cfg.TrustedProxies) != 0 {
+		t.Errorf("expected no trusted proxies by default, got %v", cfg.TrustedProxies)
+	}
+}
+
+func TestLoad_TrustedProxiesParsedFromCommaSeparatedList(t *testing.T) {
+	setRequiredEnv(t)
+	t.Setenv("TRUSTED_PROXIES", "10.0.0.1/32, 172.16.0.0/12,192.168.1.1/32")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load failed: %v", err)
+	}
+	want := []string{"10.0.0.1/32", "172.16.0.0/12", "192.168.1.1/32"}
+	if len(cfg.TrustedProxies) != len(want) {
+		t.Fatalf("expected %v, got %v", want, cfg.TrustedProxies)
+	}
+	for i, w := range want {
+		if cfg.TrustedProxies[i] != w {
+			t.Errorf("expected TrustedProxies[%d] = %q, got %q", i, w, cfg.TrustedProxies[i])
+		}
 	}
 }

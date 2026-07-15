@@ -27,6 +27,14 @@ class AppConstants {
     defaultValue: 'http://localhost:8080',
   );
 
+  /// False if [apiBaseUrl] is still the cleartext dev default — checked at
+  /// startup in main.dart so a release build that forgot
+  /// --dart-define=API_BASE_URL=https://... fails loudly immediately,
+  /// instead of silently shipping with the account JWT sent over plain
+  /// HTTP to whatever "localhost:8080" resolves to on the user's device.
+  static bool get isApiBaseUrlSafeForRelease =>
+      apiBaseUrl.startsWith('https://');
+
   // Play Billing product id — must match the subscription created in
   // Play Console > Monetize > Products > Subscriptions.
   static const String proMonthlyProductId = 'pro_monthly';

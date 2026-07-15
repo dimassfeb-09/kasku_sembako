@@ -29,14 +29,18 @@ class _CategoryAddPageState extends State<CategoryAddPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isError ? AppColors.dangerLight : AppColors.successLight,
+        backgroundColor: isError
+            ? AppColors.dangerLight
+            : AppColors.successLight,
         elevation: 0,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [
             Icon(
-              isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+              isError
+                  ? Icons.error_outline_rounded
+                  : Icons.check_circle_outline_rounded,
               color: isError ? AppColors.danger : AppColors.success,
               size: 20,
             ),
@@ -66,10 +70,7 @@ class _CategoryAddPageState extends State<CategoryAddPage> {
       return;
     }
 
-    final entity = CategoryEntity(
-      id: const Uuid().v4(),
-      name: name,
-    );
+    final entity = CategoryEntity(id: const Uuid().v4(), name: name);
 
     context.read<CategoryBloc>().add(AddCategoryEvent(entity));
   }

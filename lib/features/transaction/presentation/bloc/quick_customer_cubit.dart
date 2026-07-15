@@ -34,9 +34,8 @@ class QuickCustomerError extends QuickCustomerState {
 class QuickCustomerCubit extends Cubit<QuickCustomerState> {
   final InsertCustomerUseCase insertCustomerUseCase;
 
-  QuickCustomerCubit({
-    required this.insertCustomerUseCase,
-  }) : super(QuickCustomerInitial());
+  QuickCustomerCubit({required this.insertCustomerUseCase})
+    : super(QuickCustomerInitial());
 
   Future<void> addCustomer({
     required String name,
@@ -60,11 +59,8 @@ class QuickCustomerCubit extends Cubit<QuickCustomerState> {
 
     final result = await insertCustomerUseCase(entity);
 
-    result.fold(
-      (failure) => emit(QuickCustomerError(failure.message)),
-      (_) {
-        emit(QuickCustomerSuccess(entity));
-      },
-    );
+    result.fold((failure) => emit(QuickCustomerError(failure.message)), (_) {
+      emit(QuickCustomerSuccess(entity));
+    });
   }
 }

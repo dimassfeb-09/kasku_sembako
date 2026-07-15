@@ -77,6 +77,23 @@ class DatabaseJsonCodec {
     };
   }
 
+  /// Usernames with `role == 'admin'` in a not-yet-imported JSON payload —
+  /// used by the restore UI to warn before silently granting admin access
+  /// to an account the reviewing admin may not recognize. Deliberately
+  /// lenient (doesn't throw on malformed rows): actual enforcement of the
+  /// row format happens inside [importFromJson]; this is only for display.
+  static Set<String> adminUsernamesIn(Map<String, dynamic> json) {
+    final tables = json['tables'];
+    if (tables is! Map) return const {};
+    final userRows = tables['users'];
+    if (userRows is! List) return const {};
+    return userRows
+        .whereType<Map>()
+        .where((row) => row['role'] == 'admin' && row['username'] is String)
+        .map((row) => row['username'] as String)
+        .toSet();
+  }
+
   static Future<void> importFromJson(
     AppDatabase db,
     Map<String, dynamic> json,
@@ -119,7 +136,44 @@ class DatabaseJsonCodec {
         'Perbarui atau gunakan versi aplikasi yang sesuai untuk memulihkan cadangan ini.',
       );
     }
-    return tables.cast<String, dynamic>();
+    final castTables = tables.cast<String, dynamic>();
+    _validateUsersRows(_listOf(castTables, 'users'));
+    return castTables;
+  }
+
+  static final RegExp _hexHash64 = RegExp(r'^[0-9a-f]{64}$');
+  static final RegExp _hexSalt32 = RegExp(r'^[0-9a-f]{32}$');
+  static const Set<String> _allowedRoles = {'admin', 'cashier'};
+
+  /// Defense-in-depth content validation for the `users` table specifically
+  /// — this is the table a hand-crafted backup would need to tamper with to
+  /// plant a backdoor admin account. Rejects the whole import if any row's
+  /// `role` isn't a known value or `pinHash`/`pinSalt` isn't a well-formed
+  /// hash/salt of the expected shape, rather than silently accepting
+  /// arbitrary attacker-supplied strings for these security-sensitive
+  /// fields.
+  static void _validateUsersRows(List<Map<String, dynamic>> userRows) {
+    for (final row in userRows) {
+      final role = row['role'];
+      if (role is! String || !_allowedRoles.contains(role)) {
+        throw InvalidBackupFormatException(
+          'Format cadangan tidak valid: peran pengguna tidak dikenali (${row['username']}).',
+        );
+      }
+      final pinHash = row['pinHash'];
+      if (pinHash is! String || !_hexHash64.hasMatch(pinHash)) {
+        throw InvalidBackupFormatException(
+          'Format cadangan tidak valid: hash PIN tidak sesuai format (${row['username']}).',
+        );
+      }
+      final pinSalt = row['pinSalt'];
+      if (pinSalt != null &&
+          (pinSalt is! String || !_hexSalt32.hasMatch(pinSalt))) {
+        throw InvalidBackupFormatException(
+          'Format cadangan tidak valid: salt PIN tidak sesuai format (${row['username']}).',
+        );
+      }
+    }
   }
 
   static List<Map<String, dynamic>> _listOf(

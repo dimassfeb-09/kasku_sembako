@@ -23,9 +23,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterFirstAdminEvent>(_onRegisterFirstAdmin);
   }
 
-  Future<void> _onCheckSession(CheckSessionEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onCheckSession(
+    CheckSessionEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
-    
+
     // Cek apakah database kosong
     final hasUsersResult = await hasUsersUseCase();
     bool databaseHasUsers = true;
@@ -40,19 +43,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     final result = await getSessionUseCase();
-    result.fold(
-      (failure) => emit(Unauthenticated()),
-      (user) {
-        if (user != null) {
-          emit(Authenticated(user));
-        } else {
-          emit(Unauthenticated());
-        }
-      },
-    );
+    result.fold((failure) => emit(Unauthenticated()), (user) {
+      if (user != null) {
+        emit(Authenticated(user));
+      } else {
+        emit(Unauthenticated());
+      }
+    });
   }
 
-  Future<void> _onLoginSubmitted(LoginSubmittedEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onLoginSubmitted(
+    LoginSubmittedEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
     final result = await loginUseCase(event.username, event.pin);
     result.fold(
@@ -70,7 +73,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future<void> _onRegisterFirstAdmin(RegisterFirstAdminEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onRegisterFirstAdmin(
+    RegisterFirstAdminEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
     final result = await registerFirstAdminUseCase(event.username, event.pin);
     result.fold(

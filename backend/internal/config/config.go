@@ -4,8 +4,15 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
+
+// minJWTSecretLength guards against a trivially weak or placeholder
+// JWT_SECRET (e.g. left as ".env.example"'s sample value) being used
+// directly as the HMAC-SHA256 signing key, which would let an attacker
+// brute-force it and forge arbitrary tokens.
+const minJWTSecretLength = 32
 
 // Config holds all runtime configuration, sourced from environment
 // variables. No .env file is loaded implicitly in production; use
@@ -21,6 +28,14 @@ type Config struct {
 	BackupMaxSizeBytes           int64
 	BackupRetentionCount         int
 	SubscriptionStalenessTTL     time.Duration
+	// TrustedProxies is a list of CIDRs for reverse proxies allowed to set
+	// X-Forwarded-For. Empty (default) means don't trust any proxy header —
+	// c.IP() falls back to the direct TCP peer, which is the safe default
+	// for a backend not yet deployed behind a known proxy. Set this only to
+	// the actual reverse proxy's address once one is in front of this
+	// service, or rate limiting collapses every client behind the proxy
+	// into a single shared bucket (or, if misconfigured, becomes spoofable).
+	TrustedProxies []string
 }
 
 func Load() (*Config, error) {
@@ -37,6 +52,17 @@ func Load() (*Config, error) {
 	}
 	if cfg.JWTSecret == "" {
 		return nil, fmt.Errorf("JWT_SECRET is required")
+	}
+	if len(cfg.JWTSecret) < minJWTSecretLength {
+		return nil, fmt.Errorf("JWT_SECRET must be at least %d characters (got %d) - generate a real random secret, e.g. `openssl rand -base64 32`", minJWTSecretLength, len(cfg.JWTSecret))
+	}
+
+	if raw := os.Getenv("TRUSTED_PROXIES"); raw != "" {
+		for _, cidr := range strings.Split(raw, ",") {
+			if trimmed := strings.TrimSpace(cidr); trimmed != "" {
+				cfg.TrustedProxies = append(cfg.TrustedProxies, trimmed)
+			}
+		}
 	}
 
 	ttlDays, err := strconv.Atoi(getEnv("JWT_TTL_DAYS", "30"))

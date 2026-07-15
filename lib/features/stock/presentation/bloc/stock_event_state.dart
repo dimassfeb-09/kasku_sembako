@@ -38,19 +38,23 @@ abstract class StockState extends Equatable {
 }
 
 class StockInitial extends StockState {}
+
 class StockLoading extends StockState {}
+
 class StockHistoryLoaded extends StockState {
   final List<StockHistoryEntity> histories;
   const StockHistoryLoaded(this.histories);
   @override
   List<Object?> get props => [histories];
 }
+
 class StockOperationSuccess extends StockState {
   final String message;
   const StockOperationSuccess(this.message);
   @override
   List<Object?> get props => [message];
 }
+
 class StockError extends StockState {
   final String message;
   const StockError(this.message);

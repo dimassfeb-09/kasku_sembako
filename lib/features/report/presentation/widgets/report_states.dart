@@ -53,4 +53,3 @@ class ReportErrorState extends StatelessWidget {
     );
   }
 }
-

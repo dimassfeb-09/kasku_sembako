@@ -16,10 +16,7 @@ typedef _C = AppColors;
 class ReceiptPreviewDialog extends StatefulWidget {
   final TransactionEntity transaction;
 
-  const ReceiptPreviewDialog({
-    super.key,
-    required this.transaction,
-  });
+  const ReceiptPreviewDialog({super.key, required this.transaction});
 
   @override
   State<ReceiptPreviewDialog> createState() => _ReceiptPreviewDialogState();
@@ -104,10 +101,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
     }
     buffer.writeln('-' * 32);
     buffer.writeln(
-      formatRow(
-        'TOTAL',
-        widget.transaction.totalAmount.toRupiah(),
-      ),
+      formatRow('TOTAL', widget.transaction.totalAmount.toRupiah()),
     );
     buffer.writeln(formatRow('Pembayaran', widget.transaction.paymentMethod));
     buffer.writeln('=' * 32);
@@ -215,14 +209,19 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFF0EDE4)),
+                              border: Border.all(
+                                color: const Color(0xFFF0EDE4),
+                              ),
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if (storeLogoPath != null && File(storeLogoPath!).existsSync())
+                                if (storeLogoPath != null &&
+                                    File(storeLogoPath!).existsSync())
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
+                                    padding: const EdgeInsets.only(
+                                      bottom: 16.0,
+                                    ),
                                     child: Center(
                                       child: Image.file(
                                         File(storeLogoPath!),

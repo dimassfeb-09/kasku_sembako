@@ -11,6 +11,9 @@ abstract class TransactionRepository {
     double tax,
     String? customerId,
   );
-  Future<Either<Failure, List<TransactionEntity>>> getTransactions(DateTime startDate, DateTime endDate);
+  Future<Either<Failure, List<TransactionEntity>>> getTransactions(
+    DateTime startDate,
+    DateTime endDate,
+  );
   Future<Either<Failure, void>> voidTransaction(String transactionId);
 }

@@ -19,10 +19,7 @@ class PosSetupLoaded extends PosSetupState {
   final List<CategoryEntity> categories;
   final List<CustomerEntity> customers;
 
-  const PosSetupLoaded({
-    required this.categories,
-    required this.customers,
-  });
+  const PosSetupLoaded({required this.categories, required this.customers});
 
   @override
   List<Object?> get props => [categories, customers];
@@ -49,29 +46,26 @@ class PosSetupCubit extends Cubit<PosSetupState> {
     final categoryResult = await getCategoriesUseCase();
     final customerResult = await getCustomersUseCase();
 
-    categoryResult.fold(
-      (failure) => emit(PosSetupError(failure.message)),
-      (categories) {
-        customerResult.fold(
-          (failure) => emit(PosSetupError(failure.message)),
-          (customers) {
-            emit(PosSetupLoaded(
-              categories: categories,
-              customers: customers,
-            ));
-          },
-        );
-      },
-    );
+    categoryResult.fold((failure) => emit(PosSetupError(failure.message)), (
+      categories,
+    ) {
+      customerResult.fold((failure) => emit(PosSetupError(failure.message)), (
+        customers,
+      ) {
+        emit(PosSetupLoaded(categories: categories, customers: customers));
+      });
+    });
   }
 
   void updateCustomers(List<CustomerEntity> updatedCustomers) {
     if (state is PosSetupLoaded) {
       final loaded = state as PosSetupLoaded;
-      emit(PosSetupLoaded(
-        categories: loaded.categories,
-        customers: updatedCustomers,
-      ));
+      emit(
+        PosSetupLoaded(
+          categories: loaded.categories,
+          customers: updatedCustomers,
+        ),
+      );
     }
   }
 }

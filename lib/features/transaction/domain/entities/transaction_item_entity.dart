@@ -25,14 +25,14 @@ class TransactionItemEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        transactionId,
-        productId,
-        productName,
-        qty,
-        price,
-        purchasePrice,
-        discount,
-        subtotal,
-      ];
+    id,
+    transactionId,
+    productId,
+    productName,
+    qty,
+    price,
+    purchasePrice,
+    discount,
+    subtotal,
+  ];
 }

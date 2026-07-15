@@ -5,8 +5,16 @@ class Users extends Table {
   TextColumn get id => text()();
   TextColumn get username => text().unique()();
   TextColumn get pinHash => text()();
+  // Per-user random salt for PBKDF2 PIN hashing. Null on rows created before
+  // this column existed — AuthLocalDataSourceImpl.login() falls back to
+  // verifying the legacy unsalted SHA-256 hash for those and transparently
+  // upgrades them to a salted hash on successful login.
+  TextColumn get pinSalt => text().nullable()();
   TextColumn get role => text()(); // 'admin' atau 'cashier'
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  // Local brute-force throttling for the PIN login screen.
+  IntColumn get failedPinAttempts => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lockedUntil => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -221,7 +221,10 @@ class _WholesaleManagementPageState extends State<WholesaleManagementPage> {
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.borderLight, width: 1),
+                          border: Border.all(
+                            color: AppColors.borderLight,
+                            width: 1,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.02),
@@ -247,7 +250,8 @@ class _WholesaleManagementPageState extends State<WholesaleManagementPage> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: product.imagePath != null &&
+                                  child:
+                                      product.imagePath != null &&
                                           File(product.imagePath!).existsSync()
                                       ? Image.file(
                                           File(product.imagePath!),
@@ -269,7 +273,8 @@ class _WholesaleManagementPageState extends State<WholesaleManagementPage> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         product.name,
@@ -301,7 +306,9 @@ class _WholesaleManagementPageState extends State<WholesaleManagementPage> {
                                           color: tierCount > 0
                                               ? AppColors.successLight
                                               : AppColors.warningLight,
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,

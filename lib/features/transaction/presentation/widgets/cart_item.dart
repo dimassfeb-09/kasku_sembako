@@ -128,10 +128,7 @@ class CartItem extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: PosColors.white,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: PosColors.border,
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: PosColors.border, width: 1.5),
                       ),
                       child: const Icon(
                         Icons.remove_rounded,
@@ -235,10 +232,7 @@ class EmptyCart extends StatelessWidget {
               Text(
                 'Tap produk di katalog untuk menambahkan',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: PosColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: PosColors.textSecondary),
               ),
             ],
           ),

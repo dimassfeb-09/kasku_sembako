@@ -26,7 +26,12 @@ class ExpenseLoaded extends ExpenseState {
   });
 
   @override
-  List<Object?> get props => [expenses, totalToday, totalThisMonth, groupedByDate];
+  List<Object?> get props => [
+    expenses,
+    totalToday,
+    totalThisMonth,
+    groupedByDate,
+  ];
 }
 
 class ExpenseError extends ExpenseState {

@@ -259,7 +259,9 @@ class _ExpensePageState extends State<ExpensePage>
         },
         builder: (context, state) {
           if (state is ExpenseLoading || state is ExpenseInitial) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
           }
           if (state is ExpenseLoaded) {
             final totalAll = state.expenses.fold(

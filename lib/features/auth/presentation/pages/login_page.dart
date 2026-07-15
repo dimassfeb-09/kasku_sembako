@@ -64,7 +64,10 @@ class _LoginPageState extends State<LoginPage> {
               decoration: BoxDecoration(
                 color: Colors.white, // Surface White
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1), // Slate 100 border
+                border: Border.all(
+                  color: const Color(0xFFF1F5F9),
+                  width: 1,
+                ), // Slate 100 border
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x0A000000), // Soft shadow 4% opacity

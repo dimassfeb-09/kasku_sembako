@@ -40,13 +40,19 @@ class DebtorsTab extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                query.isNotEmpty ? Icons.search_off_rounded : Icons.check_circle_outline_rounded,
+                query.isNotEmpty
+                    ? Icons.search_off_rounded
+                    : Icons.check_circle_outline_rounded,
                 size: 64,
-                color: query.isNotEmpty ? const Color(0xFF94A3B8) : const Color(0xFF10B981), // Slate 400 or Green 500
+                color: query.isNotEmpty
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF10B981), // Slate 400 or Green 500
               ),
               const SizedBox(height: 16),
               Text(
-                query.isNotEmpty ? 'Debitur Tidak Ditemukan' : 'Semua Tagihan Lunas',
+                query.isNotEmpty
+                    ? 'Debitur Tidak Ditemukan'
+                    : 'Semua Tagihan Lunas',
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 16,

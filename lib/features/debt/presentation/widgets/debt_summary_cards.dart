@@ -6,10 +6,7 @@ import '../../../customer/domain/entities/customer_entity.dart';
 class DebtSummaryCards extends StatelessWidget {
   final List<CustomerEntity> customers;
 
-  const DebtSummaryCards({
-    super.key,
-    required this.customers,
-  });
+  const DebtSummaryCards({super.key, required this.customers});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +28,10 @@ class DebtSummaryCards extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFBEB), // Amber 50
                 borderRadius: BorderRadius.circular(16), // 16px corner radius
-                border: Border.all(color: const Color(0xFFFDE68A), width: 1), // Amber 200 border
+                border: Border.all(
+                  color: const Color(0xFFFDE68A),
+                  width: 1,
+                ), // Amber 200 border
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +66,10 @@ class DebtSummaryCards extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFFF0FDFA), // Teal 50
                 borderRadius: BorderRadius.circular(16), // 16px corner radius
-                border: Border.all(color: const Color(0xFFCCFBF1), width: 1), // Teal 100 border
+                border: Border.all(
+                  color: const Color(0xFFCCFBF1),
+                  width: 1,
+                ), // Teal 100 border
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -19,7 +19,9 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } catch (e) {
-      return const Left(DatabaseFailure('Terjadi kesalahan pada database lokal.'));
+      return const Left(
+        DatabaseFailure('Terjadi kesalahan pada database lokal.'),
+      );
     }
   }
 
@@ -49,18 +51,25 @@ class AuthRepositoryImpl implements AuthRepository {
       final result = await localDataSource.hasUsers();
       return Right(result);
     } catch (e) {
-      return Left(DatabaseFailure('Gagal memeriksa data pengguna: ${e.toString()}'));
+      return Left(
+        DatabaseFailure('Gagal memeriksa data pengguna: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, UserEntity>> registerFirstAdmin(String username, String pin) async {
+  Future<Either<Failure, UserEntity>> registerFirstAdmin(
+    String username,
+    String pin,
+  ) async {
     try {
       final user = await localDataSource.registerFirstAdmin(username, pin);
       await localDataSource.cacheSession(user);
       return Right(user);
     } catch (e) {
-      return Left(DatabaseFailure('Gagal mendaftarkan super admin: ${e.toString()}'));
+      return Left(
+        DatabaseFailure('Gagal mendaftarkan super admin: ${e.toString()}'),
+      );
     }
   }
 }

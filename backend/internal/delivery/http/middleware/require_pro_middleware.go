@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,7 @@ func RequirePro(subs *usecase.SubscriptionUsecase) fiber.Handler {
 
 		sub, err := subs.GetStatus(c.Context(), userID)
 		if err != nil {
-			if err == domain.ErrNotFound {
+			if err == domain.ErrNotFound || errors.Is(err, domain.ErrSubscriptionNotPro) {
 				return fiber.NewError(fiber.StatusPaymentRequired, "no active Pro subscription")
 			}
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to verify subscription status")

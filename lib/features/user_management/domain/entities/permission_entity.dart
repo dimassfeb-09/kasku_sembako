@@ -19,11 +19,11 @@ class PermissionEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        menuProduct,
-        menuStock,
-        menuReport,
-        actionVoid,
-      ];
+    id,
+    userId,
+    menuProduct,
+    menuStock,
+    menuReport,
+    actionVoid,
+  ];
 }

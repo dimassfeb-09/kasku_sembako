@@ -28,14 +28,22 @@ class TransactionRepositoryImpl implements TransactionRepository {
       );
       return Right(transaction);
     } catch (e) {
-      return Left(DatabaseFailure('Gagal memproses transaksi: ${e.toString()}'));
+      return Left(
+        DatabaseFailure('Gagal memproses transaksi: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, List<TransactionEntity>>> getTransactions(DateTime startDate, DateTime endDate) async {
+  Future<Either<Failure, List<TransactionEntity>>> getTransactions(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     try {
-      final transactions = await localDataSource.getTransactions(startDate, endDate);
+      final transactions = await localDataSource.getTransactions(
+        startDate,
+        endDate,
+      );
       return Right(transactions);
     } catch (e) {
       return const Left(DatabaseFailure('Gagal mengambil data transaksi'));
@@ -48,7 +56,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
       await localDataSource.voidTransaction(transactionId);
       return const Right(null);
     } catch (e) {
-      return Left(DatabaseFailure('Gagal membatalkan transaksi: ${e.toString()}'));
+      return Left(
+        DatabaseFailure('Gagal membatalkan transaksi: ${e.toString()}'),
+      );
     }
   }
 }

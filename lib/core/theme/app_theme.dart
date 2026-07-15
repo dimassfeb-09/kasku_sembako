@@ -49,7 +49,9 @@ class AppTheme {
           elevation: 0,
           foregroundColor: Colors.white,
           backgroundColor: AppColors.primary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
@@ -62,7 +64,9 @@ class AppTheme {
           elevation: 0,
           foregroundColor: AppColors.textPrimary,
           side: const BorderSide(color: AppColors.border, width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,

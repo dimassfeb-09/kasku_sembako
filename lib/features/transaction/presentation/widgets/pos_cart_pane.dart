@@ -38,10 +38,7 @@ class PosCartPane extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Customer row
-              CustomerBar(
-                state: state,
-                onTap: onSelectCustomerTap,
-              ),
+              CustomerBar(state: state, onTap: onSelectCustomerTap),
               Container(height: 1, color: _C.border),
               // Cart items
               Expanded(
@@ -60,17 +57,17 @@ class PosCartPane extends StatelessWidget {
                           return mod_cart.CartItem(
                             item: item,
                             onDecrement: () => context.read<PosBloc>().add(
-                                  UpdateCartItemQtyEvent(
-                                    item.product,
-                                    item.quantity - 1,
-                                  ),
-                                ),
+                              UpdateCartItemQtyEvent(
+                                item.product,
+                                item.quantity - 1,
+                              ),
+                            ),
                             onIncrement: () => context.read<PosBloc>().add(
-                                  UpdateCartItemQtyEvent(
-                                    item.product,
-                                    item.quantity + 1,
-                                  ),
-                                ),
+                              UpdateCartItemQtyEvent(
+                                item.product,
+                                item.quantity + 1,
+                              ),
+                            ),
                             onQtyTap: () => onQtyEditTap(item),
                           );
                         },
