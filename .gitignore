@@ -43,3 +43,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Claude Code personal instructions (not shared)
+CLAUDE.local.md
+
+# Backend (Go) secrets and local artifacts
+backend/.env
+backend/service-account.json
+backend/backup_storage/
+backend/api
+backend/*.jks
+android/key.properties

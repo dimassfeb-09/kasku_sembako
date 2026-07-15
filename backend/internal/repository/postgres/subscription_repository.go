@@ -1,0 +1,87 @@
+package postgres
+
+import (
+	"context"
+	"errors"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/dimassfeb-09/kasku_sembako/backend/internal/domain"
+)
+
+type SubscriptionRepository struct {
+	pool *pgxpool.Pool
+}
+
+func NewSubscriptionRepository(pool *pgxpool.Pool) *SubscriptionRepository {
+	return &SubscriptionRepository{pool: pool}
+}
+
+// Upsert inserts a subscription or, if the purchase_token already exists,
+// updates its status/expiry/acknowledgement in place. purchase_token is
+// UNIQUE so this is the single write path for both first-time verification
+// and later re-verification of the same purchase.
+func (r *SubscriptionRepository) Upsert(ctx context.Context, s *domain.Subscription) error {
+	const q = `
+		INSERT INTO subscriptions
+			(user_id, product_id, purchase_token, status, expiry_time, acknowledged, last_verified_at)
+		VALUES ($1, $2, $3, $4, $5, $6, now())
+		ON CONFLICT (purchase_token) DO UPDATE SET
+			status = EXCLUDED.status,
+			expiry_time = EXCLUDED.expiry_time,
+			acknowledged = EXCLUDED.acknowledged,
+			last_verified_at = now(),
+			updated_at = now()
+		RETURNING id, user_id, product_id, purchase_token, status, expiry_time,
+			acknowledged, last_verified_at, created_at, updated_at`
+	row := r.pool.QueryRow(ctx, q,
+		s.UserID, s.ProductID, s.PurchaseToken, s.Status, s.ExpiryTime, s.Acknowledged,
+	)
+	return row.Scan(
+		&s.ID, &s.UserID, &s.ProductID, &s.PurchaseToken, &s.Status, &s.ExpiryTime,
+		&s.Acknowledged, &s.LastVerifiedAt, &s.CreatedAt, &s.UpdatedAt,
+	)
+}
+
+func (r *SubscriptionRepository) FindLatestByUserID(ctx context.Context, userID string) (*domain.Subscription, error) {
+	const q = `
+		SELECT id, user_id, product_id, purchase_token, status, expiry_time,
+			acknowledged, last_verified_at, created_at, updated_at
+		FROM subscriptions
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT 1`
+	s := &domain.Subscription{}
+	err := r.pool.QueryRow(ctx, q, userID).Scan(
+		&s.ID, &s.UserID, &s.ProductID, &s.PurchaseToken, &s.Status, &s.ExpiryTime,
+		&s.Acknowledged, &s.LastVerifiedAt, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, err
+	}
+	return s, nil
+}
+
+func (r *SubscriptionRepository) FindByPurchaseToken(ctx context.Context, token string) (*domain.Subscription, error) {
+	const q = `
+		SELECT id, user_id, product_id, purchase_token, status, expiry_time,
+			acknowledged, last_verified_at, created_at, updated_at
+		FROM subscriptions
+		WHERE purchase_token = $1`
+	s := &domain.Subscription{}
+	err := r.pool.QueryRow(ctx, q, token).Scan(
+		&s.ID, &s.UserID, &s.ProductID, &s.PurchaseToken, &s.Status, &s.ExpiryTime,
+		&s.Acknowledged, &s.LastVerifiedAt, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrNotFound
+		}
+		return nil, err
+	}
+	return s, nil
+}

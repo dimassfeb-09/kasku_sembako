@@ -3,7 +3,7 @@ import '../../domain/entities/home_metrics.dart';
 
 abstract class HomeState extends Equatable {
   const HomeState();
-  
+
   @override
   List<Object?> get props => [];
 }

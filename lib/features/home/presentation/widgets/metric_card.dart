@@ -65,11 +65,7 @@ class MetricCard extends StatelessWidget {
                     color: pastelBgColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 16,
-                  ),
+                  child: Icon(icon, color: color, size: 16),
                 ),
               ],
             ),
@@ -85,7 +81,9 @@ class MetricCard extends StatelessWidget {
                     fontFamily: 'Inter',
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: color == Colors.grey ? const Color(0xFF0F172A) : color,
+                    color: color == Colors.grey
+                        ? const Color(0xFF0F172A)
+                        : color,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -108,4 +106,3 @@ class MetricCard extends StatelessWidget {
     );
   }
 }
-

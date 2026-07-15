@@ -21,7 +21,8 @@ class DisconnectPrinterEvent extends PrinterEvent {}
 class PrintTestEvent extends PrinterEvent {}
 
 class PrintReceiptEvent extends PrinterEvent {
-  final dynamic transaction; // Using dynamic here to avoid complex imports if not needed, or TransactionEntity
+  final dynamic
+  transaction; // Using dynamic here to avoid complex imports if not needed, or TransactionEntity
   const PrintReceiptEvent(this.transaction);
   @override
   List<Object?> get props => [transaction];
@@ -34,6 +35,7 @@ abstract class PrinterState extends Equatable {
 }
 
 class PrinterInitial extends PrinterState {}
+
 class PrinterLoading extends PrinterState {}
 
 class PrinterLoaded extends PrinterState {

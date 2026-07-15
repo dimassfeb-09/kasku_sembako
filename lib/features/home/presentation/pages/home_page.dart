@@ -172,7 +172,12 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     // Welcome Banner
                     Container(
-                      margin: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+                      margin: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: 16,
+                        bottom: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -202,7 +207,9 @@ class _HomePageState extends State<HomePage> {
                               ),
                               child: CircleAvatar(
                                 radius: 24,
-                                backgroundColor: const Color(0xFFF0FDFA), // Teal 50
+                                backgroundColor: const Color(
+                                  0xFFF0FDFA,
+                                ), // Teal 50
                                 child: Icon(
                                   isAdmin
                                       ? Icons.admin_panel_settings_rounded
@@ -245,8 +252,12 @@ class _HomePageState extends State<HomePage> {
                                       style: TextStyle(
                                         fontFamily: 'Inter',
                                         color: isAdmin
-                                            ? const Color(0xFF0D9488) // Teal 600
-                                            : const Color(0xFF3B82F6), // Blue 600
+                                            ? const Color(
+                                                0xFF0D9488,
+                                              ) // Teal 600
+                                            : const Color(
+                                                0xFF3B82F6,
+                                              ), // Blue 600
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 0.5,
@@ -264,7 +275,10 @@ class _HomePageState extends State<HomePage> {
                     // Dashboard Panel (Khusus Admin)
                     if (isAdmin) ...[
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -319,7 +333,9 @@ class _HomePageState extends State<HomePage> {
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   crossAxisCount: screenWidth > 600 ? 4 : 2,
-                                  childAspectRatio: screenWidth > 600 ? 1.6 : 1.32,
+                                  childAspectRatio: screenWidth > 600
+                                      ? 1.6
+                                      : 1.32,
                                   crossAxisSpacing: 12,
                                   mainAxisSpacing: 12,
                                   children: [
@@ -347,7 +363,9 @@ class _HomePageState extends State<HomePage> {
                                       icon: Icons.warning_amber_rounded,
                                       color: metrics.lowStock > 0
                                           ? const Color(0xFFF59E0B) // Amber
-                                          : const Color(0xFF94A3B8), // Slate 400
+                                          : const Color(
+                                              0xFF94A3B8,
+                                            ), // Slate 400
                                       subtitle: metrics.lowStock > 0
                                           ? 'Butuh restock'
                                           : 'Semua aman',
@@ -362,7 +380,10 @@ class _HomePageState extends State<HomePage> {
                     ] else ...[
                       // Ringkasan Transaksi Saya (Khusus Kasir)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -443,10 +464,15 @@ class _HomePageState extends State<HomePage> {
 
                       // Quick Cashier Action Panel (Khusus Kasir)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF0FDFA), // Teal 50 background
+                            color: const Color(
+                              0xFFF0FDFA,
+                            ), // Teal 50 background
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: const Color(0xFF99F6E4), // Teal 200 border
@@ -519,7 +545,9 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0D9488), // Teal 600
+                                    backgroundColor: const Color(
+                                      0xFF0D9488,
+                                    ), // Teal 600
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     shadowColor: Colors.transparent,
@@ -542,7 +570,10 @@ class _HomePageState extends State<HomePage> {
 
                     // Menu Section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
                       child: Row(
                         children: [
                           const Text(
@@ -556,13 +587,16 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF1F5F9), // Slate 100
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              '${isAdmin ? 14 : 7} Fitur',
+                              '${isAdmin ? 15 : 7} Fitur',
                               style: const TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 10,
@@ -658,6 +692,11 @@ class _HomePageState extends State<HomePage> {
                             title: 'Pengaturan',
                             icon: Icons.settings_rounded,
                             route: '/settings',
+                          ),
+                          const HomeMenuCard(
+                            title: 'Akun Toko',
+                            icon: Icons.workspace_premium_rounded,
+                            route: '/account',
                           ),
                         ],
                       ],

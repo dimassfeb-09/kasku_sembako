@@ -23,13 +23,19 @@ part 'app_database.g.dart';
     Expenses,
     ActivityLogs,
     DebtPayments,
+    SubscriptionCaches,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// For tests only — injects an arbitrary [QueryExecutor] (e.g.
+  /// `NativeDatabase.memory()`) instead of the real on-disk file, so unit
+  /// tests don't depend on path_provider/platform channels.
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
+
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -43,6 +49,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 3) {
           await m.createTable(debtPayments);
+        }
+        if (from < 4) {
+          await m.createTable(subscriptionCaches);
         }
       },
       beforeOpen: (details) async {

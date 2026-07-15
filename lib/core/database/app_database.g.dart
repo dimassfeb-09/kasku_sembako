@@ -5222,6 +5222,376 @@ class DebtPaymentsCompanion extends UpdateCompanion<DebtPayment> {
   }
 }
 
+class $SubscriptionCachesTable extends SubscriptionCaches
+    with TableInfo<$SubscriptionCachesTable, SubscriptionCache> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SubscriptionCachesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tierMeta = const VerificationMeta('tier');
+  @override
+  late final GeneratedColumn<String> tier = GeneratedColumn<String>(
+    'tier',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+    'expires_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastVerifiedAtMeta = const VerificationMeta(
+    'lastVerifiedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastVerifiedAt =
+      GeneratedColumn<DateTime>(
+        'last_verified_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tier,
+    isActive,
+    expiresAt,
+    lastVerifiedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'subscription_caches';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SubscriptionCache> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('tier')) {
+      context.handle(
+        _tierMeta,
+        tier.isAcceptableOrUnknown(data['tier']!, _tierMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tierMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    }
+    if (data.containsKey('last_verified_at')) {
+      context.handle(
+        _lastVerifiedAtMeta,
+        lastVerifiedAt.isAcceptableOrUnknown(
+          data['last_verified_at']!,
+          _lastVerifiedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastVerifiedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SubscriptionCache map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SubscriptionCache(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      tier: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tier'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires_at'],
+      ),
+      lastVerifiedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_verified_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SubscriptionCachesTable createAlias(String alias) {
+    return $SubscriptionCachesTable(attachedDatabase, alias);
+  }
+}
+
+class SubscriptionCache extends DataClass
+    implements Insertable<SubscriptionCache> {
+  final String id;
+  final String tier;
+  final bool isActive;
+  final DateTime? expiresAt;
+  final DateTime lastVerifiedAt;
+  const SubscriptionCache({
+    required this.id,
+    required this.tier,
+    required this.isActive,
+    this.expiresAt,
+    required this.lastVerifiedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tier'] = Variable<String>(tier);
+    map['is_active'] = Variable<bool>(isActive);
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<DateTime>(expiresAt);
+    }
+    map['last_verified_at'] = Variable<DateTime>(lastVerifiedAt);
+    return map;
+  }
+
+  SubscriptionCachesCompanion toCompanion(bool nullToAbsent) {
+    return SubscriptionCachesCompanion(
+      id: Value(id),
+      tier: Value(tier),
+      isActive: Value(isActive),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
+      lastVerifiedAt: Value(lastVerifiedAt),
+    );
+  }
+
+  factory SubscriptionCache.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SubscriptionCache(
+      id: serializer.fromJson<String>(json['id']),
+      tier: serializer.fromJson<String>(json['tier']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      expiresAt: serializer.fromJson<DateTime?>(json['expiresAt']),
+      lastVerifiedAt: serializer.fromJson<DateTime>(json['lastVerifiedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'tier': serializer.toJson<String>(tier),
+      'isActive': serializer.toJson<bool>(isActive),
+      'expiresAt': serializer.toJson<DateTime?>(expiresAt),
+      'lastVerifiedAt': serializer.toJson<DateTime>(lastVerifiedAt),
+    };
+  }
+
+  SubscriptionCache copyWith({
+    String? id,
+    String? tier,
+    bool? isActive,
+    Value<DateTime?> expiresAt = const Value.absent(),
+    DateTime? lastVerifiedAt,
+  }) => SubscriptionCache(
+    id: id ?? this.id,
+    tier: tier ?? this.tier,
+    isActive: isActive ?? this.isActive,
+    expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+    lastVerifiedAt: lastVerifiedAt ?? this.lastVerifiedAt,
+  );
+  SubscriptionCache copyWithCompanion(SubscriptionCachesCompanion data) {
+    return SubscriptionCache(
+      id: data.id.present ? data.id.value : this.id,
+      tier: data.tier.present ? data.tier.value : this.tier,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      lastVerifiedAt: data.lastVerifiedAt.present
+          ? data.lastVerifiedAt.value
+          : this.lastVerifiedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SubscriptionCache(')
+          ..write('id: $id, ')
+          ..write('tier: $tier, ')
+          ..write('isActive: $isActive, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('lastVerifiedAt: $lastVerifiedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, tier, isActive, expiresAt, lastVerifiedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SubscriptionCache &&
+          other.id == this.id &&
+          other.tier == this.tier &&
+          other.isActive == this.isActive &&
+          other.expiresAt == this.expiresAt &&
+          other.lastVerifiedAt == this.lastVerifiedAt);
+}
+
+class SubscriptionCachesCompanion extends UpdateCompanion<SubscriptionCache> {
+  final Value<String> id;
+  final Value<String> tier;
+  final Value<bool> isActive;
+  final Value<DateTime?> expiresAt;
+  final Value<DateTime> lastVerifiedAt;
+  final Value<int> rowid;
+  const SubscriptionCachesCompanion({
+    this.id = const Value.absent(),
+    this.tier = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.lastVerifiedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SubscriptionCachesCompanion.insert({
+    required String id,
+    required String tier,
+    this.isActive = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    required DateTime lastVerifiedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       tier = Value(tier),
+       lastVerifiedAt = Value(lastVerifiedAt);
+  static Insertable<SubscriptionCache> custom({
+    Expression<String>? id,
+    Expression<String>? tier,
+    Expression<bool>? isActive,
+    Expression<DateTime>? expiresAt,
+    Expression<DateTime>? lastVerifiedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tier != null) 'tier': tier,
+      if (isActive != null) 'is_active': isActive,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (lastVerifiedAt != null) 'last_verified_at': lastVerifiedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SubscriptionCachesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? tier,
+    Value<bool>? isActive,
+    Value<DateTime?>? expiresAt,
+    Value<DateTime>? lastVerifiedAt,
+    Value<int>? rowid,
+  }) {
+    return SubscriptionCachesCompanion(
+      id: id ?? this.id,
+      tier: tier ?? this.tier,
+      isActive: isActive ?? this.isActive,
+      expiresAt: expiresAt ?? this.expiresAt,
+      lastVerifiedAt: lastVerifiedAt ?? this.lastVerifiedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (tier.present) {
+      map['tier'] = Variable<String>(tier.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (lastVerifiedAt.present) {
+      map['last_verified_at'] = Variable<DateTime>(lastVerifiedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SubscriptionCachesCompanion(')
+          ..write('id: $id, ')
+          ..write('tier: $tier, ')
+          ..write('isActive: $isActive, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('lastVerifiedAt: $lastVerifiedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5241,6 +5611,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $ActivityLogsTable activityLogs = $ActivityLogsTable(this);
   late final $DebtPaymentsTable debtPayments = $DebtPaymentsTable(this);
+  late final $SubscriptionCachesTable subscriptionCaches =
+      $SubscriptionCachesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5258,6 +5630,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     expenses,
     activityLogs,
     debtPayments,
+    subscriptionCaches,
   ];
 }
 
@@ -10536,6 +10909,221 @@ typedef $$DebtPaymentsTableProcessedTableManager =
       DebtPayment,
       PrefetchHooks Function({bool customerId, bool cashierId})
     >;
+typedef $$SubscriptionCachesTableCreateCompanionBuilder =
+    SubscriptionCachesCompanion Function({
+      required String id,
+      required String tier,
+      Value<bool> isActive,
+      Value<DateTime?> expiresAt,
+      required DateTime lastVerifiedAt,
+      Value<int> rowid,
+    });
+typedef $$SubscriptionCachesTableUpdateCompanionBuilder =
+    SubscriptionCachesCompanion Function({
+      Value<String> id,
+      Value<String> tier,
+      Value<bool> isActive,
+      Value<DateTime?> expiresAt,
+      Value<DateTime> lastVerifiedAt,
+      Value<int> rowid,
+    });
+
+class $$SubscriptionCachesTableFilterComposer
+    extends Composer<_$AppDatabase, $SubscriptionCachesTable> {
+  $$SubscriptionCachesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tier => $composableBuilder(
+    column: $table.tier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastVerifiedAt => $composableBuilder(
+    column: $table.lastVerifiedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SubscriptionCachesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SubscriptionCachesTable> {
+  $$SubscriptionCachesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tier => $composableBuilder(
+    column: $table.tier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastVerifiedAt => $composableBuilder(
+    column: $table.lastVerifiedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SubscriptionCachesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SubscriptionCachesTable> {
+  $$SubscriptionCachesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tier =>
+      $composableBuilder(column: $table.tier, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastVerifiedAt => $composableBuilder(
+    column: $table.lastVerifiedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$SubscriptionCachesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SubscriptionCachesTable,
+          SubscriptionCache,
+          $$SubscriptionCachesTableFilterComposer,
+          $$SubscriptionCachesTableOrderingComposer,
+          $$SubscriptionCachesTableAnnotationComposer,
+          $$SubscriptionCachesTableCreateCompanionBuilder,
+          $$SubscriptionCachesTableUpdateCompanionBuilder,
+          (
+            SubscriptionCache,
+            BaseReferences<
+              _$AppDatabase,
+              $SubscriptionCachesTable,
+              SubscriptionCache
+            >,
+          ),
+          SubscriptionCache,
+          PrefetchHooks Function()
+        > {
+  $$SubscriptionCachesTableTableManager(
+    _$AppDatabase db,
+    $SubscriptionCachesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SubscriptionCachesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SubscriptionCachesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SubscriptionCachesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> tier = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime?> expiresAt = const Value.absent(),
+                Value<DateTime> lastVerifiedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SubscriptionCachesCompanion(
+                id: id,
+                tier: tier,
+                isActive: isActive,
+                expiresAt: expiresAt,
+                lastVerifiedAt: lastVerifiedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String tier,
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime?> expiresAt = const Value.absent(),
+                required DateTime lastVerifiedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SubscriptionCachesCompanion.insert(
+                id: id,
+                tier: tier,
+                isActive: isActive,
+                expiresAt: expiresAt,
+                lastVerifiedAt: lastVerifiedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SubscriptionCachesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SubscriptionCachesTable,
+      SubscriptionCache,
+      $$SubscriptionCachesTableFilterComposer,
+      $$SubscriptionCachesTableOrderingComposer,
+      $$SubscriptionCachesTableAnnotationComposer,
+      $$SubscriptionCachesTableCreateCompanionBuilder,
+      $$SubscriptionCachesTableUpdateCompanionBuilder,
+      (
+        SubscriptionCache,
+        BaseReferences<
+          _$AppDatabase,
+          $SubscriptionCachesTable,
+          SubscriptionCache
+        >,
+      ),
+      SubscriptionCache,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10564,4 +11152,6 @@ class $AppDatabaseManager {
       $$ActivityLogsTableTableManager(_db, _db.activityLogs);
   $$DebtPaymentsTableTableManager get debtPayments =>
       $$DebtPaymentsTableTableManager(_db, _db.debtPayments);
+  $$SubscriptionCachesTableTableManager get subscriptionCaches =>
+      $$SubscriptionCachesTableTableManager(_db, _db.subscriptionCaches);
 }

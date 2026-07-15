@@ -24,22 +24,20 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
     final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
     // Ambil semua transaksi hari ini
-    final trxs = await (db.select(db.transactions)
-          ..where((tbl) {
-            var expr = tbl.createdAt.isBiggerOrEqualValue(todayStart) &
-                tbl.createdAt.isSmallerOrEqualValue(todayEnd);
-            if (!isAdmin && userId != null) {
-              expr = expr & tbl.cashierId.equals(userId);
-            }
-            return expr;
-          }))
-        .get();
+    final trxs =
+        await (db.select(db.transactions)..where((tbl) {
+              var expr =
+                  tbl.createdAt.isBiggerOrEqualValue(todayStart) &
+                  tbl.createdAt.isSmallerOrEqualValue(todayEnd);
+              if (!isAdmin && userId != null) {
+                expr = expr & tbl.cashierId.equals(userId);
+              }
+              return expr;
+            }))
+            .get();
 
     final activeTrxs = trxs.where((t) => t.status != 'VOID').toList();
-    final double omset = activeTrxs.fold(
-      0.0,
-      (sum, t) => sum + t.totalAmount,
-    );
+    final double omset = activeTrxs.fold(0.0, (sum, t) => sum + t.totalAmount);
     final int trxCount = activeTrxs.length;
 
     double totalExp = 0.0;
@@ -47,18 +45,22 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
 
     if (isAdmin) {
       // Ambil pengeluaran hari ini
-      final exps = await (db.select(db.expenses)
-            ..where((tbl) =>
-                tbl.date.isBiggerOrEqualValue(todayStart) &
-                tbl.date.isSmallerOrEqualValue(todayEnd)))
-          .get();
+      final exps =
+          await (db.select(db.expenses)..where(
+                (tbl) =>
+                    tbl.date.isBiggerOrEqualValue(todayStart) &
+                    tbl.date.isSmallerOrEqualValue(todayEnd),
+              ))
+              .get();
       totalExp = exps.fold(0.0, (sum, e) => sum + e.amount);
 
       // Ambil barang dengan stok menipis (<= 5)
-      final lowStockProducts = await (db.select(db.products)
-            ..where((tbl) =>
-                tbl.stock.isSmallerThanValue(6) & tbl.isActive.equals(true)))
-          .get();
+      final lowStockProducts =
+          await (db.select(db.products)..where(
+                (tbl) =>
+                    tbl.stock.isSmallerThanValue(6) & tbl.isActive.equals(true),
+              ))
+              .get();
       lowStockCount = lowStockProducts.length;
     }
 

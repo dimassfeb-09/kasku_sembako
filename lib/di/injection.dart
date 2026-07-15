@@ -75,6 +75,28 @@ import '../core/services/printer_service.dart';
 import '../core/services/activity_log_service.dart';
 import '../features/settings/presentation/bloc/printer_bloc.dart';
 
+import 'package:dio/dio.dart';
+import '../core/network/dio_client.dart';
+
+import '../features/account/data/datasources/account_remote_datasource.dart';
+import '../features/account/domain/repositories/account_repository.dart';
+import '../features/account/data/repositories/account_repository_impl.dart';
+import '../features/account/domain/usecases/account_usecases.dart';
+import '../features/account/presentation/bloc/account_bloc.dart';
+
+import '../features/subscription/data/datasources/billing_local_datasource.dart';
+import '../features/subscription/data/datasources/subscription_remote_datasource.dart';
+import '../features/subscription/domain/repositories/subscription_repository.dart';
+import '../features/subscription/data/repositories/subscription_repository_impl.dart';
+import '../features/subscription/domain/usecases/subscription_usecases.dart';
+import '../features/subscription/presentation/cubit/subscription_cubit.dart';
+
+import '../features/settings/data/datasources/cloud_backup_remote_datasource.dart';
+import '../features/settings/domain/repositories/cloud_backup_repository.dart';
+import '../features/settings/data/repositories/cloud_backup_repository_impl.dart';
+import '../features/settings/domain/usecases/cloud_backup_usecases.dart';
+import '../features/settings/presentation/bloc/backup_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -89,6 +111,9 @@ Future<void> init() async {
   sl.registerLazySingleton<ExportService>(() => ExportService());
   sl.registerLazySingleton<ActivityLogService>(
     () => ActivityLogService(sl<AppDatabase>(), sl<FlutterSecureStorage>()),
+  );
+  sl.registerLazySingleton<Dio>(
+    () => DioClient.build(sl<FlutterSecureStorage>()),
   );
 
   // Datasources
@@ -141,6 +166,21 @@ Future<void> init() async {
   sl.registerLazySingleton<ExpenseLocalDataSource>(
     () => ExpenseLocalDataSourceImpl(sl<AppDatabase>()),
   );
+  sl.registerLazySingleton<AccountRemoteDataSource>(
+    () => AccountRemoteDataSourceImpl(
+      dio: sl<Dio>(),
+      secureStorage: sl<FlutterSecureStorage>(),
+    ),
+  );
+  sl.registerLazySingleton<BillingLocalDataSource>(
+    () => BillingLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<SubscriptionRemoteDataSource>(
+    () => SubscriptionRemoteDataSourceImpl(dio: sl<Dio>()),
+  );
+  sl.registerLazySingleton<CloudBackupRemoteDataSource>(
+    () => CloudBackupRemoteDataSourceImpl(dio: sl<Dio>()),
+  );
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
@@ -172,6 +212,24 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<ExpenseRepository>(
     () => ExpenseRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<AccountRepository>(
+    () => AccountRepositoryImpl(
+      remoteDataSource: sl<AccountRemoteDataSource>(),
+      secureStorage: sl<FlutterSecureStorage>(),
+    ),
+  );
+  sl.registerLazySingleton<SubscriptionRepository>(
+    () => SubscriptionRepositoryImpl(
+      billingLocalDataSource: sl<BillingLocalDataSource>(),
+      remoteDataSource: sl<SubscriptionRemoteDataSource>(),
+      db: sl<AppDatabase>(),
+    ),
+  );
+  sl.registerLazySingleton<CloudBackupRepository>(
+    () => CloudBackupRepositoryImpl(
+      remoteDataSource: sl<CloudBackupRemoteDataSource>(),
+    ),
   );
 
   // Usecases
@@ -214,6 +272,21 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetExpensesUseCase(sl()));
   sl.registerLazySingleton(() => AddExpenseUseCase(sl()));
   sl.registerLazySingleton(() => DeleteExpenseUseCase(sl()));
+
+  sl.registerLazySingleton(() => RegisterAccountUseCase(sl()));
+  sl.registerLazySingleton(() => LoginAccountUseCase(sl()));
+  sl.registerLazySingleton(() => LogoutAccountUseCase(sl()));
+  sl.registerLazySingleton(() => GetCachedAccountUseCase(sl()));
+
+  sl.registerLazySingleton(() => PurchaseProUseCase(sl()));
+  sl.registerLazySingleton(() => RestorePurchasesUseCase(sl()));
+  sl.registerLazySingleton(() => GetCachedSubscriptionStatusUseCase(sl()));
+  sl.registerLazySingleton(() => RefreshSubscriptionStatusUseCase(sl()));
+
+  sl.registerLazySingleton(() => UploadCloudBackupUseCase(sl()));
+  sl.registerLazySingleton(() => DownloadCloudBackupUseCase(sl()));
+  sl.registerLazySingleton(() => ListBackupsUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteBackupUseCase(sl()));
 
   // Blocs/Cubits
   sl.registerFactory(
@@ -290,18 +363,40 @@ Future<void> init() async {
 
   sl.registerFactory(() => QuickCustomerCubit(insertCustomerUseCase: sl()));
   sl.registerFactory(
-    () => PosSetupCubit(
-      getCategoriesUseCase: sl(),
-      getCustomersUseCase: sl(),
-    ),
+    () => PosSetupCubit(getCategoriesUseCase: sl(), getCustomersUseCase: sl()),
   );
   sl.registerFactory(() => PermissionCubit(getUserPermissionUseCase: sl()));
-  
+
   sl.registerFactory(
     () => ExpenseBloc(
       getExpensesUseCase: sl(),
       addExpenseUseCase: sl(),
       deleteExpenseUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => AccountBloc(
+      registerAccountUseCase: sl(),
+      loginAccountUseCase: sl(),
+      logoutAccountUseCase: sl(),
+      getCachedAccountUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => SubscriptionCubit(
+      purchaseProUseCase: sl(),
+      restorePurchasesUseCase: sl(),
+      getCachedSubscriptionStatusUseCase: sl(),
+      refreshSubscriptionStatusUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => BackupBloc(
+      uploadCloudBackupUseCase: sl(),
+      downloadCloudBackupUseCase: sl(),
     ),
   );
 }

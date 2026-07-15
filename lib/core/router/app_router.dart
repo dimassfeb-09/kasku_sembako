@@ -29,6 +29,11 @@ import '../../features/settings/presentation/pages/activity_log_page.dart';
 import '../../features/user_management/presentation/pages/user_management_page.dart';
 import '../../features/transaction/presentation/pages/transaction_history_page.dart';
 import '../../features/debt/presentation/pages/debt_management_page.dart';
+import '../../features/account/presentation/pages/account_login_page.dart';
+import '../../features/account/presentation/pages/account_register_page.dart';
+import '../../features/account/presentation/pages/account_home_page.dart';
+import '../../features/subscription/presentation/pages/subscription_upgrade_page.dart';
+import '../../features/subscription/presentation/cubit/subscription_cubit.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,6 +58,10 @@ class AppRouter {
     '/history',
     '/wholesale-management',
     '/debts',
+    '/account',
+    '/account/login',
+    '/account/register',
+    '/subscription/upgrade',
   ];
 
   static final router = GoRouter(
@@ -253,6 +262,29 @@ class AppRouter {
         path: '/debts',
         name: 'debts',
         builder: (context, state) => const DebtManagementPage(),
+      ),
+      GoRoute(
+        path: '/account',
+        name: 'account',
+        builder: (context, state) => const AccountHomePage(),
+      ),
+      GoRoute(
+        path: '/account/login',
+        name: 'account_login',
+        builder: (context, state) => const AccountLoginPage(),
+      ),
+      GoRoute(
+        path: '/account/register',
+        name: 'account_register',
+        builder: (context, state) => const AccountRegisterPage(),
+      ),
+      GoRoute(
+        path: '/subscription/upgrade',
+        name: 'subscription_upgrade',
+        builder: (context, state) => BlocProvider<SubscriptionCubit>(
+          create: (_) => di.sl<SubscriptionCubit>(),
+          child: const SubscriptionUpgradePage(),
+        ),
       ),
     ],
   );

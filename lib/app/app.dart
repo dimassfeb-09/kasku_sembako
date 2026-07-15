@@ -18,6 +18,8 @@ import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/settings/presentation/bloc/printer_bloc.dart';
 import '../features/user_management/presentation/bloc/permission_cubit.dart';
 import '../features/expense/presentation/bloc/expense_bloc.dart';
+import '../features/account/presentation/bloc/account_bloc.dart';
+import '../features/account/presentation/bloc/account_event.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -43,6 +45,9 @@ class App extends StatelessWidget {
         BlocProvider<HomeBloc>(create: (_) => di.sl<HomeBloc>()),
         BlocProvider<PermissionCubit>(create: (_) => di.sl<PermissionCubit>()),
         BlocProvider<ExpenseBloc>(create: (_) => di.sl<ExpenseBloc>()),
+        BlocProvider<AccountBloc>(
+          create: (_) => di.sl<AccountBloc>()..add(CheckAccountSessionEvent()),
+        ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {

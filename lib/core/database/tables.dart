@@ -7,7 +7,7 @@ class Users extends Table {
   TextColumn get pinHash => text()();
   TextColumn get role => text()(); // 'admin' atau 'cashier'
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -20,7 +20,7 @@ class Permissions extends Table {
   BoolColumn get menuStock => boolean().withDefault(const Constant(false))();
   BoolColumn get menuReport => boolean().withDefault(const Constant(false))();
   BoolColumn get actionVoid => boolean().withDefault(const Constant(false))();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -30,7 +30,7 @@ class Categories extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get color => text().nullable()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -47,7 +47,7 @@ class Products extends Table {
   TextColumn get unit => text()(); // pcs, kg, etc
   TextColumn get imagePath => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -58,7 +58,7 @@ class WholesalePrices extends Table {
   TextColumn get productId => text().references(Products, #id)();
   IntColumn get minQty => integer()();
   RealColumn get price => real()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -70,7 +70,7 @@ class Customers extends Table {
   TextColumn get phone => text().nullable()();
   TextColumn get notes => text().nullable()();
   RealColumn get debtAmount => real().withDefault(const Constant(0))();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -87,7 +87,7 @@ class Transactions extends Table {
   TextColumn get paymentMethod => text()(); // cash, qris, dll
   TextColumn get status => text()(); // success, hold, void
   DateTimeColumn get createdAt => dateTime()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -103,7 +103,7 @@ class TransactionItems extends Table {
   RealColumn get purchasePrice => real().withDefault(const Constant(0))();
   RealColumn get discount => real().withDefault(const Constant(0))();
   RealColumn get subtotal => real()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -117,7 +117,7 @@ class StockHistories extends Table {
   TextColumn get notes => text().nullable()();
   TextColumn get userId => text().references(Users, #id)();
   DateTimeColumn get createdAt => dateTime()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -130,7 +130,7 @@ class Expenses extends Table {
   TextColumn get notes => text().nullable()();
   DateTimeColumn get date => dateTime()();
   TextColumn get receiptPath => text().nullable()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -142,7 +142,7 @@ class ActivityLogs extends Table {
   TextColumn get action => text()();
   TextColumn get description => text()();
   DateTimeColumn get createdAt => dateTime()();
-  
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -156,6 +156,24 @@ class DebtPayments extends Table {
   TextColumn get notes => text().nullable()();
   TextColumn get cashierId => text().references(Users, #id)();
   DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// Cached local copy of the store's cloud Pro-subscription entitlement, used
+// for offline gating of Pro-only UI (e.g. the cloud backup buttons in
+// backup_page.dart). Deliberately NOT on the Users table: that table is
+// local per-cashier PIN staff access, an orthogonal concept to this
+// store-level cloud subscription. Always a single row (id = 'current');
+// the source of truth is the backend, refreshed via GET /subscriptions/status.
+@DataClassName('SubscriptionCache')
+class SubscriptionCaches extends Table {
+  TextColumn get id => text()();
+  TextColumn get tier => text()(); // 'free' or 'pro'
+  BoolColumn get isActive => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get expiresAt => dateTime().nullable()();
+  DateTimeColumn get lastVerifiedAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};

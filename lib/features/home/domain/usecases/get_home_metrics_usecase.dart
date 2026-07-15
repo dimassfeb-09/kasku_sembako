@@ -12,9 +12,6 @@ class GetHomeMetricsUseCase {
     required bool isAdmin,
     required String? userId,
   }) async {
-    return await repository.getHomeMetrics(
-      isAdmin: isAdmin,
-      userId: userId,
-    );
+    return await repository.getHomeMetrics(isAdmin: isAdmin, userId: userId);
   }
 }

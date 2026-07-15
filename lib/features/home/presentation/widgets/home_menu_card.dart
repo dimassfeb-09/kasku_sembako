@@ -73,8 +73,12 @@ class HomeMenuCard extends StatelessWidget {
     }
 
     final Color routeColor = _getRouteColor(route);
-    final Color primaryColor = hasPermission ? routeColor : const Color(0xFF94A3B8); // Slate 400 when locked
-    final Color pastelBgColor = hasPermission ? routeColor.withOpacity(0.08) : const Color(0xFFF1F5F9); // Slate 100 when locked
+    final Color primaryColor = hasPermission
+        ? routeColor
+        : const Color(0xFF94A3B8); // Slate 400 when locked
+    final Color pastelBgColor = hasPermission
+        ? routeColor.withOpacity(0.08)
+        : const Color(0xFFF1F5F9); // Slate 100 when locked
 
     return Container(
       decoration: BoxDecoration(
@@ -125,7 +129,10 @@ class HomeMenuCard extends StatelessWidget {
               children: [
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 12.0,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
@@ -136,11 +143,7 @@ class HomeMenuCard extends StatelessWidget {
                             color: pastelBgColor,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            icon,
-                            size: 26,
-                            color: primaryColor,
-                          ),
+                          child: Icon(icon, size: 26, color: primaryColor),
                         ),
                         const SizedBox(height: 10),
                         Text(
@@ -185,4 +188,3 @@ class HomeMenuCard extends StatelessWidget {
     );
   }
 }
-
