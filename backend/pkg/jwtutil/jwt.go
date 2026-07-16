@@ -12,17 +12,21 @@ var ErrInvalidToken = errors.New("invalid or expired token")
 type Claims struct {
 	UserID string `json:"sub"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
+
+const ClaimsLocalsKey = "claims"
 
 // Issue signs a single long-lived JWT (no refresh token for MVP — see plan
 // rationale: the gated resource, a subscription flag and backup files the
 // shop already controls locally, doesn't warrant refresh-token complexity).
-func Issue(secret string, userID, email string, ttl time.Duration) (string, error) {
+func Issue(secret string, userID, email, role string, ttl time.Duration) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		UserID: userID,
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),

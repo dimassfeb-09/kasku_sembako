@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_input.dart';
 import '../../../product/domain/entities/product_entity.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 import '../bloc/stock_bloc.dart';
 import '../bloc/stock_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -31,6 +32,10 @@ class _StockAdjustmentPageState extends State<StockAdjustmentPage> {
   }
 
   void _onSave() {
+    if (!isProEntitled(context)) {
+      showProUpsell(context, fitur: 'Penyesuaian stok');
+      return;
+    }
     final qty = int.tryParse(_qtyController.text) ?? 0;
     if (qty <= 0) {
       ScaffoldMessenger.of(

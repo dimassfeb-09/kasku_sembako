@@ -45,15 +45,26 @@ class ReportLoadedContent extends StatelessWidget {
               }
               context.read<ReportBloc>().add(ExportExcelEvent());
             },
+            onExportCsv: () {
+              if (!isProEntitled(context)) {
+                showProUpsell(context, fitur: 'Export data CSV');
+                return;
+              }
+              context.read<ReportBloc>().add(ExportCsvEvent());
+            },
           ),
           Expanded(
             child: state.transactions.isEmpty
                 ? const ReportEmptyState()
                 : ReportTransactionList(
                     transactions: state.transactions,
-                    onVoid: (id) => context.read<ReportBloc>().add(
-                      VoidTransactionEvent(id),
-                    ),
+                    onVoid: (id) {
+                      if (!isProEntitled(context)) {
+                        showProUpsell(context, fitur: 'Void transaksi');
+                        return;
+                      }
+                      context.read<ReportBloc>().add(VoidTransactionEvent(id));
+                    },
                   ),
           ),
         ],

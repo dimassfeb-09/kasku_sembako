@@ -4,23 +4,21 @@ import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final RegisterUseCase registerUseCase;
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
   final GetSessionUseCase getSessionUseCase;
-  final HasUsersUseCase hasUsersUseCase;
-  final RegisterFirstAdminUseCase registerFirstAdminUseCase;
 
   AuthBloc({
+    required this.registerUseCase,
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.getSessionUseCase,
-    required this.hasUsersUseCase,
-    required this.registerFirstAdminUseCase,
   }) : super(AuthInitial()) {
     on<CheckSessionEvent>(_onCheckSession);
+    on<RegisterSubmittedEvent>(_onRegisterSubmitted);
     on<LoginSubmittedEvent>(_onLoginSubmitted);
     on<LogoutEvent>(_onLogout);
-    on<RegisterFirstAdminEvent>(_onRegisterFirstAdmin);
   }
 
   Future<void> _onCheckSession(
@@ -28,28 +26,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
-    // Cek apakah database kosong
-    final hasUsersResult = await hasUsersUseCase();
-    bool databaseHasUsers = true;
-    hasUsersResult.fold(
-      (failure) {}, // Abaikan error atau asumsikan ada user
-      (hasUsers) => databaseHasUsers = hasUsers,
-    );
-
-    if (!databaseHasUsers) {
-      emit(SetupRequired());
-      return;
-    }
-
     final result = await getSessionUseCase();
-    result.fold((failure) => emit(Unauthenticated()), (user) {
-      if (user != null) {
-        emit(Authenticated(user));
-      } else {
-        emit(Unauthenticated());
-      }
-    });
+    result.fold(
+      (failure) => emit(Unauthenticated()),
+      (user) => user != null ? emit(Authenticated(user)) : emit(Unauthenticated()),
+    );
+  }
+
+  Future<void> _onRegisterSubmitted(
+    RegisterSubmittedEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await registerUseCase(event.email, event.password);
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (user) => emit(Authenticated(user)),
+    );
   }
 
   Future<void> _onLoginSubmitted(
@@ -57,7 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    final result = await loginUseCase(event.username, event.pin);
+    final result = await loginUseCase(event.email, event.password);
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (user) => emit(Authenticated(user)),
@@ -70,18 +63,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (_) => emit(Unauthenticated()),
-    );
-  }
-
-  Future<void> _onRegisterFirstAdmin(
-    RegisterFirstAdminEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-    final result = await registerFirstAdminUseCase(event.username, event.pin);
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (user) => emit(Authenticated(user)),
     );
   }
 }

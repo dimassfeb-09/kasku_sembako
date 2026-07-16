@@ -11,7 +11,8 @@ import (
 const UserIDLocalsKey = "userID"
 
 // RequireAuth verifies the Authorization: Bearer <jwt> header and stores
-// the authenticated user id in Fiber locals for downstream handlers.
+// the authenticated user id and claims in Fiber locals for downstream
+// handlers.
 func RequireAuth(jwtSecret string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		header := c.Get("Authorization")
@@ -26,6 +27,7 @@ func RequireAuth(jwtSecret string) fiber.Handler {
 		}
 
 		c.Locals(UserIDLocalsKey, claims.UserID)
+		c.Locals(jwtutil.ClaimsLocalsKey, claims)
 		return c.Next()
 	}
 }
@@ -33,4 +35,9 @@ func RequireAuth(jwtSecret string) fiber.Handler {
 func UserID(c *fiber.Ctx) string {
 	id, _ := c.Locals(UserIDLocalsKey).(string)
 	return id
+}
+
+func Claims(c *fiber.Ctx) *jwtutil.Claims {
+	cl, _ := c.Locals(jwtutil.ClaimsLocalsKey).(*jwtutil.Claims)
+	return cl
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/services/export_service.dart';
 import '../../../transaction/domain/usecases/get_transactions_usecase.dart';
 import '../../../transaction/domain/usecases/void_transaction_usecase.dart';
@@ -17,6 +18,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
     on<LoadReportsEvent>(_onLoadReports);
     on<ExportPdfEvent>(_onExportPdf);
     on<ExportExcelEvent>(_onExportExcel);
+    on<ExportCsvEvent>(_onExportCsv);
     on<VoidTransactionEvent>(_onVoidTransaction);
   }
 
@@ -81,6 +83,37 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
       emit(ReportExportError("Gagal mengekspor PDF: ${e.toString()}"));
     }
     // Re-emit loaded state to keep UI active
+    emit(currentState);
+  }
+
+  Future<void> _onExportCsv(
+    ExportCsvEvent event,
+    Emitter<ReportState> emit,
+  ) async {
+    if (state is! ReportLoaded) return;
+    final currentState = state as ReportLoaded;
+    if (currentState.transactions.isEmpty) return;
+
+    emit(ReportExporting());
+    try {
+      final headers = ['Tanggal', 'No Struk', 'Kasir', 'Pembayaran', 'Total'];
+      final rows = currentState.transactions.map((t) => [
+        DateFormat('dd/MM/yyyy HH:mm').format(t.createdAt),
+        t.receiptNumber,
+        t.cashierId,
+        t.paymentMethod,
+        t.totalAmount.toStringAsFixed(0),
+      ]).toList();
+
+      await exportService.exportToCsv(
+        headers: headers,
+        rows: rows,
+        fileName: 'laporan_penjualan.csv',
+      );
+      emit(const ReportExportSuccess('Berhasil mengekspor CSV'));
+    } catch (e) {
+      emit(ReportExportError('Gagal mengekspor CSV: ${e.toString()}'));
+    }
     emit(currentState);
   }
 

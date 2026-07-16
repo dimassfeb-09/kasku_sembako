@@ -7,6 +7,7 @@ import '../../../account/presentation/bloc/account_state.dart';
 import '../../domain/entities/subscription_status_entity.dart';
 import '../cubit/subscription_cubit.dart';
 import '../cubit/subscription_state.dart';
+import '../widgets/pro_comparison_card.dart';
 
 class SubscriptionUpgradePage extends StatefulWidget {
   const SubscriptionUpgradePage({super.key});
@@ -55,8 +56,8 @@ class _SubscriptionUpgradePageState extends State<SubscriptionUpgradePage> {
               final isPro = status?.isEntitled ?? false;
               final isBusy = state is SubscriptionPurchaseInProgress;
 
-              return Padding(
-                padding: const EdgeInsets.all(24.0),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -136,6 +137,8 @@ class _SubscriptionUpgradePageState extends State<SubscriptionUpgradePage> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    const ProComparisonCard(),
                     const SizedBox(height: 24),
                     if (!isPro)
                       AppButton(
@@ -152,6 +155,7 @@ class _SubscriptionUpgradePageState extends State<SubscriptionUpgradePage> {
                       onPressed: () =>
                           context.read<SubscriptionCubit>().restorePurchases(),
                     ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               );

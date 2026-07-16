@@ -52,11 +52,23 @@ func (r *fakeUserRepo) FindByID(ctx context.Context, id string) (*domain.User, e
 	return u, nil
 }
 
+func (r *fakeUserRepo) ListAll(ctx context.Context) ([]*domain.User, error) {
+	users := make([]*domain.User, 0, len(r.byID))
+	for _, u := range r.byID {
+		users = append(users, u)
+	}
+	return users, nil
+}
+
+func (r *fakeUserRepo) Count(ctx context.Context) (int, error) {
+	return len(r.byID), nil
+}
+
 const testJWTSecret = "test-secret"
 
 func TestRegister_SuccessHashesPasswordAndIssuesValidToken(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	token, user, err := uc.Register(context.Background(), "owner@example.com", "hunter22222")
 	if err != nil {
@@ -89,7 +101,7 @@ func TestRegister_SuccessHashesPasswordAndIssuesValidToken(t *testing.T) {
 
 func TestRegister_DuplicateEmailReturnsErrEmailTaken(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	if _, _, err := uc.Register(context.Background(), "dupe@example.com", "password1"); err != nil {
 		t.Fatalf("first Register failed: %v", err)
@@ -103,7 +115,7 @@ func TestRegister_DuplicateEmailReturnsErrEmailTaken(t *testing.T) {
 
 func TestLogin_SuccessWithCorrectPassword(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	if _, _, err := uc.Register(context.Background(), "owner@example.com", "correcthorse"); err != nil {
 		t.Fatalf("Register failed: %v", err)
@@ -123,7 +135,7 @@ func TestLogin_SuccessWithCorrectPassword(t *testing.T) {
 
 func TestLogin_WrongPasswordReturnsInvalidCredentials(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	if _, _, err := uc.Register(context.Background(), "owner@example.com", "correcthorse"); err != nil {
 		t.Fatalf("Register failed: %v", err)
@@ -140,7 +152,7 @@ func TestLogin_WrongPasswordReturnsInvalidCredentials(t *testing.T) {
 // enumerate registered emails by comparing error responses.
 func TestLogin_UnknownEmailReturnsInvalidCredentialsNotNotFound(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	_, _, err := uc.Login(context.Background(), "nobody@example.com", "whatever123")
 	if err != domain.ErrInvalidCredentials {
@@ -150,7 +162,7 @@ func TestLogin_UnknownEmailReturnsInvalidCredentialsNotNotFound(t *testing.T) {
 
 func TestMe_ReturnsUserByID(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	_, registered, err := uc.Register(context.Background(), "owner@example.com", "password123")
 	if err != nil {
@@ -168,10 +180,35 @@ func TestMe_ReturnsUserByID(t *testing.T) {
 
 func TestMe_UnknownIDReturnsNotFound(t *testing.T) {
 	repo := newFakeUserRepo()
-	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour)
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "")
 
 	_, err := uc.Me(context.Background(), "does-not-exist")
 	if err != domain.ErrNotFound {
 		t.Fatalf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestRegister_AutoPromotesAdminEmail(t *testing.T) {
+	repo := newFakeUserRepo()
+	uc := NewAuthUsecase(repo, testJWTSecret, time.Hour, "admin@example.com")
+
+	_, user, err := uc.Register(context.Background(), "admin@example.com", "password123")
+	if err != nil {
+		t.Fatalf("Register failed: %v", err)
+	}
+	if user.Role != "admin" {
+		t.Fatalf("expected role admin for admin email, got %s", user.Role)
+	}
+
+	token, _, err := uc.Login(context.Background(), "admin@example.com", "password123")
+	if err != nil {
+		t.Fatalf("Login failed: %v", err)
+	}
+	claims, err := jwtutil.Verify(testJWTSecret, token)
+	if err != nil {
+		t.Fatalf("token verification failed: %v", err)
+	}
+	if claims.Role != "admin" {
+		t.Fatalf("expected claims.Role admin, got %s", claims.Role)
 	}
 }

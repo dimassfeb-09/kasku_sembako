@@ -41,11 +41,12 @@ class PrinterLoading extends PrinterState {}
 class PrinterLoaded extends PrinterState {
   final List<BluetoothInfo> devices;
   final String? connectedMacAddress;
+  final bool bluetoothOn;
 
-  const PrinterLoaded(this.devices, this.connectedMacAddress);
+  const PrinterLoaded(this.devices, this.connectedMacAddress, {this.bluetoothOn = true});
 
   @override
-  List<Object?> get props => [devices, connectedMacAddress];
+  List<Object?> get props => [devices, connectedMacAddress, bluetoothOn];
 }
 
 class PrinterError extends PrinterState {

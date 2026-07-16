@@ -11,8 +11,6 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
-    Users,
-    Permissions,
     Categories,
     Products,
     WholesalePrices,
@@ -29,35 +27,16 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  /// For tests only — injects an arbitrary [QueryExecutor] (e.g.
-  /// `NativeDatabase.memory()`) instead of the real on-disk file, so unit
-  /// tests don't depend on path_provider/platform channels.
   AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
-      },
-      onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await m.addColumn(transactionItems, transactionItems.purchasePrice);
-        }
-        if (from < 3) {
-          await m.createTable(debtPayments);
-        }
-        if (from < 4) {
-          await m.createTable(subscriptionCaches);
-        }
-        if (from < 5) {
-          await m.addColumn(users, users.pinSalt);
-          await m.addColumn(users, users.failedPinAttempts);
-          await m.addColumn(users, users.lockedUntil);
-        }
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');

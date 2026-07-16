@@ -8,15 +8,14 @@ import '../features/home/data/repositories/home_repository_impl.dart';
 import '../features/home/domain/usecases/get_home_metrics_usecase.dart';
 import '../core/database/app_database.dart';
 
-import '../features/auth/data/datasources/auth_local_datasource.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/datasources/store_profile_remote_datasource.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
+import '../features/auth/domain/repositories/store_profile_repository.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/data/repositories/store_profile_repository_impl.dart';
 import '../features/auth/domain/usecases/auth_usecases.dart';
-import '../features/user_management/data/datasources/permission_local_datasource.dart';
-import '../features/user_management/domain/repositories/permission_repository.dart';
-import '../features/user_management/data/repositories/permission_repository_impl.dart';
-import '../features/user_management/domain/usecases/get_user_permission_usecase.dart';
-import '../features/user_management/presentation/bloc/permission_cubit.dart';
+import '../features/auth/domain/usecases/store_profile_usecases.dart';
 
 import '../features/product/data/datasources/product_local_datasource.dart';
 import '../features/product/domain/repositories/product_repository.dart';
@@ -96,6 +95,8 @@ import '../features/settings/domain/repositories/cloud_backup_repository.dart';
 import '../features/settings/data/repositories/cloud_backup_repository_impl.dart';
 import '../features/settings/domain/usecases/cloud_backup_usecases.dart';
 import '../features/settings/presentation/bloc/backup_bloc.dart';
+import '../features/settings/data/datasources/backup_schedule_local_datasource.dart';
+import '../core/services/backup_scheduler_service.dart';
 
 final sl = GetIt.instance;
 
@@ -124,19 +125,19 @@ Future<void> init() async {
     () => ActivityLogService(sl<AppDatabase>(), sl<FlutterSecureStorage>()),
   );
   sl.registerLazySingleton<Dio>(
-    () => DioClient.build(sl<FlutterSecureStorage>()),
+    () => buildDio(sl<FlutterSecureStorage>()),
   );
 
   // Datasources
-  sl.registerLazySingleton<AuthLocalDataSource>(
-    () => AuthLocalDataSourceImpl(
-      db: sl<AppDatabase>(),
-      secureStorage: sl<FlutterSecureStorage>(),
-      logService: sl<ActivityLogService>(),
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(
+      dio: sl(),
+      secureStorage: sl(),
     ),
   );
-  sl.registerLazySingleton<PermissionLocalDataSource>(
-    () => PermissionLocalDataSourceImpl(db: sl<AppDatabase>()),
+
+  sl.registerLazySingleton<StoreProfileRemoteDataSource>(
+    () => StoreProfileRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<ProductLocalDataSource>(
     () => ProductLocalDataSourceImpl(
@@ -195,10 +196,14 @@ Future<void> init() async {
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(localDataSource: sl()),
+    () => AuthRepositoryImpl(
+        remoteDataSource: sl<AuthRemoteDataSource>(),
+        secureStorage: sl()),
   );
-  sl.registerLazySingleton<PermissionRepository>(
-    () => PermissionRepositoryImpl(localDataSource: sl()),
+
+  sl.registerLazySingleton<StoreProfileRepository>(
+    () => StoreProfileRepositoryImpl(
+        remoteDataSource: sl<StoreProfileRemoteDataSource>()),
   );
   sl.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(localDataSource: sl()),
@@ -244,13 +249,13 @@ Future<void> init() async {
   );
 
   // Usecases
+  sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetSessionUseCase(sl()));
-  sl.registerLazySingleton(() => HasUsersUseCase(sl()));
-  sl.registerLazySingleton(() => RegisterFirstAdminUseCase(sl()));
-  sl.registerLazySingleton(() => GetUserPermissionUseCase(sl()));
 
+  sl.registerLazySingleton(() => SaveStoreProfileUseCase(sl()));
+  sl.registerLazySingleton(() => GetStoreProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetProductByBarcodeUseCase(sl()));
   sl.registerLazySingleton(() => InsertProductUseCase(sl()));
@@ -302,11 +307,10 @@ Future<void> init() async {
   // Blocs/Cubits
   sl.registerFactory(
     () => AuthBloc(
+      registerUseCase: sl(),
       loginUseCase: sl(),
       logoutUseCase: sl(),
       getSessionUseCase: sl(),
-      hasUsersUseCase: sl(),
-      registerFirstAdminUseCase: sl(),
     ),
   );
 
@@ -376,7 +380,6 @@ Future<void> init() async {
   sl.registerFactory(
     () => PosSetupCubit(getCategoriesUseCase: sl(), getCustomersUseCase: sl()),
   );
-  sl.registerFactory(() => PermissionCubit(getUserPermissionUseCase: sl()));
 
   sl.registerFactory(
     () => ExpenseBloc(
@@ -409,5 +412,13 @@ Future<void> init() async {
       uploadCloudBackupUseCase: sl(),
       downloadCloudBackupUseCase: sl(),
     ),
+  );
+
+  sl.registerLazySingleton<BackupScheduleLocalDataSource>(
+    () => BackupScheduleLocalDataSource(sl()),
+  );
+
+  sl.registerLazySingleton<BackupSchedulerService>(
+    () => BackupSchedulerService(),
   );
 }

@@ -8,8 +8,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../../../di/injection.dart';
 import '../../../category/domain/entities/category_entity.dart';
-import '../../domain/entities/product_entity.dart';
 import '../../../category/domain/usecases/category_usecases.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../domain/entities/product_entity.dart';
+import '../../domain/repositories/product_repository.dart';
 import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
@@ -296,6 +300,18 @@ class _ProductAddPageState extends State<ProductAddPage> {
         isError: true,
       );
       return;
+    }
+
+    final subState = context.read<SubscriptionCubit>().state;
+    if (subState is SubscriptionStatusLoaded && !subState.status.isEntitled) {
+      final countResult = await sl<ProductRepository>().countProducts();
+      final count = countResult.fold((_) => 0, (c) => c);
+      if (count >= 20) {
+        if (mounted) {
+          showProUpsell(context, fitur: 'Menambah produk');
+        }
+        return;
+      }
     }
 
     String? localImagePath;

@@ -18,6 +18,13 @@ func NewBackupRepository(pool *pgxpool.Pool) *BackupRepository {
 	return &BackupRepository{pool: pool}
 }
 
+func (r *BackupRepository) CountAll(ctx context.Context) (int, error) {
+	const q = `SELECT COUNT(*) FROM backups`
+	var count int
+	err := r.pool.QueryRow(ctx, q).Scan(&count)
+	return count, err
+}
+
 func (r *BackupRepository) Create(ctx context.Context, b *domain.Backup) error {
 	const q = `
 		INSERT INTO backups (user_id, payload)

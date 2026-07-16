@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../product/domain/entities/product_entity.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
 import '../bloc/stock_bloc.dart';
 import '../bloc/stock_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -29,12 +31,20 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
           if (state is StockLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is StockHistoryLoaded) {
-            if (state.histories.isEmpty) {
+            final subState = context.read<SubscriptionCubit>().state;
+            final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+
+            var histories = List.of(state.histories);
+            if (!isPro) {
+              final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+              histories = histories.where((h) => h.createdAt.isAfter(oneMonthAgo)).toList();
+            }
+
+            if (histories.isEmpty) {
               return const Center(child: Text('Belum ada riwayat stok.'));
             }
             // Sort by createdAt descending
-            final histories = List.of(state.histories)
-              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            histories.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
             return ListView.separated(
               padding: const EdgeInsets.all(16),

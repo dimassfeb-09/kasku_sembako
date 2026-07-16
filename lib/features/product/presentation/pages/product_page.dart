@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../di/injection.dart';
+import '../../../../core/services/export_service.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
@@ -19,6 +24,29 @@ class _ProductPageState extends State<ProductPage> {
   void initState() {
     super.initState();
     context.read<ProductBloc>().add(LoadProductsEvent());
+  }
+
+  void _exportCsv(BuildContext context) {
+    final subState = context.read<SubscriptionCubit>().state;
+    if (subState is! SubscriptionStatusLoaded || !subState.status.isEntitled) {
+      showProUpsell(context, fitur: 'Export data CSV');
+      return;
+    }
+    final state = context.read<ProductBloc>().state;
+    if (state is! ProductLoaded || state.products.isEmpty) return;
+    sl<ExportService>().exportToCsv(
+      headers: ['Kode', 'Nama', 'Kategori', 'Harga Beli', 'Harga Jual', 'Stok', 'Satuan'],
+      rows: state.products.map((p) => [
+        p.barcode,
+        p.name,
+        p.categoryId ?? '',
+        p.purchasePrice.toStringAsFixed(0),
+        p.sellingPrice.toStringAsFixed(0),
+        p.stock.toString(),
+        p.unit,
+      ]).toList(),
+      fileName: 'produk.csv',
+    );
   }
 
   @override
@@ -43,6 +71,17 @@ class _ProductPageState extends State<ProductPage> {
           ),
         ),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.table_chart_outlined,
+                color: AppColors.textSecondary,
+                size: 22,
+              ),
+              onPressed: () => _exportCsv(context),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(

@@ -7,7 +7,10 @@ import '../bloc/expense_state.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../widgets/expense_widgets.dart';
+import '../widgets/add_expense_sheet.dart';
+import '../widgets/expense_app_bar.dart';
+import '../widgets/expense_list_section.dart';
+import '../widgets/expense_summary_section.dart';
 
 class ExpensePage extends StatefulWidget {
   const ExpensePage({super.key});

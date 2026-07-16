@@ -27,6 +27,8 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
   String storeAddress = 'Jl. Contoh No. 123, Kota';
   String storePhone = '08123456789';
   String? storeLogoPath;
+  String receiptHeader = '';
+  String receiptFooter = '';
   bool isLoading = true;
 
   @override
@@ -42,12 +44,16 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
       final address = await secureStorage.read(key: 'STORE_ADDRESS');
       final phone = await secureStorage.read(key: 'STORE_PHONE');
       final logo = await secureStorage.read(key: 'STORE_LOGO_PATH');
+      final header = await secureStorage.read(key: 'RECEIPT_HEADER');
+      final footer = await secureStorage.read(key: 'RECEIPT_FOOTER');
 
       setState(() {
         if (name != null && name.isNotEmpty) storeName = name;
         if (address != null && address.isNotEmpty) storeAddress = address;
         if (phone != null && phone.isNotEmpty) storePhone = phone;
         storeLogoPath = logo;
+        if (header != null) receiptHeader = header;
+        if (footer != null) receiptFooter = footer;
         isLoading = false;
       });
     } catch (_) {
@@ -77,6 +83,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
     buffer.writeln(centerText(storeName.toUpperCase()));
     buffer.writeln(centerText(storeAddress));
     buffer.writeln(centerText('Telp: $storePhone'));
+    if (receiptHeader.isNotEmpty) {
+      buffer.writeln(centerText(receiptHeader));
+    }
     buffer.writeln('=' * 32);
     buffer.writeln('No   : ${widget.transaction.receiptNumber}');
     buffer.writeln('Kasir: ${widget.transaction.cashierId}');
@@ -105,6 +114,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
     );
     buffer.writeln(formatRow('Pembayaran', widget.transaction.paymentMethod));
     buffer.writeln('=' * 32);
+    if (receiptFooter.isNotEmpty) {
+      buffer.writeln(centerText(receiptFooter));
+    }
     buffer.writeln(centerText('Terima Kasih'));
     buffer.writeln(centerText('Barang yang sudah dibeli'));
     buffer.writeln(centerText('tidak dapat ditukar'));

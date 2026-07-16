@@ -336,43 +336,47 @@ class _PosPageState extends State<PosPage> {
                 ),
               ],
             ),
-            body: BlocListener<PosBloc, PosState>(
-              listener: (context, state) {
-                if (state is PosCheckoutSuccess) {
-                  context.read<ProductBloc>().add(LoadProductsEvent());
-                  _showCheckoutSuccessDialog(context, state);
-                } else if (state is PosError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: _C.danger,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: isTablet
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: PosProductCatalogPane(categories: categories),
-                        ),
-                        Container(width: 1, color: _C.border),
-                        Expanded(
-                          flex: 2,
-                          child: _getCartPane(context, customers),
-                        ),
-                      ],
-                    )
-                  : PosProductCatalogPane(categories: categories),
-            ),
-            bottomNavigationBar: !isTablet
-                ? BlocBuilder<PosBloc, PosState>(
+            body: Column(
+              children: [
+                Expanded(
+                  child: BlocListener<PosBloc, PosState>(
+                    listener: (context, state) {
+                      if (state is PosCheckoutSuccess) {
+                        context.read<ProductBloc>().add(LoadProductsEvent());
+                        _showCheckoutSuccessDialog(context, state);
+                      } else if (state is PosError) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(state.message),
+                            backgroundColor: _C.danger,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: isTablet
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: PosProductCatalogPane(categories: categories),
+                              ),
+                              Container(width: 1, color: _C.border),
+                              Expanded(
+                                flex: 2,
+                                child: _getCartPane(context, customers),
+                              ),
+                            ],
+                          )
+                        : PosProductCatalogPane(categories: categories),
+                  ),
+                ),
+                if (!isTablet)
+                  BlocBuilder<PosBloc, PosState>(
                     builder: (context, state) {
                       if (state.cartItems.isEmpty)
                         return const SizedBox.shrink();
@@ -463,8 +467,9 @@ class _PosPageState extends State<PosPage> {
                         ),
                       );
                     },
-                  )
-                : null,
+                  ),
+              ],
+            ),
           );
         }
         return const SizedBox.shrink();

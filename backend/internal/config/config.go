@@ -23,6 +23,7 @@ type Config struct {
 	DatabaseURL                  string
 	JWTSecret                    string
 	JWTTTL                       time.Duration
+	AdminEmail                   string
 	GooglePackageName            string
 	GoogleServiceAccountJSONPath string
 	BackupMaxSizeBytes           int64
@@ -33,8 +34,8 @@ type Config struct {
 	// c.IP() falls back to the direct TCP peer, which is the safe default
 	// for a backend not yet deployed behind a known proxy. Set this only to
 	// the actual reverse proxy's address once one is in front of this
-	// service, or rate limiting collapses every client behind the proxy
-	// into a single shared bucket (or, if misconfigured, becomes spoofable).
+	// service, or rate limiting collapses every client behind an unconfigured
+	// proxy into a single shared bucket (or, if misconfigured, becomes spoofable).
 	TrustedProxies []string
 }
 
@@ -43,6 +44,7 @@ func Load() (*Config, error) {
 		Port:                         getEnv("PORT", "8080"),
 		DatabaseURL:                  os.Getenv("DATABASE_URL"),
 		JWTSecret:                    os.Getenv("JWT_SECRET"),
+		AdminEmail:                   os.Getenv("ADMIN_EMAIL"),
 		GooglePackageName:            os.Getenv("GOOGLE_PLAY_PACKAGE_NAME"),
 		GoogleServiceAccountJSONPath: os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"),
 	}

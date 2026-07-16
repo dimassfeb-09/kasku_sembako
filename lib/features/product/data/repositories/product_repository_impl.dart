@@ -22,6 +22,16 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<Either<Failure, int>> countProducts() async {
+    try {
+      final count = await localDataSource.countProducts();
+      return Right(count);
+    } catch (e) {
+      return const Left(DatabaseFailure('Gagal menghitung produk'));
+    }
+  }
+
+  @override
   Future<Either<Failure, ProductEntity>> getProductByBarcode(
     String barcode,
   ) async {

@@ -8,6 +8,7 @@ import '../../../../core/error/exceptions.dart';
 abstract class ProductLocalDataSource {
   Future<List<ProductModel>> getProducts();
   Future<ProductModel> getProductByBarcode(String barcode);
+  Future<int> countProducts();
   Future<void> insertProduct(ProductModel product);
   Future<void> updateProduct(ProductModel product);
   Future<void> deleteProduct(String id);
@@ -23,6 +24,13 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   Future<List<ProductModel>> getProducts() async {
     final products = await db.select(db.products).get();
     return products.map((p) => ProductModel.fromDrift(p)).toList();
+  }
+
+  @override
+  Future<int> countProducts() async {
+    final products = await (db.select(db.products)
+      ..where((p) => p.isActive.equals(true))).get();
+    return products.length;
   }
 
   @override

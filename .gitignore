@@ -1,3 +1,5 @@
+vendor/
+
 # Miscellaneous
 *.class
 *.log
@@ -49,6 +51,7 @@ CLAUDE.local.md
 
 # Backend (Go) secrets and local artifacts
 backend/.env
+graphify-out/
 backend/service-account.json
 backend/backup_storage/
 backend/api

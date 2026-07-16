@@ -7,6 +7,24 @@ import 'package:share_plus/share_plus.dart';
 import '../../features/transaction/domain/entities/transaction_entity.dart';
 
 class ExportService {
+  Future<void> exportToCsv({
+    required List<String> headers,
+    required List<List<String>> rows,
+    required String fileName,
+  }) async {
+    final buffer = StringBuffer();
+    buffer.writeln(headers.join(','));
+    for (final row in rows) {
+      buffer.writeln(
+        row.map((cell) => '"${cell.replaceAll('"', '""')}"').join(','),
+      );
+    }
+    final output = await getTemporaryDirectory();
+    final file = File('${output.path}/$fileName');
+    await file.writeAsString(buffer.toString());
+    await Share.shareXFiles([XFile(file.path)], text: fileName);
+  }
+
   Future<void> exportToPdf(
     List<TransactionEntity> transactions,
     DateTime start,

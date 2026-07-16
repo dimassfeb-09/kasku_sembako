@@ -7,6 +7,9 @@ import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 
 class ProductListItem extends StatelessWidget {
   final ProductEntity product;
@@ -207,6 +210,12 @@ class ProductListItem extends StatelessWidget {
                   size: 18,
                 ),
                 onPressed: () {
+                  final subState = context.read<SubscriptionCubit>().state;
+                  final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+                  if (!isPro) {
+                    showProUpsell(context, fitur: 'Harga grosir');
+                    return;
+                  }
                   context.push('/products/wholesale', extra: product);
                 },
                 tooltip: 'Grosir',

@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/report_bloc.dart';
 import '../bloc/report_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../widgets/report_widgets.dart';
+import '../widgets/report_app_bar.dart';
 import '../widgets/report_loaded_content.dart';
+import '../widgets/report_states.dart';
 
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../di/injection.dart';
+import '../../../../core/services/export_service.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 import '../bloc/customer_bloc.dart';
 import '../bloc/customer_event_state.dart';
 import '../../../debt/presentation/bloc/debt_bloc.dart';
@@ -22,6 +27,26 @@ class _CustomerPageState extends State<CustomerPage> {
   void initState() {
     super.initState();
     context.read<CustomerBloc>().add(LoadCustomersEvent());
+  }
+
+  void _exportCsv(BuildContext context) {
+    final subState = context.read<SubscriptionCubit>().state;
+    if (subState is! SubscriptionStatusLoaded || !subState.status.isEntitled) {
+      showProUpsell(context, fitur: 'Export data CSV');
+      return;
+    }
+    final state = context.read<CustomerBloc>().state;
+    if (state is! CustomerLoaded || state.customers.isEmpty) return;
+    sl<ExportService>().exportToCsv(
+      headers: ['Nama', 'Telepon', 'Catatan', 'Total Hutang'],
+      rows: state.customers.map((c) => [
+        c.name,
+        c.phone ?? '',
+        c.notes ?? '',
+        c.debtAmount.toStringAsFixed(0),
+      ]).toList(),
+      fileName: 'pelanggan.csv',
+    );
   }
 
   @override
@@ -46,6 +71,12 @@ class _CustomerPageState extends State<CustomerPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.table_chart_outlined, size: 22),
+            onPressed: () => _exportCsv(context),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,

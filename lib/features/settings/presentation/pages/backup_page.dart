@@ -8,10 +8,13 @@ import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:remixicon/remixicon.dart';
 import '../../../../di/injection.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/database_json_codec.dart';
 import '../../../../core/services/activity_log_service.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/app_button.dart';
 import '../../../subscription/presentation/cubit/subscription_cubit.dart';
 import '../../../subscription/presentation/cubit/subscription_state.dart';
 import '../../../transaction/presentation/bloc/pos_bloc.dart';
@@ -19,14 +22,15 @@ import '../../../transaction/presentation/bloc/pos_event_state.dart';
 import '../bloc/backup_bloc.dart';
 import '../bloc/backup_event.dart';
 import '../bloc/backup_state.dart';
+import '../widgets/backup_schedule_sheet.dart';
+
+typedef _C = AppColors;
 
 class BackupPage extends StatelessWidget {
   const BackupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // SubscriptionCubit is provided app-wide (see app.dart); only BackupBloc is
-    // page-scoped here.
     return BlocProvider<BackupBloc>(
       create: (_) => sl<BackupBloc>(),
       child: const _BackupPageBody(),
@@ -47,29 +51,23 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
   Future<void> _backupDatabase() async {
     setState(() => _isLoading = true);
     try {
-      final json = await DatabaseJsonCodec.exportToJson(sl<AppDatabase>());
-
+      final json = await exportDbToJson(sl<AppDatabase>());
       final tempDir = await getTemporaryDirectory();
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final backupFileName = 'kasirku_backup_$timestamp.json';
       final backupFile = await _writeJsonFile(
-        p.join(tempDir.path, backupFileName),
-        json,
+        p.join(tempDir.path, backupFileName), json,
       );
-
       await Share.shareXFiles([
         XFile(backupFile.path),
       ], text: 'Backup Database Kasirku Sembako $timestamp');
-
       await sl<ActivityLogService>().log(
         action: 'BACKUP',
         description: 'Berhasil membuat cadangan database: $backupFileName.',
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal membuat backup: $e')));
+      _showError('Gagal membuat backup: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -83,27 +81,13 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
   Future<void> _restoreDatabase() async {
     setState(() => _isLoading = true);
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType
-            .any, // Beberapa OS membatasi extensi khusus, lebih aman pick any
-      );
-
-      if (result == null || result.files.single.path == null) {
-        // User membatalkan picker
-        return;
-      }
-
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
+      if (result == null || result.files.single.path == null) return;
       final pickedPath = result.files.single.path!;
 
       if (!pickedPath.endsWith('.json')) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Format berkas tidak didukung! Pastikan berkas berakhiran .json',
-            ),
-          ),
-        );
+        _showError('Format berkas tidak didukung. Harus .json');
         return;
       }
 
@@ -117,20 +101,12 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
         decoded = parsed;
       } catch (_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Berkas cadangan tidak valid (bukan JSON yang valid)',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showError('Berkas cadangan tidak valid');
         return;
       }
 
       await _applyRestoreJson(
-        decoded,
-        sourceDescription: p.basename(pickedPath),
+        decoded, sourceDescription: p.basename(pickedPath),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -138,16 +114,11 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
   }
 
   Future<void> _uploadCloudBackup(BuildContext blocContext) async {
-    final json = await DatabaseJsonCodec.exportToJson(sl<AppDatabase>());
+    final json = await exportDbToJson(sl<AppDatabase>());
     if (!blocContext.mounted) return;
     blocContext.read<BackupBloc>().add(UploadCloudBackupRequested(json));
   }
 
-  /// Shared by local (file_picker) and cloud (downloaded) restore: validates
-  /// the JSON shape/schema version, applies it via [DatabaseJsonCodec], then
-  /// resets navigation/cart state. Since the JSON path does DELETE+INSERT
-  /// through the live Drift connection rather than swapping the underlying
-  /// db file, the app no longer needs to fully close and restart afterward.
   Future<void> _applyRestoreJson(
     Map<String, dynamic> json, {
     required String sourceDescription,
@@ -158,8 +129,7 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
       builder: (ctx) => AlertDialog(
         title: const Text('Konfirmasi Restore'),
         content: const Text(
-          'Apakah Anda yakin ingin memulihkan data dari berkas ini?\n\n'
-          'Peringatan: Seluruh data transaksi dan stok saat ini akan terhapus dan digantikan oleh data dari berkas backup.',
+          'Seluruh data transaksi dan stok saat ini akan terhapus dan digantikan oleh data dari berkas backup.',
         ),
         actions: [
           TextButton(
@@ -168,304 +138,328 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: _C.error),
             child: const Text('Pulihkan Data'),
           ),
         ],
       ),
     );
-
     if (confirm != true) return;
-
-    if (!await _confirmAdminAccountChanges(json)) return;
 
     try {
       await sl<ActivityLogService>().log(
         action: 'RESTORE',
-        description:
-            'Memulai pemulihan database dari berkas: $sourceDescription.',
+        description: 'Memulai pemulihan database dari berkas: $sourceDescription.',
       );
-
-      await DatabaseJsonCodec.importFromJson(sl<AppDatabase>(), json);
-
+      await importDbFromJson(sl<AppDatabase>(), json);
       if (!mounted) return;
-      // Reset app-wide state instead of the old exit()-and-reopen flow:
-      // .go('/home') disposes/rebuilds HomePage (re-fires its metrics load),
-      // and every other list page already reloads its own data in
-      // initState on next visit. PosBloc holds transient cart state with no
-      // reload event, so it needs an explicit clear.
       context.read<PosBloc>().add(ClearCartEvent());
       context.go('/home');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Data telah dipulihkan.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data telah dipulihkan.')),
+      );
     } on InvalidBackupFormatException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message), backgroundColor: Colors.red),
-      );
+      _showError(e.message);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal memulihkan data: $e')));
+      _showError('Gagal memulihkan data: $e');
     }
   }
 
-  /// Warns explicitly, by username, if restoring [json] would introduce an
-  /// admin account this device doesn't currently recognize (a brand-new
-  /// username, or an existing username being promoted to admin) — a backup
-  /// file is otherwise trusted and applied silently, which is exactly what
-  /// a hand-crafted malicious backup would rely on to plant a backdoor
-  /// admin account. Returns true if it's safe to proceed (no such accounts,
-  /// or the admin explicitly acknowledged them).
-  Future<bool> _confirmAdminAccountChanges(Map<String, dynamic> json) async {
-    final incomingAdmins = DatabaseJsonCodec.adminUsernamesIn(json);
-    if (incomingAdmins.isEmpty) return true;
-
-    final currentAdmins =
-        (await (sl<AppDatabase>().select(
-              sl<AppDatabase>().users,
-            )..where((u) => u.role.equals('admin'))).get())
-            .map((u) => u.username)
-            .toSet();
-
-    final newOrChangedAdmins = incomingAdmins.difference(currentAdmins);
-    if (newOrChangedAdmins.isEmpty) return true;
-
-    if (!mounted) return false;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Peringatan: Akun Admin Baru Terdeteksi'),
-        content: Text(
-          'Berkas ini akan menambahkan atau menaikkan akun berikut menjadi ADMIN, '
-          'yang tidak dikenali sebagai admin pada data Anda saat ini:\n\n'
-          '${newOrChangedAdmins.map((u) => '• $u').join('\n')}\n\n'
-          'Hanya lanjutkan jika Anda mengenali dan mempercayai sumber berkas ini.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Saya Mengerti, Lanjutkan'),
-          ),
-        ],
-      ),
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: _C.error),
     );
-    return confirmed == true;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cadangan & Pemulihan Data')),
+      backgroundColor: _C.background,
+      appBar: AppBar(
+        title: const Text('Cadangan & Pemulihan Data'),
+        backgroundColor: _C.white,
+        surfaceTintColor: _C.white,
+        elevation: 0,
+        scrolledUnderElevation: 0.5,
+      ),
       body: BlocListener<BackupBloc, BackupState>(
         listener: (context, state) async {
           if (state is BackupError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            _showError(state.message);
           } else if (state is CloudBackupUploadSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Cadangan berhasil diunggah ke cloud.'),
+                backgroundColor: _C.success,
               ),
             );
           } else if (state is CloudBackupDownloadSuccess) {
             await _applyRestoreJson(
-              state.payload,
-              sourceDescription: 'cadangan cloud',
+              state.payload, sourceDescription: 'cadangan cloud',
             );
           }
         },
-        child: (_isLoading)
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 80,
-                      color: Colors.blue,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Cadangkan data transaksi Anda secara berkala agar aman dari kehilangan data akibat perangkat rusak.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 32),
-                    Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.blueAccent,
-                          child: Icon(Icons.backup, color: Colors.white),
-                        ),
-                        title: const Text(
-                          'Buat Cadangan Data (Backup)',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: const Text(
-                          'Ekspor dan bagikan data Anda sebagai berkas JSON.',
-                        ),
-                        onTap: _backupDatabase,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.orangeAccent,
-                          child: Icon(
-                            Icons.settings_backup_restore,
-                            color: Colors.white,
-                          ),
-                        ),
-                        title: const Text(
-                          'Pulihkan Data (Restore)',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: const Text(
-                          'Impor data dari berkas backup berformat .json.',
-                        ),
-                        onTap: _restoreDatabase,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.workspace_premium,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Cadangan Cloud (Pro)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    BlocBuilder<SubscriptionCubit, SubscriptionState>(
-                      builder: (context, subState) {
-                        final status = subState is SubscriptionStatusLoaded
-                            ? subState.status
-                            : null;
-                        final isPro = status?.isEntitled ?? false;
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HeroSection(),
+                  const SizedBox(height: 24),
+                  _SectionLabel(icon: RemixIcons.hard_drive_2_line, label: 'Lokal'),
+                  const SizedBox(height: 12),
+                  _ActionCard(
+                    icon: RemixIcons.upload_cloud_2_line,
+                    iconBg: const Color(0xFFE0F2FE),
+                    iconColor: const Color(0xFF2563EB),
+                    title: 'Buat Cadangan',
+                    subtitle: 'Ekspor data toko sebagai berkas .json',
+                    onTap: _backupDatabase,
+                  ),
+                  const SizedBox(height: 12),
+                  _ActionCard(
+                    icon: RemixIcons.download_cloud_2_line,
+                    iconBg: const Color(0xFFFEF3C7),
+                    iconColor: const Color(0xFFD97706),
+                    title: 'Pulihkan Data',
+                    subtitle: 'Impor dari berkas backup .json',
+                    onTap: _restoreDatabase,
+                  ),
+                  const SizedBox(height: 32),
+                  BlocBuilder<SubscriptionCubit, SubscriptionState>(
+                    builder: (context, subState) {
+                      final status = subState is SubscriptionStatusLoaded
+                          ? subState.status : null;
+                      final isPro = status?.isEntitled ?? false;
+                      return BlocBuilder<BackupBloc, BackupState>(
+                        builder: (context, backupState) {
+                          final isUploading = backupState is CloudBackupUploading;
+                          final isDownloading = backupState is CloudBackupDownloading;
+                          final isBusy = isUploading || isDownloading;
 
-                        return BlocBuilder<BackupBloc, BackupState>(
-                          builder: (context, backupState) {
-                            final isBusy =
-                                backupState is CloudBackupUploading ||
-                                backupState is CloudBackupDownloading;
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Card(
-                                  child: ListTile(
-                                    enabled: isPro && !isBusy,
-                                    leading: CircleAvatar(
-                                      backgroundColor: isPro
-                                          ? Colors.teal
-                                          : Colors.grey.shade300,
-                                      child: backupState is CloudBackupUploading
-                                          ? const SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.cloud_upload,
-                                              color: Colors.white,
-                                            ),
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _SectionLabel(
+                                icon: RemixIcons.cloud_line,
+                                label: 'Cloud',
+                                trailing: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
                                     ),
-                                    title: const Text(
-                                      'Backup ke Cloud',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      isPro
-                                          ? 'Unggah data saat ini ke server.'
-                                          : 'Upgrade ke Pro untuk mengaktifkan.',
-                                    ),
-                                    onTap: isPro && !isBusy
-                                        ? () => _uploadCloudBackup(context)
-                                        : null,
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
+                                  child: const Text('PRO', style: TextStyle(
+                                    fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
                                 ),
+                              ),
+                              const SizedBox(height: 12),
+                              _ActionCard(
+                                icon: RemixIcons.upload_cloud_2_line,
+                                iconBg: const Color(0xFFF0FDFA),
+                                iconColor: const Color(0xFF0D9488),
+                                title: 'Backup ke Cloud',
+                                subtitle: isPro ? 'Unggah data terbaru' : 'Upgrade ke Pro untuk mengaktifkan',
+                                enabled: isPro,
+                                isLoading: isUploading,
+                                onTap: () => _uploadCloudBackup(context),
+                              ),
+                              const SizedBox(height: 12),
+                              _ActionCard(
+                                icon: RemixIcons.download_cloud_2_line,
+                                iconBg: const Color(0xFFF0FDFA),
+                                iconColor: const Color(0xFF0D9488),
+                                title: 'Pulihkan dari Cloud',
+                                subtitle: isPro ? 'Unduh cadangan terbaru' : 'Upgrade ke Pro untuk mengaktifkan',
+                                enabled: isPro,
+                                isLoading: isDownloading,
+                                onTap: () => context.read<BackupBloc>().add(DownloadCloudBackupRequested()),
+                              ),
+                              if (isPro) ...[
+                                const SizedBox(height: 24),
+                                const BackupScheduleSheet(),
+                              ],
+                              if (!isPro && !isBusy) ...[
                                 const SizedBox(height: 16),
-                                Card(
-                                  child: ListTile(
-                                    enabled: isPro && !isBusy,
-                                    leading: CircleAvatar(
-                                      backgroundColor: isPro
-                                          ? Colors.indigo
-                                          : Colors.grey.shade300,
-                                      child:
-                                          backupState is CloudBackupDownloading
-                                          ? const SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.cloud_download,
-                                              color: Colors.white,
-                                            ),
-                                    ),
-                                    title: const Text(
-                                      'Pulihkan dari Cloud',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      isPro
-                                          ? 'Unduh cadangan terbaru dari server.'
-                                          : 'Upgrade ke Pro untuk mengaktifkan.',
-                                    ),
-                                    onTap: isPro && !isBusy
-                                        ? () => context.read<BackupBloc>().add(
-                                            DownloadCloudBackupRequested(),
-                                          )
-                                        : null,
-                                  ),
+                                AppButton(
+                                  text: 'Upgrade ke Pro',
+                                  onPressed: () => context.push('/subscription/upgrade'),
                                 ),
                               ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
+            ),
+            if (_isLoading)
+              Container(
+                color: _C.white.withValues(alpha: 0.7),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
+
+class _HeroSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _C.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _C.borderLight),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48, height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDF4),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(RemixIcons.shield_check_line,
+              color: Color(0xFF16A34A), size: 24),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Data tetap aman',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.textPrimary)),
+                SizedBox(height: 4),
+                Text('Cadangkan secara berkala agar aman dari kehilangan data.',
+                  style: TextStyle(fontSize: 12.5, color: _C.textSecondary, height: 1.4)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Widget? trailing;
+  const _SectionLabel({required this.icon, required this.label, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: _C.textMuted),
+        const SizedBox(width: 8),
+        Text(label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.textMuted,
+            letterSpacing: 0.5)),
+        if (trailing != null) ...[
+          const Spacer(),
+          trailing!,
+        ],
+      ],
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconBg;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final bool enabled;
+  final bool isLoading;
+
+  const _ActionCard({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+    this.enabled = true,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveEnabled = enabled && !isLoading;
+    return Container(
+      decoration: BoxDecoration(
+        color: _C.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _C.borderLight),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: effectiveEnabled ? onTap : null,
+          child: Opacity(
+            opacity: effectiveEnabled ? 1 : 0.45,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      color: effectiveEnabled ? iconBg : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: isLoading
+                        ? const Center(child: SizedBox(
+                            width: 20, height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          ))
+                        : Icon(icon, size: 22,
+                            color: effectiveEnabled ? iconColor : _C.textMuted),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: effectiveEnabled ? _C.textPrimary : _C.textMuted,
+                          )),
+                        const SizedBox(height: 3),
+                        Text(subtitle,
+                          style: const TextStyle(fontSize: 12, color: _C.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  if (effectiveEnabled)
+                    const Icon(RemixIcons.arrow_right_s_line, size: 20, color: _C.textMuted),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+

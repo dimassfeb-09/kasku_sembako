@@ -3,13 +3,23 @@ import '../../../../core/error/failures.dart';
 import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
+class RegisterUseCase {
+  final AuthRepository repository;
+
+  RegisterUseCase(this.repository);
+
+  Future<Either<Failure, UserEntity>> call(String email, String password) async {
+    return await repository.register(email, password);
+  }
+}
+
 class LoginUseCase {
   final AuthRepository repository;
 
   LoginUseCase(this.repository);
 
-  Future<Either<Failure, UserEntity>> call(String username, String pin) async {
-    return await repository.login(username, pin);
+  Future<Either<Failure, UserEntity>> call(String email, String password) async {
+    return await repository.login(email, password);
   }
 }
 
@@ -30,25 +40,5 @@ class GetSessionUseCase {
 
   Future<Either<Failure, UserEntity?>> call() async {
     return await repository.getCachedSession();
-  }
-}
-
-class HasUsersUseCase {
-  final AuthRepository repository;
-
-  HasUsersUseCase(this.repository);
-
-  Future<Either<Failure, bool>> call() async {
-    return await repository.hasUsers();
-  }
-}
-
-class RegisterFirstAdminUseCase {
-  final AuthRepository repository;
-
-  RegisterFirstAdminUseCase(this.repository);
-
-  Future<Either<Failure, UserEntity>> call(String username, String pin) async {
-    return await repository.registerFirstAdmin(username, pin);
   }
 }

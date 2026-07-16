@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/utils/cash_suggestion_helper.dart';
 import '../../../customer/domain/entities/customer_entity.dart';
 import '../bloc/pos_bloc.dart';
 import '../bloc/pos_event_state.dart';
@@ -204,7 +203,7 @@ class _CheckoutBottomSheetContentState
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: CashSuggestionHelper.getSuggestions(state.total)
+                      children: _cashSuggestions(state.total)
                           .map((suggestion) {
                             final isSelected = cashReceived == suggestion;
 
@@ -538,4 +537,31 @@ class _CheckoutBottomSheetContentState
       },
     );
   }
+}
+
+List<double> _cashSuggestions(double total) {
+  if (total <= 0) return [];
+  final Set<double> suggestions = {total};
+  final next50k = (total / 50000).ceil() * 50000;
+  if (next50k >= total) suggestions.add(next50k.toDouble());
+  final next100k = (total / 100000).ceil() * 100000;
+  if (next100k >= total) suggestions.add(next100k.toDouble());
+  if (total < 500000 && total % 50000 != 0) {
+    final base50 = (total / 50000).floor() * 50000;
+    if (base50 + 20000 >= total) suggestions.add((base50 + 20000).toDouble());
+    if (base50 + 40000 >= total) suggestions.add((base50 + 40000).toDouble());
+    final targetPay10kChange = total + 10000;
+    if (targetPay10kChange % 20000 == 0 || targetPay10kChange % 50000 == 0) suggestions.add(targetPay10kChange);
+    final targetPay20kChange = total + 20000;
+    if (targetPay20kChange % 50000 == 0) suggestions.add(targetPay20kChange);
+  }
+  if (total < 50000) {
+    for (final d in [5000, 10000, 20000, 50000]) {
+      if (d >= total) suggestions.add(d.toDouble());
+    }
+  } else if (total < 100000) {
+    suggestions.add(100000.toDouble());
+  }
+  final sorted = suggestions.toList()..sort();
+  return sorted.take(5).toList();
 }

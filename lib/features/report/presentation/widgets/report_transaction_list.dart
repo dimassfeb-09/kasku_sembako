@@ -10,12 +10,14 @@ class ReportListHeader extends StatelessWidget {
   final int length;
   final VoidCallback onExportPdf;
   final VoidCallback onExportExcel;
+  final VoidCallback onExportCsv;
 
   const ReportListHeader({
     super.key,
     required this.length,
     required this.onExportPdf,
     required this.onExportExcel,
+    required this.onExportCsv,
   });
 
   @override
@@ -51,6 +53,13 @@ class ReportListHeader extends StatelessWidget {
                 label: 'Excel',
                 color: AppColors.success,
                 onTap: onExportExcel,
+              ),
+              const SizedBox(width: 8),
+              ReportExportButton(
+                icon: Icons.table_chart_rounded,
+                label: 'CSV',
+                color: AppColors.primary,
+                onTap: onExportCsv,
               ),
             ],
           ),

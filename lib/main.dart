@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:workmanager/workmanager.dart';
 import 'app/app.dart';
 import 'core/constants/app_constants.dart';
+import 'core/services/backup_dispatcher.dart';
 import 'di/injection.dart' as di;
 import 'features/subscription/domain/repositories/subscription_repository.dart';
 
@@ -21,6 +23,7 @@ void main() async {
     );
   }
 
+  await Workmanager().initialize(callbackDispatcher);
   await initializeDateFormatting('id', null);
   await di.init();
 

@@ -6,7 +6,7 @@ import (
 )
 
 func TestIssueAndVerify_RoundTripPreservesClaims(t *testing.T) {
-	token, err := Issue("secret-a", "user-1", "user1@example.com", time.Hour)
+	token, err := Issue("secret-a", "user-1", "user1@example.com", "user", time.Hour)
 	if err != nil {
 		t.Fatalf("Issue failed: %v", err)
 	}
@@ -24,7 +24,7 @@ func TestIssueAndVerify_RoundTripPreservesClaims(t *testing.T) {
 }
 
 func TestVerify_WrongSecretFails(t *testing.T) {
-	token, err := Issue("secret-a", "user-1", "user1@example.com", time.Hour)
+	token, err := Issue("secret-a", "user-1", "user1@example.com", "user", time.Hour)
 	if err != nil {
 		t.Fatalf("Issue failed: %v", err)
 	}
@@ -36,7 +36,7 @@ func TestVerify_WrongSecretFails(t *testing.T) {
 
 func TestVerify_ExpiredTokenFails(t *testing.T) {
 	// Negative TTL puts ExpiresAt in the past immediately.
-	token, err := Issue("secret-a", "user-1", "user1@example.com", -time.Hour)
+	token, err := Issue("secret-a", "user-1", "user1@example.com", "user", -time.Hour)
 	if err != nil {
 		t.Fatalf("Issue failed: %v", err)
 	}

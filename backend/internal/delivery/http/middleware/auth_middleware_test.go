@@ -63,7 +63,7 @@ func TestRequireAuth_InvalidTokenReturns401(t *testing.T) {
 
 func TestRequireAuth_ExpiredTokenReturns401(t *testing.T) {
 	app := newTestApp()
-	token, err := jwtutil.Issue(testSecret, "user-1", "user1@example.com", -time.Hour)
+	token, err := jwtutil.Issue(testSecret, "user-1", "user1@example.com", "user", -time.Hour)
 	if err != nil {
 		t.Fatalf("Issue failed: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestRequireAuth_ExpiredTokenReturns401(t *testing.T) {
 
 func TestRequireAuth_ValidTokenPassesThroughAndSetsUserID(t *testing.T) {
 	app := newTestApp()
-	token, err := jwtutil.Issue(testSecret, "user-42", "user42@example.com", time.Hour)
+	token, err := jwtutil.Issue(testSecret, "user-42", "user42@example.com", "user", time.Hour)
 	if err != nil {
 		t.Fatalf("Issue failed: %v", err)
 	}

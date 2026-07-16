@@ -7,10 +7,12 @@ import 'pos_event_state.dart';
 class PosBloc extends Bloc<PosEvent, PosState> {
   final CheckoutUseCase checkoutUseCase;
   final GetWholesalePricesUseCase getWholesalePricesUseCase;
+  final bool isWholesaleAllowed;
 
   PosBloc({
     required this.checkoutUseCase,
     required this.getWholesalePricesUseCase,
+    this.isWholesaleAllowed = false,
   }) : super(PosInitial()) {
     on<AddToCartEvent>(_onAddToCart);
     on<UpdateCartItemQtyEvent>(_onUpdateCartItemQty);
@@ -51,9 +53,10 @@ class PosBloc extends Bloc<PosEvent, PosState> {
         emit(PosError('Stok habis', state));
         return;
       }
-      // Ambil Harga Grosir jika barang baru masuk cart
-      final wpResult = await getWholesalePricesUseCase(event.product.id);
-      final prices = wpResult.fold((l) => [], (r) => r);
+      // Ambil Harga Grosir hanya jika Pro
+      final prices = isWholesaleAllowed
+          ? (await getWholesalePricesUseCase(event.product.id)).fold((l) => [], (r) => r)
+          : [];
 
       updatedCart.add(
         CartItemEntity(

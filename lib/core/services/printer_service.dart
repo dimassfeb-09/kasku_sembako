@@ -4,41 +4,14 @@ import 'package:intl/intl.dart';
 import '../../features/transaction/domain/entities/transaction_entity.dart';
 
 class PrinterService {
-  Future<List<BluetoothInfo>> getPairedDevices() async {
-    final bool result = await PrintBluetoothThermal.bluetoothEnabled;
-    if (!result) throw Exception('Bluetooth tidak aktif');
-
-    final List<BluetoothInfo> listResult =
-        await PrintBluetoothThermal.pairedBluetooths;
-    return listResult;
-  }
-
-  Future<bool> connect(String macAddress) async {
-    final bool result = await PrintBluetoothThermal.connect(
-      macPrinterAddress: macAddress,
-    );
-    return result;
-  }
-
-  Future<bool> disconnect() async {
-    final bool result = await PrintBluetoothThermal.disconnect;
-    return result;
-  }
-
-  Future<bool> get isConnected async {
-    return await PrintBluetoothThermal.connectionStatus;
-  }
-
   Future<bool> printReceipt(
     TransactionEntity transaction, {
     String? storeName,
     String? storeAddress,
     String? storePhone,
+    String? receiptHeader,
+    String? receiptFooter,
   }) async {
-    if (!(await isConnected)) {
-      throw Exception('Printer belum terkoneksi');
-    }
-
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
@@ -65,6 +38,11 @@ class PrinterService {
     } else {
       bytes += generator.text(
         'Telp: 08123456789',
+        styles: const PosStyles(align: PosAlign.center),
+      );
+    }
+    if (receiptHeader != null && receiptHeader.isNotEmpty) {
+      bytes += generator.text(receiptHeader,
         styles: const PosStyles(align: PosAlign.center),
       );
     }
@@ -139,13 +117,14 @@ class PrinterService {
       styles: const PosStyles(align: PosAlign.right),
     );
     bytes += generator.hr();
+    if (receiptFooter != null && receiptFooter.isNotEmpty) {
+      bytes += generator.text(receiptFooter,
+        styles: const PosStyles(align: PosAlign.center),
+      );
+    }
     bytes += generator.text(
       'Terima Kasih',
       styles: const PosStyles(align: PosAlign.center, bold: true),
-    );
-    bytes += generator.text(
-      'Barang yang sudah dibeli tidak dapat ditukar',
-      styles: const PosStyles(align: PosAlign.center),
     );
     bytes += generator.feed(2);
 
@@ -154,8 +133,6 @@ class PrinterService {
   }
 
   Future<bool> printTest() async {
-    if (!(await isConnected)) throw Exception('Printer belum terkoneksi');
-
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];

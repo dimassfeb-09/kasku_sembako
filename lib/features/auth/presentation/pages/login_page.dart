@@ -15,33 +15,41 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _usernameController = TextEditingController();
-  final _pinController = TextEditingController();
-  bool _obscurePin = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _pinController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   void _onLogin() {
-    final username = _usernameController.text.trim();
-    final pin = _pinController.text.trim();
-    if (username.isNotEmpty && pin.isNotEmpty) {
-      context.read<AuthBloc>().add(LoginSubmittedEvent(username, pin));
-    } else {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username dan PIN tidak boleh kosong')),
+        const SnackBar(content: Text('Email dan kata sandi tidak boleh kosong')),
       );
+      return;
     }
+    context.read<AuthBloc>().add(LoginSubmittedEvent(email, password));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Slate 50 Background
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF0F172A)),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
@@ -50,112 +58,90 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: const Color(0xFFEF4444), // Red 500
+                backgroundColor: const Color(0xFFEF4444),
               ),
             );
           }
         },
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                color: Colors.white, // Surface White
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFF1F5F9),
-                  width: 1,
-                ), // Slate 100 border
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x0A000000), // Soft shadow 4% opacity
-                    offset: Offset(0, 4),
-                    blurRadius: 20,
-                  ),
-                ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 40),
+              const Text(
+                'Masuk',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              const SizedBox(height: 8),
+              Text(
+                'Masuk ke akun toko Anda untuk melanjutkan.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+              const SizedBox(height: 40),
+              AppInput(
+                label: 'Email',
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icons.mail_outline,
+                hintText: 'nama@tokoanda.com',
+              ),
+              const SizedBox(height: 20),
+              AppInput(
+                label: 'Kata Sandi',
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                prefixIcon: Icons.lock_outline,
+                hintText: 'Masukkan kata sandi',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              const SizedBox(height: 32),
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  return AppButton(
+                    text: 'Masuk',
+                    isLoading: state is AuthLoading,
+                    onPressed: _onLogin,
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Icon Placeholder (Teal themed, circular)
-                  Center(
-                    child: Container(
-                      width: 64,
-                      height: 64,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF0FDFA), // Teal 50 Light
-                        shape: BoxShape.circle,
+                  Text(
+                    'Belum punya akun? ',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                  ),
+                  GestureDetector(
+                    onTap: () => context.push('/register'),
+                    child: const Text(
+                      'Daftar',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0D9488),
                       ),
-                      child: const Icon(
-                        Icons.storefront,
-                        size: 32,
-                        color: Color(0xFF0D9488), // Teal 600
-                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Masuk ke Sistem',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF0F172A), // Slate 900
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Masukkan username dan 6 digit PIN kasir Anda untuk memulai transaksi.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF64748B), // Slate 500
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 28),
-                  AppInput(
-                    label: 'Username',
-                    controller: _usernameController,
-                    prefixIcon: Icons.person_outline,
-                    hintText: 'Nama kasir/operator',
-                  ),
-                  const SizedBox(height: 18),
-                  AppInput(
-                    label: 'PIN Keamanan',
-                    controller: _pinController,
-                    obscureText: _obscurePin,
-                    keyboardType: TextInputType.number,
-                    prefixIcon: Icons.lock_outline,
-                    hintText: '------ (6 digit angka)',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePin ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF94A3B8), // Slate 400
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePin = !_obscurePin;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      return AppButton(
-                        text: 'Masuk Kasir',
-                        isLoading: state is AuthLoading,
-                        onPressed: _onLogin,
-                      );
-                    },
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
       ),

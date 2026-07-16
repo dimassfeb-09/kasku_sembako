@@ -3,951 +3,6 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $UsersTable extends Users with TableInfo<$UsersTable, User> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $UsersTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _usernameMeta = const VerificationMeta(
-    'username',
-  );
-  @override
-  late final GeneratedColumn<String> username = GeneratedColumn<String>(
-    'username',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
-  );
-  static const VerificationMeta _pinHashMeta = const VerificationMeta(
-    'pinHash',
-  );
-  @override
-  late final GeneratedColumn<String> pinHash = GeneratedColumn<String>(
-    'pin_hash',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _pinSaltMeta = const VerificationMeta(
-    'pinSalt',
-  );
-  @override
-  late final GeneratedColumn<String> pinSalt = GeneratedColumn<String>(
-    'pin_salt',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _roleMeta = const VerificationMeta('role');
-  @override
-  late final GeneratedColumn<String> role = GeneratedColumn<String>(
-    'role',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _isActiveMeta = const VerificationMeta(
-    'isActive',
-  );
-  @override
-  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
-    'is_active',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_active" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _failedPinAttemptsMeta = const VerificationMeta(
-    'failedPinAttempts',
-  );
-  @override
-  late final GeneratedColumn<int> failedPinAttempts = GeneratedColumn<int>(
-    'failed_pin_attempts',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _lockedUntilMeta = const VerificationMeta(
-    'lockedUntil',
-  );
-  @override
-  late final GeneratedColumn<DateTime> lockedUntil = GeneratedColumn<DateTime>(
-    'locked_until',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    username,
-    pinHash,
-    pinSalt,
-    role,
-    isActive,
-    failedPinAttempts,
-    lockedUntil,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'users';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<User> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('username')) {
-      context.handle(
-        _usernameMeta,
-        username.isAcceptableOrUnknown(data['username']!, _usernameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_usernameMeta);
-    }
-    if (data.containsKey('pin_hash')) {
-      context.handle(
-        _pinHashMeta,
-        pinHash.isAcceptableOrUnknown(data['pin_hash']!, _pinHashMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_pinHashMeta);
-    }
-    if (data.containsKey('pin_salt')) {
-      context.handle(
-        _pinSaltMeta,
-        pinSalt.isAcceptableOrUnknown(data['pin_salt']!, _pinSaltMeta),
-      );
-    }
-    if (data.containsKey('role')) {
-      context.handle(
-        _roleMeta,
-        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_roleMeta);
-    }
-    if (data.containsKey('is_active')) {
-      context.handle(
-        _isActiveMeta,
-        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
-      );
-    }
-    if (data.containsKey('failed_pin_attempts')) {
-      context.handle(
-        _failedPinAttemptsMeta,
-        failedPinAttempts.isAcceptableOrUnknown(
-          data['failed_pin_attempts']!,
-          _failedPinAttemptsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('locked_until')) {
-      context.handle(
-        _lockedUntilMeta,
-        lockedUntil.isAcceptableOrUnknown(
-          data['locked_until']!,
-          _lockedUntilMeta,
-        ),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  User map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return User(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      username: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}username'],
-      )!,
-      pinHash: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}pin_hash'],
-      )!,
-      pinSalt: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}pin_salt'],
-      ),
-      role: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}role'],
-      )!,
-      isActive: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_active'],
-      )!,
-      failedPinAttempts: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}failed_pin_attempts'],
-      )!,
-      lockedUntil: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}locked_until'],
-      ),
-    );
-  }
-
-  @override
-  $UsersTable createAlias(String alias) {
-    return $UsersTable(attachedDatabase, alias);
-  }
-}
-
-class User extends DataClass implements Insertable<User> {
-  final String id;
-  final String username;
-  final String pinHash;
-  final String? pinSalt;
-  final String role;
-  final bool isActive;
-  final int failedPinAttempts;
-  final DateTime? lockedUntil;
-  const User({
-    required this.id,
-    required this.username,
-    required this.pinHash,
-    this.pinSalt,
-    required this.role,
-    required this.isActive,
-    required this.failedPinAttempts,
-    this.lockedUntil,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['username'] = Variable<String>(username);
-    map['pin_hash'] = Variable<String>(pinHash);
-    if (!nullToAbsent || pinSalt != null) {
-      map['pin_salt'] = Variable<String>(pinSalt);
-    }
-    map['role'] = Variable<String>(role);
-    map['is_active'] = Variable<bool>(isActive);
-    map['failed_pin_attempts'] = Variable<int>(failedPinAttempts);
-    if (!nullToAbsent || lockedUntil != null) {
-      map['locked_until'] = Variable<DateTime>(lockedUntil);
-    }
-    return map;
-  }
-
-  UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(
-      id: Value(id),
-      username: Value(username),
-      pinHash: Value(pinHash),
-      pinSalt: pinSalt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(pinSalt),
-      role: Value(role),
-      isActive: Value(isActive),
-      failedPinAttempts: Value(failedPinAttempts),
-      lockedUntil: lockedUntil == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lockedUntil),
-    );
-  }
-
-  factory User.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return User(
-      id: serializer.fromJson<String>(json['id']),
-      username: serializer.fromJson<String>(json['username']),
-      pinHash: serializer.fromJson<String>(json['pinHash']),
-      pinSalt: serializer.fromJson<String?>(json['pinSalt']),
-      role: serializer.fromJson<String>(json['role']),
-      isActive: serializer.fromJson<bool>(json['isActive']),
-      failedPinAttempts: serializer.fromJson<int>(json['failedPinAttempts']),
-      lockedUntil: serializer.fromJson<DateTime?>(json['lockedUntil']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'username': serializer.toJson<String>(username),
-      'pinHash': serializer.toJson<String>(pinHash),
-      'pinSalt': serializer.toJson<String?>(pinSalt),
-      'role': serializer.toJson<String>(role),
-      'isActive': serializer.toJson<bool>(isActive),
-      'failedPinAttempts': serializer.toJson<int>(failedPinAttempts),
-      'lockedUntil': serializer.toJson<DateTime?>(lockedUntil),
-    };
-  }
-
-  User copyWith({
-    String? id,
-    String? username,
-    String? pinHash,
-    Value<String?> pinSalt = const Value.absent(),
-    String? role,
-    bool? isActive,
-    int? failedPinAttempts,
-    Value<DateTime?> lockedUntil = const Value.absent(),
-  }) => User(
-    id: id ?? this.id,
-    username: username ?? this.username,
-    pinHash: pinHash ?? this.pinHash,
-    pinSalt: pinSalt.present ? pinSalt.value : this.pinSalt,
-    role: role ?? this.role,
-    isActive: isActive ?? this.isActive,
-    failedPinAttempts: failedPinAttempts ?? this.failedPinAttempts,
-    lockedUntil: lockedUntil.present ? lockedUntil.value : this.lockedUntil,
-  );
-  User copyWithCompanion(UsersCompanion data) {
-    return User(
-      id: data.id.present ? data.id.value : this.id,
-      username: data.username.present ? data.username.value : this.username,
-      pinHash: data.pinHash.present ? data.pinHash.value : this.pinHash,
-      pinSalt: data.pinSalt.present ? data.pinSalt.value : this.pinSalt,
-      role: data.role.present ? data.role.value : this.role,
-      isActive: data.isActive.present ? data.isActive.value : this.isActive,
-      failedPinAttempts: data.failedPinAttempts.present
-          ? data.failedPinAttempts.value
-          : this.failedPinAttempts,
-      lockedUntil: data.lockedUntil.present
-          ? data.lockedUntil.value
-          : this.lockedUntil,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('User(')
-          ..write('id: $id, ')
-          ..write('username: $username, ')
-          ..write('pinHash: $pinHash, ')
-          ..write('pinSalt: $pinSalt, ')
-          ..write('role: $role, ')
-          ..write('isActive: $isActive, ')
-          ..write('failedPinAttempts: $failedPinAttempts, ')
-          ..write('lockedUntil: $lockedUntil')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    username,
-    pinHash,
-    pinSalt,
-    role,
-    isActive,
-    failedPinAttempts,
-    lockedUntil,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is User &&
-          other.id == this.id &&
-          other.username == this.username &&
-          other.pinHash == this.pinHash &&
-          other.pinSalt == this.pinSalt &&
-          other.role == this.role &&
-          other.isActive == this.isActive &&
-          other.failedPinAttempts == this.failedPinAttempts &&
-          other.lockedUntil == this.lockedUntil);
-}
-
-class UsersCompanion extends UpdateCompanion<User> {
-  final Value<String> id;
-  final Value<String> username;
-  final Value<String> pinHash;
-  final Value<String?> pinSalt;
-  final Value<String> role;
-  final Value<bool> isActive;
-  final Value<int> failedPinAttempts;
-  final Value<DateTime?> lockedUntil;
-  final Value<int> rowid;
-  const UsersCompanion({
-    this.id = const Value.absent(),
-    this.username = const Value.absent(),
-    this.pinHash = const Value.absent(),
-    this.pinSalt = const Value.absent(),
-    this.role = const Value.absent(),
-    this.isActive = const Value.absent(),
-    this.failedPinAttempts = const Value.absent(),
-    this.lockedUntil = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  UsersCompanion.insert({
-    required String id,
-    required String username,
-    required String pinHash,
-    this.pinSalt = const Value.absent(),
-    required String role,
-    this.isActive = const Value.absent(),
-    this.failedPinAttempts = const Value.absent(),
-    this.lockedUntil = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       username = Value(username),
-       pinHash = Value(pinHash),
-       role = Value(role);
-  static Insertable<User> custom({
-    Expression<String>? id,
-    Expression<String>? username,
-    Expression<String>? pinHash,
-    Expression<String>? pinSalt,
-    Expression<String>? role,
-    Expression<bool>? isActive,
-    Expression<int>? failedPinAttempts,
-    Expression<DateTime>? lockedUntil,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (username != null) 'username': username,
-      if (pinHash != null) 'pin_hash': pinHash,
-      if (pinSalt != null) 'pin_salt': pinSalt,
-      if (role != null) 'role': role,
-      if (isActive != null) 'is_active': isActive,
-      if (failedPinAttempts != null) 'failed_pin_attempts': failedPinAttempts,
-      if (lockedUntil != null) 'locked_until': lockedUntil,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  UsersCompanion copyWith({
-    Value<String>? id,
-    Value<String>? username,
-    Value<String>? pinHash,
-    Value<String?>? pinSalt,
-    Value<String>? role,
-    Value<bool>? isActive,
-    Value<int>? failedPinAttempts,
-    Value<DateTime?>? lockedUntil,
-    Value<int>? rowid,
-  }) {
-    return UsersCompanion(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      pinHash: pinHash ?? this.pinHash,
-      pinSalt: pinSalt ?? this.pinSalt,
-      role: role ?? this.role,
-      isActive: isActive ?? this.isActive,
-      failedPinAttempts: failedPinAttempts ?? this.failedPinAttempts,
-      lockedUntil: lockedUntil ?? this.lockedUntil,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (username.present) {
-      map['username'] = Variable<String>(username.value);
-    }
-    if (pinHash.present) {
-      map['pin_hash'] = Variable<String>(pinHash.value);
-    }
-    if (pinSalt.present) {
-      map['pin_salt'] = Variable<String>(pinSalt.value);
-    }
-    if (role.present) {
-      map['role'] = Variable<String>(role.value);
-    }
-    if (isActive.present) {
-      map['is_active'] = Variable<bool>(isActive.value);
-    }
-    if (failedPinAttempts.present) {
-      map['failed_pin_attempts'] = Variable<int>(failedPinAttempts.value);
-    }
-    if (lockedUntil.present) {
-      map['locked_until'] = Variable<DateTime>(lockedUntil.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('UsersCompanion(')
-          ..write('id: $id, ')
-          ..write('username: $username, ')
-          ..write('pinHash: $pinHash, ')
-          ..write('pinSalt: $pinSalt, ')
-          ..write('role: $role, ')
-          ..write('isActive: $isActive, ')
-          ..write('failedPinAttempts: $failedPinAttempts, ')
-          ..write('lockedUntil: $lockedUntil, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $PermissionsTable extends Permissions
-    with TableInfo<$PermissionsTable, Permission> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $PermissionsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-    'user_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (id)',
-    ),
-  );
-  static const VerificationMeta _menuProductMeta = const VerificationMeta(
-    'menuProduct',
-  );
-  @override
-  late final GeneratedColumn<bool> menuProduct = GeneratedColumn<bool>(
-    'menu_product',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("menu_product" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _menuStockMeta = const VerificationMeta(
-    'menuStock',
-  );
-  @override
-  late final GeneratedColumn<bool> menuStock = GeneratedColumn<bool>(
-    'menu_stock',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("menu_stock" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _menuReportMeta = const VerificationMeta(
-    'menuReport',
-  );
-  @override
-  late final GeneratedColumn<bool> menuReport = GeneratedColumn<bool>(
-    'menu_report',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("menu_report" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _actionVoidMeta = const VerificationMeta(
-    'actionVoid',
-  );
-  @override
-  late final GeneratedColumn<bool> actionVoid = GeneratedColumn<bool>(
-    'action_void',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("action_void" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    userId,
-    menuProduct,
-    menuStock,
-    menuReport,
-    actionVoid,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'permissions';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<Permission> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(
-        _userIdMeta,
-        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('menu_product')) {
-      context.handle(
-        _menuProductMeta,
-        menuProduct.isAcceptableOrUnknown(
-          data['menu_product']!,
-          _menuProductMeta,
-        ),
-      );
-    }
-    if (data.containsKey('menu_stock')) {
-      context.handle(
-        _menuStockMeta,
-        menuStock.isAcceptableOrUnknown(data['menu_stock']!, _menuStockMeta),
-      );
-    }
-    if (data.containsKey('menu_report')) {
-      context.handle(
-        _menuReportMeta,
-        menuReport.isAcceptableOrUnknown(data['menu_report']!, _menuReportMeta),
-      );
-    }
-    if (data.containsKey('action_void')) {
-      context.handle(
-        _actionVoidMeta,
-        actionVoid.isAcceptableOrUnknown(data['action_void']!, _actionVoidMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Permission map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Permission(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      userId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}user_id'],
-      )!,
-      menuProduct: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}menu_product'],
-      )!,
-      menuStock: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}menu_stock'],
-      )!,
-      menuReport: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}menu_report'],
-      )!,
-      actionVoid: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}action_void'],
-      )!,
-    );
-  }
-
-  @override
-  $PermissionsTable createAlias(String alias) {
-    return $PermissionsTable(attachedDatabase, alias);
-  }
-}
-
-class Permission extends DataClass implements Insertable<Permission> {
-  final String id;
-  final String userId;
-  final bool menuProduct;
-  final bool menuStock;
-  final bool menuReport;
-  final bool actionVoid;
-  const Permission({
-    required this.id,
-    required this.userId,
-    required this.menuProduct,
-    required this.menuStock,
-    required this.menuReport,
-    required this.actionVoid,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['user_id'] = Variable<String>(userId);
-    map['menu_product'] = Variable<bool>(menuProduct);
-    map['menu_stock'] = Variable<bool>(menuStock);
-    map['menu_report'] = Variable<bool>(menuReport);
-    map['action_void'] = Variable<bool>(actionVoid);
-    return map;
-  }
-
-  PermissionsCompanion toCompanion(bool nullToAbsent) {
-    return PermissionsCompanion(
-      id: Value(id),
-      userId: Value(userId),
-      menuProduct: Value(menuProduct),
-      menuStock: Value(menuStock),
-      menuReport: Value(menuReport),
-      actionVoid: Value(actionVoid),
-    );
-  }
-
-  factory Permission.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Permission(
-      id: serializer.fromJson<String>(json['id']),
-      userId: serializer.fromJson<String>(json['userId']),
-      menuProduct: serializer.fromJson<bool>(json['menuProduct']),
-      menuStock: serializer.fromJson<bool>(json['menuStock']),
-      menuReport: serializer.fromJson<bool>(json['menuReport']),
-      actionVoid: serializer.fromJson<bool>(json['actionVoid']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'userId': serializer.toJson<String>(userId),
-      'menuProduct': serializer.toJson<bool>(menuProduct),
-      'menuStock': serializer.toJson<bool>(menuStock),
-      'menuReport': serializer.toJson<bool>(menuReport),
-      'actionVoid': serializer.toJson<bool>(actionVoid),
-    };
-  }
-
-  Permission copyWith({
-    String? id,
-    String? userId,
-    bool? menuProduct,
-    bool? menuStock,
-    bool? menuReport,
-    bool? actionVoid,
-  }) => Permission(
-    id: id ?? this.id,
-    userId: userId ?? this.userId,
-    menuProduct: menuProduct ?? this.menuProduct,
-    menuStock: menuStock ?? this.menuStock,
-    menuReport: menuReport ?? this.menuReport,
-    actionVoid: actionVoid ?? this.actionVoid,
-  );
-  Permission copyWithCompanion(PermissionsCompanion data) {
-    return Permission(
-      id: data.id.present ? data.id.value : this.id,
-      userId: data.userId.present ? data.userId.value : this.userId,
-      menuProduct: data.menuProduct.present
-          ? data.menuProduct.value
-          : this.menuProduct,
-      menuStock: data.menuStock.present ? data.menuStock.value : this.menuStock,
-      menuReport: data.menuReport.present
-          ? data.menuReport.value
-          : this.menuReport,
-      actionVoid: data.actionVoid.present
-          ? data.actionVoid.value
-          : this.actionVoid,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Permission(')
-          ..write('id: $id, ')
-          ..write('userId: $userId, ')
-          ..write('menuProduct: $menuProduct, ')
-          ..write('menuStock: $menuStock, ')
-          ..write('menuReport: $menuReport, ')
-          ..write('actionVoid: $actionVoid')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, userId, menuProduct, menuStock, menuReport, actionVoid);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Permission &&
-          other.id == this.id &&
-          other.userId == this.userId &&
-          other.menuProduct == this.menuProduct &&
-          other.menuStock == this.menuStock &&
-          other.menuReport == this.menuReport &&
-          other.actionVoid == this.actionVoid);
-}
-
-class PermissionsCompanion extends UpdateCompanion<Permission> {
-  final Value<String> id;
-  final Value<String> userId;
-  final Value<bool> menuProduct;
-  final Value<bool> menuStock;
-  final Value<bool> menuReport;
-  final Value<bool> actionVoid;
-  final Value<int> rowid;
-  const PermissionsCompanion({
-    this.id = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.menuProduct = const Value.absent(),
-    this.menuStock = const Value.absent(),
-    this.menuReport = const Value.absent(),
-    this.actionVoid = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  PermissionsCompanion.insert({
-    required String id,
-    required String userId,
-    this.menuProduct = const Value.absent(),
-    this.menuStock = const Value.absent(),
-    this.menuReport = const Value.absent(),
-    this.actionVoid = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       userId = Value(userId);
-  static Insertable<Permission> custom({
-    Expression<String>? id,
-    Expression<String>? userId,
-    Expression<bool>? menuProduct,
-    Expression<bool>? menuStock,
-    Expression<bool>? menuReport,
-    Expression<bool>? actionVoid,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (userId != null) 'user_id': userId,
-      if (menuProduct != null) 'menu_product': menuProduct,
-      if (menuStock != null) 'menu_stock': menuStock,
-      if (menuReport != null) 'menu_report': menuReport,
-      if (actionVoid != null) 'action_void': actionVoid,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  PermissionsCompanion copyWith({
-    Value<String>? id,
-    Value<String>? userId,
-    Value<bool>? menuProduct,
-    Value<bool>? menuStock,
-    Value<bool>? menuReport,
-    Value<bool>? actionVoid,
-    Value<int>? rowid,
-  }) {
-    return PermissionsCompanion(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      menuProduct: menuProduct ?? this.menuProduct,
-      menuStock: menuStock ?? this.menuStock,
-      menuReport: menuReport ?? this.menuReport,
-      actionVoid: actionVoid ?? this.actionVoid,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (menuProduct.present) {
-      map['menu_product'] = Variable<bool>(menuProduct.value);
-    }
-    if (menuStock.present) {
-      map['menu_stock'] = Variable<bool>(menuStock.value);
-    }
-    if (menuReport.present) {
-      map['menu_report'] = Variable<bool>(menuReport.value);
-    }
-    if (actionVoid.present) {
-      map['action_void'] = Variable<bool>(actionVoid.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('PermissionsCompanion(')
-          ..write('id: $id, ')
-          ..write('userId: $userId, ')
-          ..write('menuProduct: $menuProduct, ')
-          ..write('menuStock: $menuStock, ')
-          ..write('menuReport: $menuReport, ')
-          ..write('actionVoid: $actionVoid, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $CategoriesTable extends Categories
     with TableInfo<$CategoriesTable, Category> {
   @override
@@ -2521,9 +1576,6 @@ class $TransactionsTable extends Transactions
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (id)',
-    ),
   );
   static const VerificationMeta _customerIdMeta = const VerificationMeta(
     'customerId',
@@ -3746,9 +2798,6 @@ class $StockHistoriesTable extends StockHistories
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (id)',
-    ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -4571,9 +3620,6 @@ class $ActivityLogsTable extends ActivityLogs
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (id)',
-    ),
   );
   static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
@@ -4982,9 +4028,6 @@ class $DebtPaymentsTable extends DebtPayments
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (id)',
-    ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -5761,8 +4804,6 @@ class SubscriptionCachesCompanion extends UpdateCompanion<SubscriptionCache> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $UsersTable users = $UsersTable(this);
-  late final $PermissionsTable permissions = $PermissionsTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $ProductsTable products = $ProductsTable(this);
   late final $WholesalePricesTable wholesalePrices = $WholesalePricesTable(
@@ -5784,8 +4825,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    users,
-    permissions,
     categories,
     products,
     wholesalePrices,
@@ -5800,1091 +4839,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $$UsersTableCreateCompanionBuilder =
-    UsersCompanion Function({
-      required String id,
-      required String username,
-      required String pinHash,
-      Value<String?> pinSalt,
-      required String role,
-      Value<bool> isActive,
-      Value<int> failedPinAttempts,
-      Value<DateTime?> lockedUntil,
-      Value<int> rowid,
-    });
-typedef $$UsersTableUpdateCompanionBuilder =
-    UsersCompanion Function({
-      Value<String> id,
-      Value<String> username,
-      Value<String> pinHash,
-      Value<String?> pinSalt,
-      Value<String> role,
-      Value<bool> isActive,
-      Value<int> failedPinAttempts,
-      Value<DateTime?> lockedUntil,
-      Value<int> rowid,
-    });
-
-final class $$UsersTableReferences
-    extends BaseReferences<_$AppDatabase, $UsersTable, User> {
-  $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$PermissionsTable, List<Permission>>
-  _permissionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.permissions,
-    aliasName: $_aliasNameGenerator(db.users.id, db.permissions.userId),
-  );
-
-  $$PermissionsTableProcessedTableManager get permissionsRefs {
-    final manager = $$PermissionsTableTableManager(
-      $_db,
-      $_db.permissions,
-    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_permissionsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
-  _transactionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.transactions,
-    aliasName: $_aliasNameGenerator(db.users.id, db.transactions.cashierId),
-  );
-
-  $$TransactionsTableProcessedTableManager get transactionsRefs {
-    final manager = $$TransactionsTableTableManager(
-      $_db,
-      $_db.transactions,
-    ).filter((f) => f.cashierId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$StockHistoriesTable, List<StockHistory>>
-  _stockHistoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.stockHistories,
-    aliasName: $_aliasNameGenerator(db.users.id, db.stockHistories.userId),
-  );
-
-  $$StockHistoriesTableProcessedTableManager get stockHistoriesRefs {
-    final manager = $$StockHistoriesTableTableManager(
-      $_db,
-      $_db.stockHistories,
-    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_stockHistoriesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$ActivityLogsTable, List<ActivityLog>>
-  _activityLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.activityLogs,
-    aliasName: $_aliasNameGenerator(db.users.id, db.activityLogs.userId),
-  );
-
-  $$ActivityLogsTableProcessedTableManager get activityLogsRefs {
-    final manager = $$ActivityLogsTableTableManager(
-      $_db,
-      $_db.activityLogs,
-    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_activityLogsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$DebtPaymentsTable, List<DebtPayment>>
-  _debtPaymentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.debtPayments,
-    aliasName: $_aliasNameGenerator(db.users.id, db.debtPayments.cashierId),
-  );
-
-  $$DebtPaymentsTableProcessedTableManager get debtPaymentsRefs {
-    final manager = $$DebtPaymentsTableTableManager(
-      $_db,
-      $_db.debtPayments,
-    ).filter((f) => f.cashierId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_debtPaymentsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
-  $$UsersTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get username => $composableBuilder(
-    column: $table.username,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get pinHash => $composableBuilder(
-    column: $table.pinHash,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get pinSalt => $composableBuilder(
-    column: $table.pinSalt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get role => $composableBuilder(
-    column: $table.role,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isActive => $composableBuilder(
-    column: $table.isActive,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get failedPinAttempts => $composableBuilder(
-    column: $table.failedPinAttempts,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get lockedUntil => $composableBuilder(
-    column: $table.lockedUntil,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  Expression<bool> permissionsRefs(
-    Expression<bool> Function($$PermissionsTableFilterComposer f) f,
-  ) {
-    final $$PermissionsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.permissions,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PermissionsTableFilterComposer(
-            $db: $db,
-            $table: $db.permissions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> transactionsRefs(
-    Expression<bool> Function($$TransactionsTableFilterComposer f) f,
-  ) {
-    final $$TransactionsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.transactions,
-      getReferencedColumn: (t) => t.cashierId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TransactionsTableFilterComposer(
-            $db: $db,
-            $table: $db.transactions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> stockHistoriesRefs(
-    Expression<bool> Function($$StockHistoriesTableFilterComposer f) f,
-  ) {
-    final $$StockHistoriesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.stockHistories,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StockHistoriesTableFilterComposer(
-            $db: $db,
-            $table: $db.stockHistories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> activityLogsRefs(
-    Expression<bool> Function($$ActivityLogsTableFilterComposer f) f,
-  ) {
-    final $$ActivityLogsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.activityLogs,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ActivityLogsTableFilterComposer(
-            $db: $db,
-            $table: $db.activityLogs,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> debtPaymentsRefs(
-    Expression<bool> Function($$DebtPaymentsTableFilterComposer f) f,
-  ) {
-    final $$DebtPaymentsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.debtPayments,
-      getReferencedColumn: (t) => t.cashierId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DebtPaymentsTableFilterComposer(
-            $db: $db,
-            $table: $db.debtPayments,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$UsersTableOrderingComposer
-    extends Composer<_$AppDatabase, $UsersTable> {
-  $$UsersTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get username => $composableBuilder(
-    column: $table.username,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get pinHash => $composableBuilder(
-    column: $table.pinHash,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get pinSalt => $composableBuilder(
-    column: $table.pinSalt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get role => $composableBuilder(
-    column: $table.role,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get isActive => $composableBuilder(
-    column: $table.isActive,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get failedPinAttempts => $composableBuilder(
-    column: $table.failedPinAttempts,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get lockedUntil => $composableBuilder(
-    column: $table.lockedUntil,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$UsersTableAnnotationComposer
-    extends Composer<_$AppDatabase, $UsersTable> {
-  $$UsersTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get username =>
-      $composableBuilder(column: $table.username, builder: (column) => column);
-
-  GeneratedColumn<String> get pinHash =>
-      $composableBuilder(column: $table.pinHash, builder: (column) => column);
-
-  GeneratedColumn<String> get pinSalt =>
-      $composableBuilder(column: $table.pinSalt, builder: (column) => column);
-
-  GeneratedColumn<String> get role =>
-      $composableBuilder(column: $table.role, builder: (column) => column);
-
-  GeneratedColumn<bool> get isActive =>
-      $composableBuilder(column: $table.isActive, builder: (column) => column);
-
-  GeneratedColumn<int> get failedPinAttempts => $composableBuilder(
-    column: $table.failedPinAttempts,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get lockedUntil => $composableBuilder(
-    column: $table.lockedUntil,
-    builder: (column) => column,
-  );
-
-  Expression<T> permissionsRefs<T extends Object>(
-    Expression<T> Function($$PermissionsTableAnnotationComposer a) f,
-  ) {
-    final $$PermissionsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.permissions,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PermissionsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.permissions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> transactionsRefs<T extends Object>(
-    Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
-  ) {
-    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.transactions,
-      getReferencedColumn: (t) => t.cashierId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TransactionsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.transactions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> stockHistoriesRefs<T extends Object>(
-    Expression<T> Function($$StockHistoriesTableAnnotationComposer a) f,
-  ) {
-    final $$StockHistoriesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.stockHistories,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$StockHistoriesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.stockHistories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> activityLogsRefs<T extends Object>(
-    Expression<T> Function($$ActivityLogsTableAnnotationComposer a) f,
-  ) {
-    final $$ActivityLogsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.activityLogs,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ActivityLogsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.activityLogs,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> debtPaymentsRefs<T extends Object>(
-    Expression<T> Function($$DebtPaymentsTableAnnotationComposer a) f,
-  ) {
-    final $$DebtPaymentsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.debtPayments,
-      getReferencedColumn: (t) => t.cashierId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$DebtPaymentsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.debtPayments,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$UsersTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $UsersTable,
-          User,
-          $$UsersTableFilterComposer,
-          $$UsersTableOrderingComposer,
-          $$UsersTableAnnotationComposer,
-          $$UsersTableCreateCompanionBuilder,
-          $$UsersTableUpdateCompanionBuilder,
-          (User, $$UsersTableReferences),
-          User,
-          PrefetchHooks Function({
-            bool permissionsRefs,
-            bool transactionsRefs,
-            bool stockHistoriesRefs,
-            bool activityLogsRefs,
-            bool debtPaymentsRefs,
-          })
-        > {
-  $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$UsersTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$UsersTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$UsersTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> username = const Value.absent(),
-                Value<String> pinHash = const Value.absent(),
-                Value<String?> pinSalt = const Value.absent(),
-                Value<String> role = const Value.absent(),
-                Value<bool> isActive = const Value.absent(),
-                Value<int> failedPinAttempts = const Value.absent(),
-                Value<DateTime?> lockedUntil = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => UsersCompanion(
-                id: id,
-                username: username,
-                pinHash: pinHash,
-                pinSalt: pinSalt,
-                role: role,
-                isActive: isActive,
-                failedPinAttempts: failedPinAttempts,
-                lockedUntil: lockedUntil,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String username,
-                required String pinHash,
-                Value<String?> pinSalt = const Value.absent(),
-                required String role,
-                Value<bool> isActive = const Value.absent(),
-                Value<int> failedPinAttempts = const Value.absent(),
-                Value<DateTime?> lockedUntil = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => UsersCompanion.insert(
-                id: id,
-                username: username,
-                pinHash: pinHash,
-                pinSalt: pinSalt,
-                role: role,
-                isActive: isActive,
-                failedPinAttempts: failedPinAttempts,
-                lockedUntil: lockedUntil,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) =>
-                    (e.readTable(table), $$UsersTableReferences(db, table, e)),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({
-                permissionsRefs = false,
-                transactionsRefs = false,
-                stockHistoriesRefs = false,
-                activityLogsRefs = false,
-                debtPaymentsRefs = false,
-              }) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (permissionsRefs) db.permissions,
-                    if (transactionsRefs) db.transactions,
-                    if (stockHistoriesRefs) db.stockHistories,
-                    if (activityLogsRefs) db.activityLogs,
-                    if (debtPaymentsRefs) db.debtPayments,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (permissionsRefs)
-                        await $_getPrefetchedData<
-                          User,
-                          $UsersTable,
-                          Permission
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._permissionsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).permissionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (transactionsRefs)
-                        await $_getPrefetchedData<
-                          User,
-                          $UsersTable,
-                          Transaction
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._transactionsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).transactionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.cashierId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (stockHistoriesRefs)
-                        await $_getPrefetchedData<
-                          User,
-                          $UsersTable,
-                          StockHistory
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._stockHistoriesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).stockHistoriesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (activityLogsRefs)
-                        await $_getPrefetchedData<
-                          User,
-                          $UsersTable,
-                          ActivityLog
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._activityLogsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).activityLogsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.userId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (debtPaymentsRefs)
-                        await $_getPrefetchedData<
-                          User,
-                          $UsersTable,
-                          DebtPayment
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsersTableReferences
-                              ._debtPaymentsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsersTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).debtPaymentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.cashierId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$UsersTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $UsersTable,
-      User,
-      $$UsersTableFilterComposer,
-      $$UsersTableOrderingComposer,
-      $$UsersTableAnnotationComposer,
-      $$UsersTableCreateCompanionBuilder,
-      $$UsersTableUpdateCompanionBuilder,
-      (User, $$UsersTableReferences),
-      User,
-      PrefetchHooks Function({
-        bool permissionsRefs,
-        bool transactionsRefs,
-        bool stockHistoriesRefs,
-        bool activityLogsRefs,
-        bool debtPaymentsRefs,
-      })
-    >;
-typedef $$PermissionsTableCreateCompanionBuilder =
-    PermissionsCompanion Function({
-      required String id,
-      required String userId,
-      Value<bool> menuProduct,
-      Value<bool> menuStock,
-      Value<bool> menuReport,
-      Value<bool> actionVoid,
-      Value<int> rowid,
-    });
-typedef $$PermissionsTableUpdateCompanionBuilder =
-    PermissionsCompanion Function({
-      Value<String> id,
-      Value<String> userId,
-      Value<bool> menuProduct,
-      Value<bool> menuStock,
-      Value<bool> menuReport,
-      Value<bool> actionVoid,
-      Value<int> rowid,
-    });
-
-final class $$PermissionsTableReferences
-    extends BaseReferences<_$AppDatabase, $PermissionsTable, Permission> {
-  $$PermissionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.permissions.userId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get userId {
-    final $_column = $_itemColumn<String>('user_id')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$PermissionsTableFilterComposer
-    extends Composer<_$AppDatabase, $PermissionsTable> {
-  $$PermissionsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get menuProduct => $composableBuilder(
-    column: $table.menuProduct,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get menuStock => $composableBuilder(
-    column: $table.menuStock,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get menuReport => $composableBuilder(
-    column: $table.menuReport,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get actionVoid => $composableBuilder(
-    column: $table.actionVoid,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$UsersTableFilterComposer get userId {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$PermissionsTableOrderingComposer
-    extends Composer<_$AppDatabase, $PermissionsTable> {
-  $$PermissionsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get menuProduct => $composableBuilder(
-    column: $table.menuProduct,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get menuStock => $composableBuilder(
-    column: $table.menuStock,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get menuReport => $composableBuilder(
-    column: $table.menuReport,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get actionVoid => $composableBuilder(
-    column: $table.actionVoid,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$UsersTableOrderingComposer get userId {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$PermissionsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $PermissionsTable> {
-  $$PermissionsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<bool> get menuProduct => $composableBuilder(
-    column: $table.menuProduct,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get menuStock =>
-      $composableBuilder(column: $table.menuStock, builder: (column) => column);
-
-  GeneratedColumn<bool> get menuReport => $composableBuilder(
-    column: $table.menuReport,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get actionVoid => $composableBuilder(
-    column: $table.actionVoid,
-    builder: (column) => column,
-  );
-
-  $$UsersTableAnnotationComposer get userId {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$PermissionsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $PermissionsTable,
-          Permission,
-          $$PermissionsTableFilterComposer,
-          $$PermissionsTableOrderingComposer,
-          $$PermissionsTableAnnotationComposer,
-          $$PermissionsTableCreateCompanionBuilder,
-          $$PermissionsTableUpdateCompanionBuilder,
-          (Permission, $$PermissionsTableReferences),
-          Permission,
-          PrefetchHooks Function({bool userId})
-        > {
-  $$PermissionsTableTableManager(_$AppDatabase db, $PermissionsTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$PermissionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PermissionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PermissionsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> userId = const Value.absent(),
-                Value<bool> menuProduct = const Value.absent(),
-                Value<bool> menuStock = const Value.absent(),
-                Value<bool> menuReport = const Value.absent(),
-                Value<bool> actionVoid = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => PermissionsCompanion(
-                id: id,
-                userId: userId,
-                menuProduct: menuProduct,
-                menuStock: menuStock,
-                menuReport: menuReport,
-                actionVoid: actionVoid,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String userId,
-                Value<bool> menuProduct = const Value.absent(),
-                Value<bool> menuStock = const Value.absent(),
-                Value<bool> menuReport = const Value.absent(),
-                Value<bool> actionVoid = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => PermissionsCompanion.insert(
-                id: id,
-                userId: userId,
-                menuProduct: menuProduct,
-                menuStock: menuStock,
-                menuReport: menuReport,
-                actionVoid: actionVoid,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$PermissionsTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({userId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (userId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.userId,
-                                referencedTable: $$PermissionsTableReferences
-                                    ._userIdTable(db),
-                                referencedColumn: $$PermissionsTableReferences
-                                    ._userIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$PermissionsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $PermissionsTable,
-      Permission,
-      $$PermissionsTableFilterComposer,
-      $$PermissionsTableOrderingComposer,
-      $$PermissionsTableAnnotationComposer,
-      $$PermissionsTableCreateCompanionBuilder,
-      $$PermissionsTableUpdateCompanionBuilder,
-      (Permission, $$PermissionsTableReferences),
-      Permission,
-      PrefetchHooks Function({bool userId})
-    >;
 typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
       required String id,
@@ -8614,24 +6568,6 @@ final class $$TransactionsTableReferences
     extends BaseReferences<_$AppDatabase, $TransactionsTable, Transaction> {
   $$TransactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $UsersTable _cashierIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.transactions.cashierId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get cashierId {
-    final $_column = $_itemColumn<String>('cashier_id')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_cashierIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
   static $CustomersTable _customerIdTable(_$AppDatabase db) =>
       db.customers.createAlias(
         $_aliasNameGenerator(db.transactions.customerId, db.customers.id),
@@ -8694,6 +6630,11 @@ class $$TransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get cashierId => $composableBuilder(
+    column: $table.cashierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => ColumnFilters(column),
@@ -8723,29 +6664,6 @@ class $$TransactionsTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$UsersTableFilterComposer get cashierId {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cashierId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   $$CustomersTableFilterComposer get customerId {
     final $$CustomersTableFilterComposer composer = $composerBuilder(
@@ -8815,6 +6733,11 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get cashierId => $composableBuilder(
+    column: $table.cashierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => ColumnOrderings(column),
@@ -8844,29 +6767,6 @@ class $$TransactionsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$UsersTableOrderingComposer get cashierId {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cashierId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   $$CustomersTableOrderingComposer get customerId {
     final $$CustomersTableOrderingComposer composer = $composerBuilder(
@@ -8909,6 +6809,9 @@ class $$TransactionsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get cashierId =>
+      $composableBuilder(column: $table.cashierId, builder: (column) => column);
+
   GeneratedColumn<double> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => column,
@@ -8930,29 +6833,6 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  $$UsersTableAnnotationComposer get cashierId {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cashierId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   $$CustomersTableAnnotationComposer get customerId {
     final $$CustomersTableAnnotationComposer composer = $composerBuilder(
@@ -9016,11 +6896,7 @@ class $$TransactionsTableTableManager
           $$TransactionsTableUpdateCompanionBuilder,
           (Transaction, $$TransactionsTableReferences),
           Transaction,
-          PrefetchHooks Function({
-            bool cashierId,
-            bool customerId,
-            bool transactionItemsRefs,
-          })
+          PrefetchHooks Function({bool customerId, bool transactionItemsRefs})
         > {
   $$TransactionsTableTableManager(_$AppDatabase db, $TransactionsTable table)
     : super(
@@ -9094,11 +6970,7 @@ class $$TransactionsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({
-                cashierId = false,
-                customerId = false,
-                transactionItemsRefs = false,
-              }) {
+              ({customerId = false, transactionItemsRefs = false}) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
@@ -9120,21 +6992,6 @@ class $$TransactionsTableTableManager
                           dynamic
                         >
                       >(state) {
-                        if (cashierId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.cashierId,
-                                    referencedTable:
-                                        $$TransactionsTableReferences
-                                            ._cashierIdTable(db),
-                                    referencedColumn:
-                                        $$TransactionsTableReferences
-                                            ._cashierIdTable(db)
-                                            .id,
-                                  )
-                                  as T;
-                        }
                         if (customerId) {
                           state =
                               state.withJoin(
@@ -9196,11 +7053,7 @@ typedef $$TransactionsTableProcessedTableManager =
       $$TransactionsTableUpdateCompanionBuilder,
       (Transaction, $$TransactionsTableReferences),
       Transaction,
-      PrefetchHooks Function({
-        bool cashierId,
-        bool customerId,
-        bool transactionItemsRefs,
-      })
+      PrefetchHooks Function({bool customerId, bool transactionItemsRefs})
     >;
 typedef $$TransactionItemsTableCreateCompanionBuilder =
     TransactionItemsCompanion Function({
@@ -9752,24 +7605,6 @@ final class $$StockHistoriesTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
-
-  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.stockHistories.userId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get userId {
-    final $_column = $_itemColumn<String>('user_id')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 }
 
 class $$StockHistoriesTableFilterComposer
@@ -9801,6 +7636,11 @@ class $$StockHistoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -9820,29 +7660,6 @@ class $$StockHistoriesTableFilterComposer
           }) => $$ProductsTableFilterComposer(
             $db: $db,
             $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableFilterComposer get userId {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -9882,6 +7699,11 @@ class $$StockHistoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9901,29 +7723,6 @@ class $$StockHistoriesTableOrderingComposer
           }) => $$ProductsTableOrderingComposer(
             $db: $db,
             $table: $db.products,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableOrderingComposer get userId {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -9955,6 +7754,9 @@ class $$StockHistoriesTableAnnotationComposer
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -9980,29 +7782,6 @@ class $$StockHistoriesTableAnnotationComposer
     );
     return composer;
   }
-
-  $$UsersTableAnnotationComposer get userId {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$StockHistoriesTableTableManager
@@ -10018,7 +7797,7 @@ class $$StockHistoriesTableTableManager
           $$StockHistoriesTableUpdateCompanionBuilder,
           (StockHistory, $$StockHistoriesTableReferences),
           StockHistory,
-          PrefetchHooks Function({bool productId, bool userId})
+          PrefetchHooks Function({bool productId})
         > {
   $$StockHistoriesTableTableManager(
     _$AppDatabase db,
@@ -10081,7 +7860,7 @@ class $$StockHistoriesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({productId = false, userId = false}) {
+          prefetchHooksCallback: ({productId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -10115,20 +7894,6 @@ class $$StockHistoriesTableTableManager
                               )
                               as T;
                     }
-                    if (userId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.userId,
-                                referencedTable: $$StockHistoriesTableReferences
-                                    ._userIdTable(db),
-                                referencedColumn:
-                                    $$StockHistoriesTableReferences
-                                        ._userIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
 
                     return state;
                   },
@@ -10153,7 +7918,7 @@ typedef $$StockHistoriesTableProcessedTableManager =
       $$StockHistoriesTableUpdateCompanionBuilder,
       (StockHistory, $$StockHistoriesTableReferences),
       StockHistory,
-      PrefetchHooks Function({bool productId, bool userId})
+      PrefetchHooks Function({bool productId})
     >;
 typedef $$ExpensesTableCreateCompanionBuilder =
     ExpensesCompanion Function({
@@ -10389,29 +8154,6 @@ typedef $$ActivityLogsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$ActivityLogsTableReferences
-    extends BaseReferences<_$AppDatabase, $ActivityLogsTable, ActivityLog> {
-  $$ActivityLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.activityLogs.userId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get userId {
-    final $_column = $_itemColumn<String>('user_id')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$ActivityLogsTableFilterComposer
     extends Composer<_$AppDatabase, $ActivityLogsTable> {
   $$ActivityLogsTableFilterComposer({
@@ -10423,6 +8165,11 @@ class $$ActivityLogsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10440,29 +8187,6 @@ class $$ActivityLogsTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$UsersTableFilterComposer get userId {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ActivityLogsTableOrderingComposer
@@ -10476,6 +8200,11 @@ class $$ActivityLogsTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -10493,29 +8222,6 @@ class $$ActivityLogsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$UsersTableOrderingComposer get userId {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ActivityLogsTableAnnotationComposer
@@ -10530,6 +8236,9 @@ class $$ActivityLogsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
   GeneratedColumn<String> get action =>
       $composableBuilder(column: $table.action, builder: (column) => column);
 
@@ -10540,29 +8249,6 @@ class $$ActivityLogsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  $$UsersTableAnnotationComposer get userId {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ActivityLogsTableTableManager
@@ -10576,9 +8262,12 @@ class $$ActivityLogsTableTableManager
           $$ActivityLogsTableAnnotationComposer,
           $$ActivityLogsTableCreateCompanionBuilder,
           $$ActivityLogsTableUpdateCompanionBuilder,
-          (ActivityLog, $$ActivityLogsTableReferences),
+          (
+            ActivityLog,
+            BaseReferences<_$AppDatabase, $ActivityLogsTable, ActivityLog>,
+          ),
           ActivityLog,
-          PrefetchHooks Function({bool userId})
+          PrefetchHooks Function()
         > {
   $$ActivityLogsTableTableManager(_$AppDatabase db, $ActivityLogsTable table)
     : super(
@@ -10624,54 +8313,9 @@ class $$ActivityLogsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$ActivityLogsTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({userId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (userId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.userId,
-                                referencedTable: $$ActivityLogsTableReferences
-                                    ._userIdTable(db),
-                                referencedColumn: $$ActivityLogsTableReferences
-                                    ._userIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -10686,9 +8330,12 @@ typedef $$ActivityLogsTableProcessedTableManager =
       $$ActivityLogsTableAnnotationComposer,
       $$ActivityLogsTableCreateCompanionBuilder,
       $$ActivityLogsTableUpdateCompanionBuilder,
-      (ActivityLog, $$ActivityLogsTableReferences),
+      (
+        ActivityLog,
+        BaseReferences<_$AppDatabase, $ActivityLogsTable, ActivityLog>,
+      ),
       ActivityLog,
-      PrefetchHooks Function({bool userId})
+      PrefetchHooks Function()
     >;
 typedef $$DebtPaymentsTableCreateCompanionBuilder =
     DebtPaymentsCompanion Function({
@@ -10735,24 +8382,6 @@ final class $$DebtPaymentsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
-
-  static $UsersTable _cashierIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.debtPayments.cashierId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get cashierId {
-    final $_column = $_itemColumn<String>('cashier_id')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_cashierIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 }
 
 class $$DebtPaymentsTableFilterComposer
@@ -10784,6 +8413,11 @@ class $$DebtPaymentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get cashierId => $composableBuilder(
+    column: $table.cashierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -10803,29 +8437,6 @@ class $$DebtPaymentsTableFilterComposer
           }) => $$CustomersTableFilterComposer(
             $db: $db,
             $table: $db.customers,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableFilterComposer get cashierId {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cashierId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10865,6 +8476,11 @@ class $$DebtPaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get cashierId => $composableBuilder(
+    column: $table.cashierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10884,29 +8500,6 @@ class $$DebtPaymentsTableOrderingComposer
           }) => $$CustomersTableOrderingComposer(
             $db: $db,
             $table: $db.customers,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  $$UsersTableOrderingComposer get cashierId {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cashierId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10940,6 +8533,9 @@ class $$DebtPaymentsTableAnnotationComposer
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
+  GeneratedColumn<String> get cashierId =>
+      $composableBuilder(column: $table.cashierId, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -10965,29 +8561,6 @@ class $$DebtPaymentsTableAnnotationComposer
     );
     return composer;
   }
-
-  $$UsersTableAnnotationComposer get cashierId {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cashierId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$DebtPaymentsTableTableManager
@@ -11003,7 +8576,7 @@ class $$DebtPaymentsTableTableManager
           $$DebtPaymentsTableUpdateCompanionBuilder,
           (DebtPayment, $$DebtPaymentsTableReferences),
           DebtPayment,
-          PrefetchHooks Function({bool customerId, bool cashierId})
+          PrefetchHooks Function({bool customerId})
         > {
   $$DebtPaymentsTableTableManager(_$AppDatabase db, $DebtPaymentsTable table)
     : super(
@@ -11064,7 +8637,7 @@ class $$DebtPaymentsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({customerId = false, cashierId = false}) {
+          prefetchHooksCallback: ({customerId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -11097,19 +8670,6 @@ class $$DebtPaymentsTableTableManager
                               )
                               as T;
                     }
-                    if (cashierId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.cashierId,
-                                referencedTable: $$DebtPaymentsTableReferences
-                                    ._cashierIdTable(db),
-                                referencedColumn: $$DebtPaymentsTableReferences
-                                    ._cashierIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
 
                     return state;
                   },
@@ -11134,7 +8694,7 @@ typedef $$DebtPaymentsTableProcessedTableManager =
       $$DebtPaymentsTableUpdateCompanionBuilder,
       (DebtPayment, $$DebtPaymentsTableReferences),
       DebtPayment,
-      PrefetchHooks Function({bool customerId, bool cashierId})
+      PrefetchHooks Function({bool customerId})
     >;
 typedef $$SubscriptionCachesTableCreateCompanionBuilder =
     SubscriptionCachesCompanion Function({
@@ -11355,10 +8915,6 @@ typedef $$SubscriptionCachesTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$UsersTableTableManager get users =>
-      $$UsersTableTableManager(_db, _db.users);
-  $$PermissionsTableTableManager get permissions =>
-      $$PermissionsTableTableManager(_db, _db.permissions);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
   $$ProductsTableTableManager get products =>

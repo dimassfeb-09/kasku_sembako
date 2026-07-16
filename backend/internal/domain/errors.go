@@ -8,4 +8,5 @@ var (
 	ErrInvalidCredentials = errors.New("invalid email or password")
 	ErrPurchaseTokenTaken = errors.New("purchase token already registered to another account")
 	ErrSubscriptionNotPro = errors.New("subscription is not active pro")
+	ErrForbidden          = errors.New("forbidden")
 )

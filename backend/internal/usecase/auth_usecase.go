@@ -12,9 +12,10 @@ import (
 )
 
 type AuthUsecase struct {
-	users     domain.UserRepository
-	jwtSecret string
-	jwtTTL    time.Duration
+	users      domain.UserRepository
+	jwtSecret  string
+	jwtTTL     time.Duration
+	adminEmail string
 }
 
 // dummyPasswordHash is compared against on every "email not found" login
@@ -33,8 +34,8 @@ var dummyPasswordHash = func() string {
 	return string(hash)
 }()
 
-func NewAuthUsecase(users domain.UserRepository, jwtSecret string, jwtTTL time.Duration) *AuthUsecase {
-	return &AuthUsecase{users: users, jwtSecret: jwtSecret, jwtTTL: jwtTTL}
+func NewAuthUsecase(users domain.UserRepository, jwtSecret string, jwtTTL time.Duration, adminEmail string) *AuthUsecase {
+	return &AuthUsecase{users: users, jwtSecret: jwtSecret, jwtTTL: jwtTTL, adminEmail: adminEmail}
 }
 
 func (u *AuthUsecase) Register(ctx context.Context, email, password string) (token string, user *domain.User, err error) {
@@ -43,12 +44,17 @@ func (u *AuthUsecase) Register(ctx context.Context, email, password string) (tok
 		return "", nil, err
 	}
 
-	newUser := &domain.User{Email: normalizeEmail(email), PasswordHash: string(hash)}
+	role := "user"
+	if normalizeEmail(email) == normalizeEmail(u.adminEmail) {
+		role = "admin"
+	}
+
+	newUser := &domain.User{Email: normalizeEmail(email), PasswordHash: string(hash), Role: role}
 	if err := u.users.Create(ctx, newUser); err != nil {
 		return "", nil, err
 	}
 
-	token, err = jwtutil.Issue(u.jwtSecret, newUser.ID, newUser.Email, u.jwtTTL)
+	token, err = jwtutil.Issue(u.jwtSecret, newUser.ID, newUser.Email, newUser.Role, u.jwtTTL)
 	if err != nil {
 		return "", nil, err
 	}
@@ -71,7 +77,7 @@ func (u *AuthUsecase) Login(ctx context.Context, email, password string) (token 
 		return "", nil, domain.ErrInvalidCredentials
 	}
 
-	token, err = jwtutil.Issue(u.jwtSecret, existing.ID, existing.Email, u.jwtTTL)
+	token, err = jwtutil.Issue(u.jwtSecret, existing.ID, existing.Email, existing.Role, u.jwtTTL)
 	if err != nil {
 		return "", nil, err
 	}

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../user_management/presentation/bloc/permission_cubit.dart';
 import '../../../report/presentation/bloc/report_bloc.dart';
+import '../../../subscription/presentation/cubit/subscription_cubit.dart';
+import '../../../subscription/presentation/cubit/subscription_state.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../../report/presentation/bloc/report_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -29,14 +31,22 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   }
 
   void _loadTransactions() {
-    context.read<ReportBloc>().add(LoadReportsEvent(_startDate, _endDate));
+    final subState = context.read<SubscriptionCubit>().state;
+    final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+    var start = _startDate;
+    if (!isPro) {
+      final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+      if (start.isBefore(oneMonthAgo)) start = oneMonthAgo;
+    }
+    context.read<ReportBloc>().add(LoadReportsEvent(start, _endDate));
   }
 
   Future<void> _selectDateRange(BuildContext context) async {
+    final isPro = isProEntitled(context);
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
-      firstDate: DateTime(2020),
+      firstDate: isPro ? DateTime(2020) : DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
@@ -63,10 +73,6 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy');
-    final permissionState = context.watch<PermissionCubit>().state;
-    final checkingPermission =
-        permissionState is PermissionLoading ||
-        permissionState is PermissionInitial;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Riwayat Transaksi'), elevation: 0),
@@ -82,7 +88,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
           }
         },
         builder: (context, state) {
-          if (state is ReportLoading || checkingPermission) {
+          if (state is ReportLoading) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
@@ -151,10 +157,6 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   }
 
   void _showTransactionDetail(BuildContext context, TransactionEntity trx) {
-    final permissionState = context.read<PermissionCubit>().state;
-    final canVoid =
-        permissionState is PermissionLoaded && permissionState.canVoid;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -165,7 +167,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       builder: (ctx) {
         return TransactionDetailBottomSheet(
           transaction: trx,
-          canVoid: canVoid,
+          canVoid: isProEntitled(context),
           onVoidPressed: () async {
             final confirm = await showDialog<bool>(
               context: context,

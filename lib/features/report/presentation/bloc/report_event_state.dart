@@ -19,6 +19,8 @@ class ExportPdfEvent extends ReportEvent {}
 
 class ExportExcelEvent extends ReportEvent {}
 
+class ExportCsvEvent extends ReportEvent {}
+
 class VoidTransactionEvent extends ReportEvent {
   final String transactionId;
   const VoidTransactionEvent(this.transactionId);

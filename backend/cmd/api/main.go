@@ -34,6 +34,7 @@ func main() {
 	userRepo := postgres.NewUserRepository(pool)
 	subscriptionRepo := postgres.NewSubscriptionRepository(pool)
 	backupRepo := postgres.NewBackupRepository(pool)
+	storeProfileRepo := postgres.NewStoreProfileRepository(pool)
 
 	var playClient *playdeveloper.Client
 	if cfg.GoogleServiceAccountJSONPath != "" && cfg.GooglePackageName != "" {
@@ -45,15 +46,21 @@ func main() {
 		log.Println("warning: GOOGLE_APPLICATION_CREDENTIALS/GOOGLE_PLAY_PACKAGE_NAME not set — /subscriptions endpoints will fail until configured")
 	}
 
-	authUC := usecase.NewAuthUsecase(userRepo, cfg.JWTSecret, cfg.JWTTTL)
+	authUC := usecase.NewAuthUsecase(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.AdminEmail)
 	subscriptionUC := usecase.NewSubscriptionUsecase(subscriptionRepo, playClient, cfg.SubscriptionStalenessTTL)
 	backupUC := usecase.NewBackupUsecase(backupRepo, cfg.BackupRetentionCount)
+	storeProfileUC := usecase.NewStoreProfileUsecase(storeProfileRepo)
 
 	app := httpDelivery.NewRouter(httpDelivery.Dependencies{
-		Config:         cfg,
-		AuthUsecase:    authUC,
-		SubscriptionUC: subscriptionUC,
-		BackupUC:       backupUC,
+		Config:            cfg,
+		AuthUsecase:       authUC,
+		SubscriptionUC:    subscriptionUC,
+		BackupUC:          backupUC,
+		StoreProfileUC:    storeProfileUC,
+		UserRepo:          userRepo,
+		SubscriptionRepo:  subscriptionRepo,
+		BackupRepo:        backupRepo,
+		StoreProfileRepo:  storeProfileRepo,
 	})
 
 	log.Printf("listening on :%s", cfg.Port)

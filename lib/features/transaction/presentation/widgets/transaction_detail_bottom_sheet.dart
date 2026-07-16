@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 import 'receipt_preview_dialog.dart';
 import 'dashed_divider.dart';
 import 'receipt_detail_row.dart';
@@ -238,6 +239,10 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                     // Actions
                     ElevatedButton.icon(
                       onPressed: () {
+                        if (!isProEntitled(context)) {
+                          showProUpsell(context, fitur: 'Cetak ulang struk');
+                          return;
+                        }
                         showDialog(
                           context: context,
                           barrierDismissible: true,

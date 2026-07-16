@@ -1,38 +1,5 @@
 import 'package:drift/drift.dart';
 
-@DataClassName('User')
-class Users extends Table {
-  TextColumn get id => text()();
-  TextColumn get username => text().unique()();
-  TextColumn get pinHash => text()();
-  // Per-user random salt for PBKDF2 PIN hashing. Null on rows created before
-  // this column existed — AuthLocalDataSourceImpl.login() falls back to
-  // verifying the legacy unsalted SHA-256 hash for those and transparently
-  // upgrades them to a salted hash on successful login.
-  TextColumn get pinSalt => text().nullable()();
-  TextColumn get role => text()(); // 'admin' atau 'cashier'
-  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
-  // Local brute-force throttling for the PIN login screen.
-  IntColumn get failedPinAttempts => integer().withDefault(const Constant(0))();
-  DateTimeColumn get lockedUntil => dateTime().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
-@DataClassName('Permission')
-class Permissions extends Table {
-  TextColumn get id => text()();
-  TextColumn get userId => text().references(Users, #id)();
-  BoolColumn get menuProduct => boolean().withDefault(const Constant(false))();
-  BoolColumn get menuStock => boolean().withDefault(const Constant(false))();
-  BoolColumn get menuReport => boolean().withDefault(const Constant(false))();
-  BoolColumn get actionVoid => boolean().withDefault(const Constant(false))();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
 @DataClassName('Category')
 class Categories extends Table {
   TextColumn get id => text()();
@@ -52,7 +19,7 @@ class Products extends Table {
   RealColumn get purchasePrice => real()();
   RealColumn get sellingPrice => real()();
   IntColumn get stock => integer().withDefault(const Constant(0))();
-  TextColumn get unit => text()(); // pcs, kg, etc
+  TextColumn get unit => text()();
   TextColumn get imagePath => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
@@ -87,13 +54,13 @@ class Customers extends Table {
 class Transactions extends Table {
   TextColumn get id => text()();
   TextColumn get receiptNumber => text().unique()();
-  TextColumn get cashierId => text().references(Users, #id)();
+  TextColumn get cashierId => text()();
   TextColumn get customerId => text().nullable().references(Customers, #id)();
   RealColumn get totalAmount => real()();
   RealColumn get discount => real().withDefault(const Constant(0))();
   RealColumn get tax => real().withDefault(const Constant(0))();
-  TextColumn get paymentMethod => text()(); // cash, qris, dll
-  TextColumn get status => text()(); // success, hold, void
+  TextColumn get paymentMethod => text()();
+  TextColumn get status => text()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -120,10 +87,10 @@ class TransactionItems extends Table {
 class StockHistories extends Table {
   TextColumn get id => text()();
   TextColumn get productId => text().references(Products, #id)();
-  TextColumn get type => text()(); // in, out, adjustment
+  TextColumn get type => text()();
   IntColumn get qty => integer()();
   TextColumn get notes => text().nullable()();
-  TextColumn get userId => text().references(Users, #id)();
+  TextColumn get userId => text()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -146,7 +113,7 @@ class Expenses extends Table {
 @DataClassName('ActivityLog')
 class ActivityLogs extends Table {
   TextColumn get id => text()();
-  TextColumn get userId => text().references(Users, #id)();
+  TextColumn get userId => text()();
   TextColumn get action => text()();
   TextColumn get description => text()();
   DateTimeColumn get createdAt => dateTime()();
@@ -160,25 +127,19 @@ class DebtPayments extends Table {
   TextColumn get id => text()();
   TextColumn get customerId => text().references(Customers, #id)();
   RealColumn get amount => real()();
-  TextColumn get paymentMethod => text()(); // 'CASH', 'QRIS', dll
+  TextColumn get paymentMethod => text()();
   TextColumn get notes => text().nullable()();
-  TextColumn get cashierId => text().references(Users, #id)();
+  TextColumn get cashierId => text()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};
 }
 
-// Cached local copy of the store's cloud Pro-subscription entitlement, used
-// for offline gating of Pro-only UI (e.g. the cloud backup buttons in
-// backup_page.dart). Deliberately NOT on the Users table: that table is
-// local per-cashier PIN staff access, an orthogonal concept to this
-// store-level cloud subscription. Always a single row (id = 'current');
-// the source of truth is the backend, refreshed via GET /subscriptions/status.
 @DataClassName('SubscriptionCache')
 class SubscriptionCaches extends Table {
   TextColumn get id => text()();
-  TextColumn get tier => text()(); // 'free' or 'pro'
+  TextColumn get tier => text()();
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
   DateTimeColumn get expiresAt => dateTime().nullable()();
   DateTimeColumn get lastVerifiedAt => dateTime()();

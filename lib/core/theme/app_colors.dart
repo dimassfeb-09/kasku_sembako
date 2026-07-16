@@ -37,4 +37,3 @@ class AppColors {
 }
 
 typedef PosColors = AppColors;
-typedef DashboardColors = AppColors;

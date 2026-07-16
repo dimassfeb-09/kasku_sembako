@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:remixicon/remixicon.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -8,8 +10,9 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
-import '../widgets/home_menu_card.dart';
-import '../widgets/metric_card.dart';
+
+
+typedef _C = AppColors;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,7 +31,7 @@ class _HomePageState extends State<HomePage> {
         context.read<HomeBloc>().add(
           LoadHomeMetricsEvent(
             userId: authState.user.id,
-            isAdmin: authState.user.role == 'admin',
+            isAdmin: true,
           ),
         );
       }
@@ -37,31 +40,29 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is Unauthenticated) {
-          context.go('/login');
+          context.go('/onboarding');
         } else if (state is Authenticated) {
           context.read<HomeBloc>().add(
             LoadHomeMetricsEvent(
               userId: state.user.id,
-              isAdmin: state.user.role == 'admin',
+              isAdmin: true,
             ),
           );
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC), // Slate 50 background
+        backgroundColor: _C.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: _C.white,
           elevation: 0,
           scrolledUnderElevation: 0,
           centerTitle: false,
           shape: const Border(
             bottom: BorderSide(
-              color: Color(0xFFF1F5F9), // Slate 100 border
+              color: _C.borderLight,
               width: 1,
             ),
           ),
@@ -71,14 +72,14 @@ class _HomePageState extends State<HomePage> {
               fontFamily: 'Inter',
               fontWeight: FontWeight.w800,
               fontSize: 18,
-              color: Color(0xFF0F172A), // Slate 900
+              color: _C.textPrimary, // Slate 900
             ),
           ),
           actions: [
             IconButton(
               icon: const Icon(
                 Icons.logout_rounded,
-                color: Color(0xFFEF4444), // Danger Red
+                color: _C.danger,
                 size: 22,
               ),
               onPressed: () {
@@ -90,20 +91,20 @@ class _HomePageState extends State<HomePage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
-                      backgroundColor: Colors.white,
+                      backgroundColor: _C.white,
                       title: const Text(
                         'Konfirmasi Keluar',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
-                        ),
+                        color: _C.textPrimary,
                       ),
-                      content: const Text(
-                        'Apakah Anda yakin ingin keluar dari aplikasi Kasirku Sembako?',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          color: Color(0xFF64748B),
+                    ),
+                    content: const Text(
+                      'Apakah Anda yakin ingin keluar dari aplikasi Kasirku Sembako?',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: _C.textSecondary,
                         ),
                       ),
                       actions: [
@@ -113,7 +114,7 @@ class _HomePageState extends State<HomePage> {
                             'Batal',
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              color: Color(0xFF64748B),
+                              color: _C.textSecondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -124,8 +125,8 @@ class _HomePageState extends State<HomePage> {
                             context.read<AuthBloc>().add(LogoutEvent());
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFEF4444),
-                            foregroundColor: Colors.white,
+                            backgroundColor: _C.danger,
+                            foregroundColor: _C.white,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -156,112 +157,79 @@ class _HomePageState extends State<HomePage> {
         body: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             final user = state is Authenticated ? state.user : null;
-            final isAdmin = user?.role == 'admin';
 
             return RefreshIndicator(
-              color: const Color(0xFF0D9488), // Teal primary
+              color: _C.primary,
               onRefresh: () async {
                 context.read<HomeBloc>().add(
-                  LoadHomeMetricsEvent(userId: user?.id, isAdmin: isAdmin),
+                  LoadHomeMetricsEvent(userId: user?.id, isAdmin: true),
                 );
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Welcome Banner
-                    Container(
-                      margin: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        top: 16,
-                        bottom: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFFF1F5F9), // Slate 100
-                          width: 1,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x03000000), // Very soft shadow
-                            offset: Offset(0, 4),
-                            blurRadius: 16,
+                    const SizedBox(height: 20),
+
+                    // ─── Greeting Card ─────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              _C.primary.withOpacity(0.08),
+                              _C.primaryLight,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: _C.primarySurface.withOpacity(0.4)),
+                        ),
                         child: Row(
                           children: [
                             Container(
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
+                                color: _C.white,
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFF99F6E4), // Teal 200
-                                  width: 2,
-                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _C.primary.withOpacity(0.15),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: CircleAvatar(
-                                radius: 24,
-                                backgroundColor: const Color(
-                                  0xFFF0FDFA,
-                                ), // Teal 50
-                                child: Icon(
-                                  isAdmin
-                                      ? Icons.admin_panel_settings_rounded
-                                      : Icons.person_rounded,
-                                  color: const Color(0xFF0D9488), // Teal 600
-                                  size: 24,
-                                ),
+                              child: Icon(
+                                RemixIcons.store_2_line,
+                                color: _C.primary,
+                                size: 24,
                               ),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Halo, ${user?.username ?? "Pengguna"} 👋',
+                                    'Selamat ${_greeting()}, ${user?.email?.split('@').first ?? "Pengguna"}!',
                                     style: const TextStyle(
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 16,
-                                      color: Color(0xFF0F172A), // Slate 900
+                                      fontSize: 18,
+                                      color: _C.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isAdmin
-                                          ? const Color(0xFFF0FDFA) // Teal 50
-                                          : const Color(0xFFEFF6FF), // Blue 50
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      isAdmin
-                                          ? 'SUPER ADMIN STORE'
-                                          : 'STAF KASIR RITEL',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        color: isAdmin
-                                            ? const Color(
-                                                0xFF0D9488,
-                                              ) // Teal 600
-                                            : const Color(
-                                                0xFF3B82F6,
-                                              ), // Blue 600
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
-                                      ),
+                                  Text(
+                                    'Ini ringkasan toko Anda hari ini',
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 13,
+                                      color: _C.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -271,435 +239,222 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 24),
 
-                    // Dashboard Panel (Khusus Admin)
-                    if (isAdmin) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 12.0,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Ringkasan Toko Hari Ini',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate 900
+                    // ─── Metrics ──────────────────────────────────────────
+                    BlocBuilder<HomeBloc, HomeState>(
+                      builder: (context, state) {
+                        if (state is HomeMetricsLoading || state is HomeInitial) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: SizedBox(
+                              height: 180,
+                              child: Center(
+                                child: CircularProgressIndicator(color: _C.primary),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            BlocBuilder<HomeBloc, HomeState>(
-                              builder: (context, state) {
-                                if (state is HomeMetricsLoading ||
-                                    state is HomeInitial) {
-                                  return const SizedBox(
-                                    height: 140,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFF0D9488),
-                                      ),
-                                    ),
-                                  );
-                                }
+                          );
+                        }
 
-                                if (state is HomeMetricsError) {
-                                  return Container(
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFEF2F2),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        state.message,
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          color: Color(0xFFEF4444),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                final metrics =
-                                    (state as HomeMetricsLoaded).metrics;
-
-                                return GridView.count(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  crossAxisCount: screenWidth > 600 ? 4 : 2,
-                                  childAspectRatio: screenWidth > 600
-                                      ? 1.6
-                                      : 1.32,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  children: [
-                                    MetricCard(
-                                      title: 'Omset Penjualan',
-                                      value: metrics.omset.toRupiah(),
-                                      icon: Icons.trending_up_rounded,
-                                      color: const Color(0xFF0D9488), // Teal
-                                    ),
-                                    MetricCard(
-                                      title: 'Jumlah Transaksi',
-                                      value: '${metrics.trxCount} Nota',
-                                      icon: Icons.receipt_long_rounded,
-                                      color: const Color(0xFF3B82F6), // Blue
-                                    ),
-                                    MetricCard(
-                                      title: 'Pengeluaran Toko',
-                                      value: metrics.expenses.toRupiah(),
-                                      icon: Icons.trending_down_rounded,
-                                      color: const Color(0xFFEF4444), // Red
-                                    ),
-                                    MetricCard(
-                                      title: 'Stok Menipis (≤5)',
-                                      value: '${metrics.lowStock} Produk',
-                                      icon: Icons.warning_amber_rounded,
-                                      color: metrics.lowStock > 0
-                                          ? const Color(0xFFF59E0B) // Amber
-                                          : const Color(
-                                              0xFF94A3B8,
-                                            ), // Slate 400
-                                      subtitle: metrics.lowStock > 0
-                                          ? 'Butuh restock'
-                                          : 'Semua aman',
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ] else ...[
-                      // Ringkasan Transaksi Saya (Khusus Kasir)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 12.0,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Ringkasan Saya Hari Ini',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14,
-                                color: Color(0xFF0F172A),
+                        if (state is HomeMetricsError) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Container(
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: _C.errorLight,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  state.message,
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: _C.danger,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            BlocBuilder<HomeBloc, HomeState>(
-                              builder: (context, state) {
-                                if (state is HomeMetricsLoading ||
-                                    state is HomeInitial) {
-                                  return const SizedBox(
-                                    height: 100,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFF0D9488),
-                                      ),
-                                    ),
-                                  );
-                                }
+                          );
+                        }
 
-                                if (state is HomeMetricsError) {
-                                  return Container(
-                                    height: 90,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFEF2F2),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        state.message,
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          color: Color(0xFFEF4444),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
+                        final metrics = (state as HomeMetricsLoaded).metrics;
+                        final w = MediaQuery.of(context).size.width;
+                        final crossAxisCount = w > 600 ? 4 : 2;
 
-                                final metrics =
-                                    (state as HomeMetricsLoaded).metrics;
-
-                                return GridView.count(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  crossAxisCount: 2,
-                                  childAspectRatio: 1.35,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  children: [
-                                    MetricCard(
-                                      title: 'Omset Saya',
-                                      value: metrics.omset.toRupiah(),
-                                      icon: Icons.trending_up_rounded,
-                                      color: const Color(0xFF0D9488),
-                                    ),
-                                    MetricCard(
-                                      title: 'Transaksi Saya',
-                                      value: '${metrics.trxCount} Nota',
-                                      icon: Icons.receipt_long_rounded,
-                                      color: const Color(0xFF3B82F6),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Quick Cashier Action Panel (Khusus Kasir)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 8.0,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFF0FDFA,
-                            ), // Teal 50 background
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFF99F6E4), // Teal 200 border
-                              width: 1,
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x02000000),
-                                offset: Offset(0, 4),
-                                blurRadius: 12,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: GridView.count(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisCount: crossAxisCount,
+                            childAspectRatio: crossAxisCount == 4 ? 1.7 : 1.5,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            children: [
+                              _MetricTile(
+                                icon: RemixIcons.money_dollar_circle_line,
+                                label: 'Omset',
+                                value: metrics.omset.toRupiah(),
+                                color: _C.primary,
+                              ),
+                              _MetricTile(
+                                icon: RemixIcons.receipt_line,
+                                label: 'Transaksi',
+                                value: '${metrics.trxCount}',
+                                color: _C.info,
+                              ),
+                              _MetricTile(
+                                icon: RemixIcons.money_dollar_box_line,
+                                label: 'Pengeluaran',
+                                value: metrics.expenses.toRupiah(),
+                                color: _C.danger,
+                              ),
+                              _MetricTile(
+                                icon: RemixIcons.alert_line,
+                                label: 'Stok Menipis',
+                                value: '${metrics.lowStock}',
+                                color: metrics.lowStock > 0 ? _C.warning : _C.textMuted,
                               ),
                             ],
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(18.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.point_of_sale_rounded,
-                                        color: Color(0xFF0D9488), // Teal 600
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Text(
-                                      'Aktivitas Kasir Aktif',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 14,
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Siap melayani pelanggan! Pastikan printer struk Anda sudah terhubung sebelum memulai transaksi.',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 12,
-                                    color: Color(0xFF64748B), // Slate 500
-                                    height: 1.3,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: () => context.push('/pos'),
-                                  icon: const Icon(
-                                    Icons.add_shopping_cart_rounded,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                  label: const Text(
-                                    'Buka POS / Kasir Baru',
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ─── Quick POS Card ───────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: _C.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: _C.borderLight),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: _C.primaryLight,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                RemixIcons.shopping_cart_2_line,
+                                color: _C.primary,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Mesin Kasir',
                                     style: TextStyle(
                                       fontFamily: 'Inter',
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                      color: _C.textPrimary,
                                     ),
                                   ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(
-                                      0xFF0D9488,
-                                    ), // Teal 600
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shadowColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Siap melayani transaksi baru',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      color: _C.textSecondary,
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              height: 48,
+                              child: ElevatedButton.icon(
+                                onPressed: () => context.push('/pos'),
+                                icon: const Icon(
+                                  RemixIcons.add_line,
+                                  size: 18,
+                                  color: _C.white,
+                                ),
+                                label: const Text(
+                                  'Buka',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: _C.white,
                                   ),
                                 ),
-                              ],
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _C.primary,
+                                  foregroundColor: _C.white,
+                                  elevation: 0,
+                                  shadowColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
+                    const SizedBox(height: 24),
 
-                    const SizedBox(height: 12),
-
-                    // Menu Section
+                    // ─── Quick Shortcuts ──────────────────────────────────
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         children: [
                           const Text(
-                            'Pilihan Menu',
+                            'Akses Cepat',
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w800,
-                              fontSize: 14,
-                              color: Color(0xFF0F172A), // Slate 900
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9), // Slate 100
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '${isAdmin ? 15 : 7} Fitur',
-                              style: const TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF64748B), // Slate 500
-                              ),
+                              fontSize: 15,
+                              color: _C.textPrimary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: screenWidth > 768
-                          ? 6
-                          : screenWidth > 480
-                          ? 4
-                          : 3,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.98,
-                      children: [
-                        const HomeMenuCard(
-                          title: 'POS Kasir',
-                          icon: Icons.point_of_sale_rounded,
-                          route: '/pos',
-                        ),
-                        const HomeMenuCard(
-                          title: 'Kategori',
-                          icon: Icons.category_rounded,
-                          route: '/categories',
-                        ),
-                        const HomeMenuCard(
-                          title: 'Produk',
-                          icon: Icons.inventory_2_rounded,
-                          route: '/products',
-                        ),
-                        const HomeMenuCard(
-                          title: 'Stok',
-                          icon: Icons.warehouse_rounded,
-                          route: '/stock',
-                        ),
-                        const HomeMenuCard(
-                          title: 'Pelanggan',
-                          icon: Icons.people_rounded,
-                          route: '/customers',
-                        ),
-                        const HomeMenuCard(
-                          title: 'Hutang Piutang',
-                          icon: Icons.account_balance_wallet_rounded,
-                          route: '/debts',
-                        ),
-                        const HomeMenuCard(
-                          title: 'Riwayat',
-                          icon: Icons.receipt_long_rounded,
-                          route: '/history',
-                        ),
-                        if (isAdmin) ...[
-                          const HomeMenuCard(
-                            title: 'Laporan',
-                            icon: Icons.bar_chart_rounded,
-                            route: '/reports',
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          _QuickChip(
+                            icon: RemixIcons.inbox_2_line,
+                            label: 'Produk',
+                            color: _C.info,
+                            onTap: () => context.push('/products'),
                           ),
-                          const HomeMenuCard(
-                            title: 'Pengeluaran',
-                            icon: Icons.money_off_rounded,
-                            route: '/expenses',
+                          const SizedBox(width: 10),
+                          _QuickChip(
+                            icon: RemixIcons.receipt_line,
+                            label: 'Riwayat',
+                            color: _C.primary,
+                            onTap: () => context.push('/history'),
                           ),
-                          const HomeMenuCard(
-                            title: 'Harga Grosir',
-                            icon: Icons.discount_rounded,
-                            route: '/wholesale-management',
-                          ),
-                          const HomeMenuCard(
-                            title: 'Cadangan Data',
-                            icon: Icons.backup_rounded,
-                            route: '/backup',
-                          ),
-                          const HomeMenuCard(
-                            title: 'Log Aktivitas',
-                            icon: Icons.history_edu_rounded,
-                            route: '/logs',
-                          ),
-                          const HomeMenuCard(
-                            title: 'Pengguna',
-                            icon: Icons.manage_accounts_rounded,
-                            route: '/users',
-                          ),
-                          const HomeMenuCard(
-                            title: 'Pengaturan',
-                            icon: Icons.settings_rounded,
-                            route: '/settings',
-                          ),
-                          const HomeMenuCard(
-                            title: 'Akun Toko',
-                            icon: Icons.workspace_premium_rounded,
-                            route: '/account',
+                          const SizedBox(width: 10),
+                          _QuickChip(
+                            icon: RemixIcons.group_2_line,
+                            label: 'Pelanggan',
+                            color: const Color(0xFF0EA5E9),
+                            onTap: () => context.push('/customers'),
                           ),
                         ],
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 32),
                   ],
@@ -707,6 +462,154 @@ class _HomePageState extends State<HomePage> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+String _greeting() {
+  final h = DateTime.now().hour;
+  if (h < 12) return 'pagi';
+  if (h < 15) return 'siang';
+  if (h < 18) return 'sore';
+  return 'malam';
+}
+
+class _MetricTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final String? subtitle;
+  final Color color;
+
+  const _MetricTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.subtitle,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _C.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _C.borderLight, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _C.textSecondary,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 16, color: color),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle!,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: _C.textMuted,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuickChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: _C.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _C.borderLight, width: 1),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(14),
+            splashColor: color.withOpacity(0.08),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: 22, color: color),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

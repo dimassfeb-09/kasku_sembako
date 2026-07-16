@@ -9,23 +9,23 @@ abstract class AuthEvent extends Equatable {
 class CheckSessionEvent extends AuthEvent {}
 
 class LoginSubmittedEvent extends AuthEvent {
-  final String username;
-  final String pin;
+  final String email;
+  final String password;
 
-  const LoginSubmittedEvent(this.username, this.pin);
+  const LoginSubmittedEvent(this.email, this.password);
 
   @override
-  List<Object> get props => [username, pin];
+  List<Object> get props => [email, password];
+}
+
+class RegisterSubmittedEvent extends AuthEvent {
+  final String email;
+  final String password;
+
+  const RegisterSubmittedEvent(this.email, this.password);
+
+  @override
+  List<Object> get props => [email, password];
 }
 
 class LogoutEvent extends AuthEvent {}
-
-class RegisterFirstAdminEvent extends AuthEvent {
-  final String username;
-  final String pin;
-
-  const RegisterFirstAdminEvent(this.username, this.pin);
-
-  @override
-  List<Object> get props => [username, pin];
-}

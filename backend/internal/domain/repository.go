@@ -8,6 +8,8 @@ type UserRepository interface {
 	Create(ctx context.Context, u *User) error
 	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByID(ctx context.Context, id string) (*User, error)
+	ListAll(ctx context.Context) ([]*User, error)
+	Count(ctx context.Context) (int, error)
 }
 
 // SubscriptionRepository persists Play Billing subscription state.
@@ -17,6 +19,12 @@ type SubscriptionRepository interface {
 	Upsert(ctx context.Context, s *Subscription) error
 	FindLatestByUserID(ctx context.Context, userID string) (*Subscription, error)
 	FindByPurchaseToken(ctx context.Context, token string) (*Subscription, error)
+}
+
+// StoreProfileRepository persists store profile data per user.
+type StoreProfileRepository interface {
+	Upsert(ctx context.Context, p *StoreProfile) error
+	FindByUserID(ctx context.Context, userID string) (*StoreProfile, error)
 }
 
 // BackupRepository persists JSON backup snapshots directly in Postgres

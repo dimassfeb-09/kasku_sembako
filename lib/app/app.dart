@@ -16,11 +16,12 @@ import '../features/transaction/presentation/bloc/pos_bloc.dart';
 import '../features/report/presentation/bloc/report_bloc.dart';
 import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/settings/presentation/bloc/printer_bloc.dart';
-import '../features/user_management/presentation/bloc/permission_cubit.dart';
 import '../features/expense/presentation/bloc/expense_bloc.dart';
 import '../features/account/presentation/bloc/account_bloc.dart';
 import '../features/account/presentation/bloc/account_event.dart';
 import '../features/subscription/presentation/cubit/subscription_cubit.dart';
+import '../features/subscription/presentation/cubit/subscription_state.dart';
+import '../core/services/backup_scheduler_service.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -40,14 +41,23 @@ class App extends StatelessWidget {
           create: (_) => di.sl<WholesalePriceBloc>(),
         ),
         BlocProvider<StockBloc>(create: (_) => di.sl<StockBloc>()),
-        BlocProvider<PosBloc>(create: (_) => di.sl<PosBloc>()),
-        BlocProvider<PrinterBloc>(create: (_) => di.sl<PrinterBloc>()),
-        BlocProvider<ReportBloc>(create: (_) => di.sl<ReportBloc>()),
-        BlocProvider<HomeBloc>(create: (_) => di.sl<HomeBloc>()),
-        BlocProvider<PermissionCubit>(create: (_) => di.sl<PermissionCubit>()),
         BlocProvider<SubscriptionCubit>(
           create: (_) => di.sl<SubscriptionCubit>(),
         ),
+        BlocProvider<PosBloc>(
+          create: (ctx) {
+            final subState = ctx.read<SubscriptionCubit>().state;
+            final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+            return PosBloc(
+              checkoutUseCase: di.sl(),
+              getWholesalePricesUseCase: di.sl(),
+              isWholesaleAllowed: isPro,
+            );
+          },
+        ),
+        BlocProvider<PrinterBloc>(create: (_) => di.sl<PrinterBloc>()),
+        BlocProvider<ReportBloc>(create: (_) => di.sl<ReportBloc>()),
+        BlocProvider<HomeBloc>(create: (_) => di.sl<HomeBloc>()),
         BlocProvider<ExpenseBloc>(create: (_) => di.sl<ExpenseBloc>()),
         BlocProvider<AccountBloc>(
           create: (_) => di.sl<AccountBloc>()..add(CheckAccountSessionEvent()),
@@ -56,11 +66,8 @@ class App extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            context.read<PermissionCubit>().checkPermissions(
-              role: state.user.role,
-              userId: state.user.id,
-            );
             context.read<SubscriptionCubit>().loadStatus();
+            di.sl<BackupSchedulerService>().init();
           }
         },
         child: MaterialApp.router(
