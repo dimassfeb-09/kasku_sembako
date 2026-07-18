@@ -7,10 +7,9 @@ import '../../../product/presentation/bloc/product_bloc.dart';
 import '../../../product/presentation/bloc/product_event.dart';
 import '../../../product/presentation/bloc/product_state.dart';
 import '../widgets/stock_product_list_item.dart';
-import '../widgets/stock_filter_chip.dart';
 
 class StockPage extends StatefulWidget {
-  const StockPage({Key? key}) : super(key: key);
+  const StockPage({super.key});
 
   @override
   State<StockPage> createState() => _StockPageState();
@@ -107,21 +106,21 @@ class _StockPageState extends State<StockPage> {
                 // Stock Status Filter Row
                 Row(
                   children: [
-                    StockFilterChip(
+                    _StockFilterChip(
                       value: 'ALL',
                       label: 'Semua Stok',
                       selectedValue: _stockFilter,
                       onChanged: (val) => setState(() => _stockFilter = val),
                     ),
                     const SizedBox(width: 8),
-                    StockFilterChip(
+                    _StockFilterChip(
                       value: 'OUT_OF_STOCK',
                       label: 'Stok Habis',
                       selectedValue: _stockFilter,
                       onChanged: (val) => setState(() => _stockFilter = val),
                     ),
                     const SizedBox(width: 8),
-                    StockFilterChip(
+                    _StockFilterChip(
                       value: 'LOW_STOCK',
                       label: 'Stok Menipis',
                       selectedValue: _stockFilter,
@@ -232,12 +231,17 @@ class _StockPageState extends State<StockPage> {
                     }).toList();
                   }
 
-                  // Filter by Stock Status
+                  filtered = filtered
+                      .where((p) => p.isActive && p.trackStock)
+                      .toList();
+
                   if (_stockFilter == 'OUT_OF_STOCK') {
                     filtered = filtered.where((p) => p.stock <= 0).toList();
                   } else if (_stockFilter == 'LOW_STOCK') {
                     filtered = filtered
-                        .where((p) => p.stock > 0 && p.stock <= 5)
+                        .where(
+                          (p) => p.stock > 0 && p.stock <= (p.minStock ?? 5),
+                        )
                         .toList();
                   }
 
@@ -268,6 +272,61 @@ class _StockPageState extends State<StockPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StockFilterChip extends StatelessWidget {
+  final String value;
+  final String label;
+  final String selectedValue;
+  final ValueChanged<String> onChanged;
+
+  const _StockFilterChip({
+    required this.value,
+    required this.label,
+    required this.selectedValue,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = selectedValue == value;
+    Color activeColor = AppColors.primary;
+    Color activeBg = AppColors.primaryLight;
+    if (value == 'OUT_OF_STOCK') {
+      activeColor = AppColors.danger;
+      activeBg = AppColors.dangerLight;
+    } else if (value == 'LOW_STOCK') {
+      activeColor = AppColors.warning;
+      activeBg = AppColors.warningLight;
+    }
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onChanged(value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? activeBg : AppColors.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? activeColor : AppColors.border,
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              color: isSelected ? activeColor : AppColors.textSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }

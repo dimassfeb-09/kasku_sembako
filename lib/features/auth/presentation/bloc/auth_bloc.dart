@@ -29,7 +29,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await getSessionUseCase();
     result.fold(
       (failure) => emit(Unauthenticated()),
-      (user) => user != null ? emit(Authenticated(user)) : emit(Unauthenticated()),
+      (user) =>
+          user != null ? emit(Authenticated(user)) : emit(Unauthenticated()),
     );
   }
 
@@ -38,7 +39,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    final result = await registerUseCase(event.email, event.password);
+    final result = await registerUseCase(
+      event.name,
+      event.email,
+      event.password,
+      event.whatsapp,
+    );
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (user) => emit(Authenticated(user)),

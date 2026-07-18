@@ -5,8 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../subscription/presentation/utils/pro_gate.dart';
 import 'receipt_preview_dialog.dart';
-import 'dashed_divider.dart';
-import 'receipt_detail_row.dart';
 
 class TransactionDetailBottomSheet extends StatelessWidget {
   final TransactionEntity transaction;
@@ -122,29 +120,29 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const DashedDivider(
+                          const _DashedDivider(
                             color: AppColors.border,
                             height: 1,
                           ),
                           const SizedBox(height: 12),
-                          ReceiptDetailRow(
+                          _ReceiptDetailRow(
                             label: 'Waktu',
                             value: DateFormat(
                               'dd/MM/yyyy HH:mm',
                             ).format(transaction.createdAt),
                           ),
                           const SizedBox(height: 6),
-                          ReceiptDetailRow(
+                          _ReceiptDetailRow(
                             label: 'Kasir',
                             value: transaction.cashierId,
                           ),
                           const SizedBox(height: 6),
-                          ReceiptDetailRow(
+                          _ReceiptDetailRow(
                             label: 'Metode Bayar',
                             value: transaction.paymentMethod,
                           ),
                           const SizedBox(height: 12),
-                          const DashedDivider(
+                          const _DashedDivider(
                             color: AppColors.border,
                             height: 1,
                           ),
@@ -204,9 +202,9 @@ class TransactionDetailBottomSheet extends StatelessWidget {
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                           const SizedBox(height: 12),
-                          const DashedDivider(
+                          const _DashedDivider(
                             color: AppColors.border,
                             height: 1,
                           ),
@@ -308,6 +306,66 @@ class TransactionDetailBottomSheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _DashedDivider extends StatelessWidget {
+  final double height;
+  final Color color;
+  final double dashWidth;
+  final double dashGap;
+
+  const _DashedDivider({this.height = 1, this.color = Colors.grey})
+    : dashWidth = 5,
+      dashGap = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final boxWidth = constraints.constrainWidth();
+        final dashCount = (boxWidth / (dashWidth + dashGap)).floor();
+        return Flex(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
+          children: List.generate(dashCount, (_) {
+            return SizedBox(
+              width: dashWidth,
+              height: height,
+              child: DecoratedBox(decoration: BoxDecoration(color: color)),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
+
+class _ReceiptDetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _ReceiptDetailRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

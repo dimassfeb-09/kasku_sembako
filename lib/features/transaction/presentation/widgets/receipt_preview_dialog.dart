@@ -9,7 +9,6 @@ import '../../../../di/injection.dart';
 import '../../../settings/presentation/bloc/printer_bloc.dart';
 import '../../../settings/presentation/bloc/printer_event_state.dart';
 import '../../domain/entities/transaction_entity.dart';
-import 'dashed_divider.dart';
 
 typedef _C = AppColors;
 
@@ -30,6 +29,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
   String receiptHeader = '';
   String receiptFooter = '';
   bool isLoading = true;
+  bool printLogo = true;
+  bool watermarkEnabled = true;
+  String? _selectedPrinterMac;
 
   @override
   void initState() {
@@ -46,6 +48,10 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
       final logo = await secureStorage.read(key: 'STORE_LOGO_PATH');
       final header = await secureStorage.read(key: 'RECEIPT_HEADER');
       final footer = await secureStorage.read(key: 'RECEIPT_FOOTER');
+      final printLogoVal =
+          await secureStorage.read(key: 'PRINT_LOGO') ?? 'true';
+      final watermarkVal =
+          await secureStorage.read(key: 'WATERMARK_ENABLED') ?? 'true';
 
       setState(() {
         if (name != null && name.isNotEmpty) storeName = name;
@@ -54,6 +60,8 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
         storeLogoPath = logo;
         if (header != null) receiptHeader = header;
         if (footer != null) receiptFooter = footer;
+        printLogo = printLogoVal == 'true';
+        watermarkEnabled = watermarkVal == 'true';
         isLoading = false;
       });
     } catch (_) {
@@ -65,27 +73,21 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
 
   String _generateMonospaceReceipt() {
     final buffer = StringBuffer();
-
-    // Helper untuk merata-tengahkan teks (center)
-    String centerText(String text) {
+    String center(String text) {
       if (text.length >= 32) return text.substring(0, 32);
-      final padding = (32 - text.length) ~/ 2;
-      return ' ' * padding + text;
+      return ' ' * ((32 - text.length) ~/ 2) + text;
     }
 
-    // Helper untuk membuat baris kiri-kanan (row)
-    String formatRow(String left, String right) {
+    String row(String left, String right) {
       final space = 32 - left.length - right.length;
       if (space <= 0) return '$left\n${' ' * (32 - right.length)}$right';
       return left + ' ' * space + right;
     }
 
-    buffer.writeln(centerText(storeName.toUpperCase()));
-    buffer.writeln(centerText(storeAddress));
-    buffer.writeln(centerText('Telp: $storePhone'));
-    if (receiptHeader.isNotEmpty) {
-      buffer.writeln(centerText(receiptHeader));
-    }
+    buffer.writeln(center(storeName.toUpperCase()));
+    buffer.writeln(center(storeAddress));
+    buffer.writeln(center('Telp: $storePhone'));
+    if (receiptHeader.isNotEmpty) buffer.writeln(center(receiptHeader));
     buffer.writeln('=' * 32);
     buffer.writeln('No   : ${widget.transaction.receiptNumber}');
     buffer.writeln('Kasir: ${widget.transaction.cashierId}');
@@ -96,31 +98,29 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
 
     for (var item in widget.transaction.items) {
       buffer.writeln(item.productName);
-      final qtyPrice =
-          '${item.qty} x ${item.price.toRupiah(withSymbol: false)}';
-      final subtotal = item.subtotal.toRupiah(withSymbol: false);
-
-      buffer.writeln(formatRow(qtyPrice, subtotal));
-
+      buffer.writeln(
+        row(
+          '${item.qty} x ${item.price.toRupiah(withSymbol: false)}',
+          item.subtotal.toRupiah(withSymbol: false),
+        ),
+      );
       if (item.discount > 0) {
-        final discText =
-            '-${item.discount.toRupiah(withSymbol: false)} (Grosir)';
-        buffer.writeln(formatRow('', discText));
+        buffer.writeln(
+          row('', '-${item.discount.toRupiah(withSymbol: false)} (Grosir)'),
+        );
       }
     }
     buffer.writeln('-' * 32);
-    buffer.writeln(
-      formatRow('TOTAL', widget.transaction.totalAmount.toRupiah()),
-    );
-    buffer.writeln(formatRow('Pembayaran', widget.transaction.paymentMethod));
+    buffer.writeln(row('TOTAL', widget.transaction.totalAmount.toRupiah()));
+    buffer.writeln(row('Pembayaran', widget.transaction.paymentMethod));
     buffer.writeln('=' * 32);
-    if (receiptFooter.isNotEmpty) {
-      buffer.writeln(centerText(receiptFooter));
+    if (receiptFooter.isNotEmpty) buffer.writeln(center(receiptFooter));
+    buffer.writeln(center('Terima Kasih'));
+    if (watermarkEnabled) {
+      buffer.writeln('-' * 32);
+      buffer.writeln(center('Dicetak via Kasirku'));
+      buffer.writeln(center('Download di PlayStore'));
     }
-    buffer.writeln(centerText('Terima Kasih'));
-    buffer.writeln(centerText('Barang yang sudah dibeli'));
-    buffer.writeln(centerText('tidak dapat ditukar'));
-
     return buffer.toString();
   }
 
@@ -128,194 +128,256 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Padding(
-          padding: EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(32),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
               SizedBox(width: 16),
-              Text('Memuat pratinjau...'),
+              Text(
+                'Memuat...',
+                style: TextStyle(fontSize: 14, color: _C.textSecondary),
+              ),
             ],
           ),
         ),
       );
     }
 
-    final rawReceipt = _generateMonospaceReceipt();
+    final receipt = _generateMonospaceReceipt();
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: _C.white,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 400),
+        constraints: const BoxConstraints(maxWidth: 380),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Kertas Struk
-            Flexible(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFDFBF7), // Off-white premium
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 8, 0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: _C.primaryLight,
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                    child: const Icon(
+                      Icons.receipt_long_rounded,
+                      color: _C.primary,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Pratinjau Struk',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: _C.textMuted,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: _C.borderLight),
+            // Receipt content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _C.borderLight),
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Ripped paper top dashed line
-                      const DashedDivider(
-                        height: 6,
-                        color: _C.border,
-                        dashWidth: 6,
-                        dashGap: 4,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const SizedBox(width: 16),
-                          const Icon(
-                            Icons.receipt_long_rounded,
-                            color: _C.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Pratinjau Struk',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: _C.textSecondary,
-                            ),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.close, size: 18),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
-                      const Divider(height: 1, color: _C.border),
-                      // Receipt Monospace Content
-                      Flexible(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFF0EDE4),
+                      if (printLogo &&
+                          storeLogoPath != null &&
+                          File(storeLogoPath!).existsSync())
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.file(
+                                File(storeLogoPath!),
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.contain,
                               ),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (storeLogoPath != null &&
-                                    File(storeLogoPath!).existsSync())
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: 16.0,
-                                    ),
-                                    child: Center(
-                                      child: Image.file(
-                                        File(storeLogoPath!),
-                                        width: 60,
-                                        height: 60,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
-                                Text(
-                                  rawReceipt,
-                                  style: const TextStyle(
-                                    fontFamily: 'monospace',
-                                    fontSize: 13,
-                                    height: 1.4,
-                                    color: Color(0xFF333333),
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ),
-                      ),
-                      // Ripped paper bottom dashed line
-                      const DashedDivider(
-                        height: 6,
-                        color: _C.border,
-                        dashWidth: 6,
-                        dashGap: 4,
+                      Text(
+                        receipt,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          height: 1.45,
+                          color: Color(0xFF333333),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            // Printer selector
+            BlocBuilder<PrinterBloc, PrinterState>(
+              builder: (context, pState) {
+                if (pState is! PrinterLoaded || pState.printers.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Cetak ke:',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: _C.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: pState.printers.map((p) {
+                            final selected =
+                                _selectedPrinterMac == p.macAddress;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => _selectedPrinterMac = p.macAddress,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: selected ? _C.primary : _C.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: selected ? _C.primary : _C.border,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    p.label.isNotEmpty
+                                        ? p.label
+                                        : 'Printer ${p.role}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: selected
+                                          ? Colors.white
+                                          : _C.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
             // Actions
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      foregroundColor: Colors.white,
-                      surfaceTintColor: Colors.transparent,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Colors.white24),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _C.textSecondary,
+                        side: const BorderSide(color: _C.border),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Tutup',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'Tutup',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      context.read<PrinterBloc>().add(
-                        PrintReceiptEvent(widget.transaction),
-                      );
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.print_rounded, size: 16),
-                    label: const Text('Cetak Sekarang'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _C.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        context.read<PrinterBloc>().add(
+                          PrintReceiptEvent(
+                            widget.transaction,
+                            macAddress: _selectedPrinterMac,
+                          ),
+                        );
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.print_rounded, size: 16),
+                      label: const Text(
+                        'Cetak Sekarang',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
                       ),
-                      elevation: 0,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _C.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

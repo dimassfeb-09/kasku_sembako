@@ -11,20 +11,29 @@ class AccountHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text('Akun Toko'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: BlocBuilder<AccountBloc, AccountState>(
-        builder: (context, state) {
-          if (state is AccountSignedIn) {
-            return _SignedInView(email: state.account.email);
-          }
-          return _SignedOutView(onSignIn: () => context.push('/account/login'));
-        },
+    return BlocListener<AccountBloc, AccountState>(
+      listener: (context, state) {
+        if (state is AccountSignedOut) {
+          context.go('/login');
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          title: const Text('Akun Toko'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: BlocBuilder<AccountBloc, AccountState>(
+          builder: (context, state) {
+            if (state is AccountSignedIn) {
+              return _SignedInView(email: state.account.email);
+            }
+            return _SignedOutView(
+              onSignIn: () => context.push('/account/login'),
+            );
+          },
+        ),
       ),
     );
   }

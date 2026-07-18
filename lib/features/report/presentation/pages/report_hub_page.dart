@@ -32,11 +32,26 @@ class ReportHubPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _ReportCard(title: 'Riwayat Transaksi', icon: RemixIcons.receipt_line, route: '/history', color: _C.primary),
+            _ReportCard(
+              title: 'Riwayat Transaksi',
+              icon: RemixIcons.receipt_line,
+              route: '/history',
+              color: _C.primary,
+            ),
             const SizedBox(height: 10),
-            _ReportCard(title: 'Laporan', icon: RemixIcons.bar_chart_grouped_line, route: '/reports', color: _C.success),
+            _ReportCard(
+              title: 'Laporan',
+              icon: RemixIcons.bar_chart_grouped_line,
+              route: '/reports',
+              color: _C.success,
+            ),
             const SizedBox(height: 10),
-            _ReportCard(title: 'Pengeluaran', icon: RemixIcons.money_dollar_box_line, route: '/expenses', color: _C.danger),
+            _ReportCard(
+              title: 'Pengeluaran',
+              icon: RemixIcons.money_dollar_box_line,
+              route: '/expenses',
+              color: _C.danger,
+            ),
           ],
         ),
       ),
@@ -50,7 +65,12 @@ class _ReportCard extends StatelessWidget {
   final String route;
   final Color color;
 
-  const _ReportCard({required this.title, required this.icon, required this.route, required this.color});
+  const _ReportCard({
+    required this.title,
+    required this.icon,
+    required this.route,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +85,7 @@ class _ReportCard extends StatelessWidget {
         child: InkWell(
           onTap: () => context.push(route),
           borderRadius: BorderRadius.circular(14),
-          splashColor: color.withOpacity(0.08),
+          splashColor: color.withValues(alpha: 0.08),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
             child: Row(
@@ -73,7 +93,7 @@ class _ReportCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.08),
+                    color: color.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, size: 22, color: color),

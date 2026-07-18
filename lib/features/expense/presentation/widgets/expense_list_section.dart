@@ -4,77 +4,48 @@ import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../../../core/utils/currency_formatter.dart';
 
-class ExpenseListHeader extends StatelessWidget {
-  final int groupedDays;
-  const ExpenseListHeader({super.key, required this.groupedDays});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: Colors.transparent,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Riwayat Pengeluaran',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Text(
-            '$groupedDays hari',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class ExpenseEmptyState extends StatelessWidget {
   const ExpenseEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.money_off_rounded,
-              color: Color(0xFF94A3B8), // Slate 400 minimal stroke
-              size: 64,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Belum Ada Pengeluaran',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+            child: const Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 32,
+              color: AppColors.primary,
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Catat pengeluaran operasional toko Anda di sini untuk memantau arus kas secara berkala.',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Belum Ada Pengeluaran',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Catat pengeluaran operasional toko\nuntuk memantau arus kas.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -94,7 +65,7 @@ class ExpenseGroupedList extends StatelessWidget {
   Widget build(BuildContext context) {
     final keys = grouped.keys.toList();
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 100),
+      padding: const EdgeInsets.only(top: 4, bottom: 100),
       itemCount: keys.length,
       itemBuilder: (context, i) {
         final dateKey = keys[i];
@@ -104,9 +75,8 @@ class ExpenseGroupedList extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Date header
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -114,7 +84,7 @@ class ExpenseGroupedList extends StatelessWidget {
                     dateKey.toUpperCase(),
                     style: const TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
                     ),
@@ -122,15 +92,14 @@ class ExpenseGroupedList extends StatelessWidget {
                   Text(
                     dayTotal.toRupiah(),
                     style: const TextStyle(
-                      color: Color(0xFFEF4444), // Red 500
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
+                      color: AppColors.error,
                     ),
                   ),
                 ],
               ),
             ),
-            // Items
             ...items.map(
               (exp) => ExpenseTile(exp: exp, onDelete: () => onDelete(exp)),
             ),
@@ -145,106 +114,41 @@ class ExpenseTile extends StatelessWidget {
   final ExpenseEntity exp;
   final VoidCallback onDelete;
 
-  const ExpenseTile({required this.exp, required this.onDelete});
-
-  // Returns category icon and colors (bgColor, iconColor)
-  (IconData, Color, Color) _categoryConfig(String category) {
-    switch (category.toLowerCase()) {
-      case 'listrik':
-        return (
-          Icons.bolt_rounded,
-          const Color(0xFFFFFBEB),
-          const Color(0xFFD97706),
-        ); // Amber
-      case 'air':
-        return (
-          Icons.water_drop_rounded,
-          const Color(0xFFEFF6FF),
-          const Color(0xFF2563EB),
-        ); // Blue
-      case 'gaji':
-        return (
-          Icons.people_rounded,
-          const Color(0xFFF0FDFA),
-          const Color(0xFF0D9488),
-        ); // Teal
-      case 'sewa':
-        return (
-          Icons.home_rounded,
-          const Color(0xFFEEF2FF),
-          const Color(0xFF4F46E5),
-        ); // Indigo
-      case 'transport':
-        return (
-          Icons.local_shipping_rounded,
-          const Color(0xFFFFF7ED),
-          const Color(0xFFEA580C),
-        ); // Orange
-      default:
-        return (
-          Icons.receipt_outlined,
-          const Color(0xFFF8FAFC),
-          const Color(0xFF64748B),
-        ); // Slate (Default)
-    }
-  }
+  const ExpenseTile({super.key, required this.exp, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     final timeStr = DateFormat('HH:mm').format(exp.date);
     final (icon, bgColor, iconColor) = _categoryConfig(exp.category);
 
-    return Dismissible(
-      key: Key(exp.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFEF2F2), // Red 50
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFFEE2E2)),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(
-          Icons.delete_outline_rounded,
-          color: Color(0xFFEF4444), // Red 500
-          size: 22,
-        ),
-      ),
-      confirmDismiss: (_) async {
-        onDelete();
-        return false;
-      },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
         decoration: BoxDecoration(
-          color: Colors.white, // Surface white Card
-          borderRadius: BorderRadius.circular(16), // 16px corner radius
-          border: Border.all(
-            color: const Color(0xFFF1F5F9),
-          ), // Slate 100 border
-          boxShadow: const [
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x05000000), // Soft ambient shadow
-              blurRadius: 16,
-              offset: Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Category Icon container with custom styled background
             Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-              child: Icon(icon, color: iconColor, size: 18),
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
-            const SizedBox(width: 14),
-            // Info
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,15 +156,15 @@ class ExpenseTile extends StatelessWidget {
                   Text(
                     exp.category,
                     style: const TextStyle(
-                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.access_time_rounded,
                         size: 11,
                         color: AppColors.textSecondary,
@@ -269,28 +173,20 @@ class ExpenseTile extends StatelessWidget {
                       Text(
                         timeStr,
                         style: const TextStyle(
-                          color: AppColors.textSecondary,
                           fontSize: 11,
-                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       if (exp.notes != null && exp.notes!.isNotEmpty) ...[
                         const SizedBox(width: 8),
-                        Text(
-                          '·',
-                          style: TextStyle(
-                            color: AppColors.textSecondary.withOpacity(0.5),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
+                        Flexible(
                           child: Text(
                             exp.notes!,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -302,37 +198,34 @@ class ExpenseTile extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Amount + delete button
-            Row(
-              mainAxisSize: MainAxisSize.min,
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   exp.amount.toRupiah(),
                   style: const TextStyle(
-                    color: Color(0xFFEF4444), // Red 500
+                    fontWeight: FontWeight.w800,
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    color: AppColors.error,
                   ),
                 ),
-                const SizedBox(width: 12),
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: onDelete,
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2), // Red 50
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.errorLight,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Icon(
                       Icons.delete_outline_rounded,
-                      color: Color(0xFFEF4444), // Red 500
-                      size: 16,
+                      size: 14,
+                      color: AppColors.error,
                     ),
                   ),
-                  onPressed: onDelete,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'Hapus Catatan',
                 ),
               ],
             ),
@@ -340,5 +233,46 @@ class ExpenseTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+(IconData, Color, Color) _categoryConfig(String category) {
+  switch (category.toLowerCase()) {
+    case 'listrik':
+      return (
+        Icons.bolt_rounded,
+        const Color(0xFFFFFBEB),
+        const Color(0xFFD97706),
+      );
+    case 'air':
+      return (
+        Icons.water_drop_rounded,
+        const Color(0xFFEFF6FF),
+        const Color(0xFF2563EB),
+      );
+    case 'gaji':
+      return (
+        Icons.people_rounded,
+        const Color(0xFFF0FDFA),
+        const Color(0xFF0D9488),
+      );
+    case 'sewa':
+      return (
+        Icons.home_rounded,
+        const Color(0xFFEEF2FF),
+        const Color(0xFF4F46E5),
+      );
+    case 'transport':
+      return (
+        Icons.local_shipping_rounded,
+        const Color(0xFFFFF7ED),
+        const Color(0xFFEA580C),
+      );
+    default:
+      return (
+        Icons.receipt_outlined,
+        const Color(0xFFF8FAFC),
+        const Color(0xFF64748B),
+      );
   }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:remixicon/remixicon.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../subscription/presentation/utils/pro_gate.dart';
 
 typedef _C = AppColors;
 
@@ -37,12 +38,43 @@ class DataHubPage extends StatelessWidget {
         crossAxisSpacing: 12,
         childAspectRatio: 1.05,
         children: [
-          _DataCard(title: 'Produk', icon: RemixIcons.inbox_2_line, route: '/products', color: _C.info),
-          _DataCard(title: 'Pelanggan', icon: RemixIcons.group_2_line, route: '/customers', color: _C.primary),
-          _DataCard(title: 'Kategori', icon: RemixIcons.price_tag_3_line, route: '/categories', color: _C.warning),
-          _DataCard(title: 'Stok', icon: RemixIcons.water_flash_line, route: '/stock', color: const Color(0xFF8B5CF6)),
-          _DataCard(title: 'Hutang Piutang', icon: RemixIcons.wallet_3_line, route: '/debts', color: const Color(0xFFD97706)),
-          _DataCard(title: 'Harga Grosir', icon: RemixIcons.discount_percent_line, route: '/wholesale-management', color: const Color(0xFFF43F5E), isPro: true),
+          _DataCard(
+            title: 'Produk',
+            icon: RemixIcons.inbox_2_line,
+            route: '/products',
+            color: _C.info,
+          ),
+          _DataCard(
+            title: 'Pelanggan',
+            icon: RemixIcons.group_2_line,
+            route: '/customers',
+            color: _C.primary,
+          ),
+          _DataCard(
+            title: 'Kategori',
+            icon: RemixIcons.price_tag_3_line,
+            route: '/categories',
+            color: _C.warning,
+          ),
+          _DataCard(
+            title: 'Stok',
+            icon: RemixIcons.water_flash_line,
+            route: '/stock',
+            color: const Color(0xFF8B5CF6),
+          ),
+          _DataCard(
+            title: 'Hutang Piutang',
+            icon: RemixIcons.wallet_3_line,
+            route: '/debts',
+            color: const Color(0xFFD97706),
+          ),
+          _DataCard(
+            title: 'Harga Grosir',
+            icon: RemixIcons.discount_percent_line,
+            route: '/wholesale-management',
+            color: const Color(0xFFF43F5E),
+            isPro: true,
+          ),
         ],
       ),
     );
@@ -56,7 +88,13 @@ class _DataCard extends StatelessWidget {
   final Color color;
   final bool isPro;
 
-  const _DataCard({required this.title, required this.icon, required this.route, required this.color, this.isPro = false});
+  const _DataCard({
+    required this.title,
+    required this.icon,
+    required this.route,
+    required this.color,
+    this.isPro = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +107,16 @@ class _DataCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.push(route),
+          onTap: () {
+            if (isPro && !isProEntitled(context)) {
+              showProUpsell(context, fitur: title);
+              return;
+            }
+            context.push(route);
+          },
           borderRadius: BorderRadius.circular(16),
-          splashColor: color.withOpacity(0.08),
-          highlightColor: color.withOpacity(0.04),
+          splashColor: color.withValues(alpha: 0.08),
+          highlightColor: color.withValues(alpha: 0.04),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -80,7 +124,7 @@ class _DataCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.08),
+                    color: color.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, size: 28, color: color),
@@ -99,7 +143,10 @@ class _DataCard extends StatelessWidget {
                 if (isPro) ...[
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: _C.warning,
                       borderRadius: BorderRadius.circular(4),

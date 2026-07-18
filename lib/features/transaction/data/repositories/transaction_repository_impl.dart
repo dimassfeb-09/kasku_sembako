@@ -11,6 +11,16 @@ class TransactionRepositoryImpl implements TransactionRepository {
   TransactionRepositoryImpl({required this.localDataSource});
 
   @override
+  Future<Either<Failure, int>> countToday() async {
+    try {
+      final count = await localDataSource.countToday();
+      return Right(count);
+    } catch (e) {
+      return const Left(DatabaseFailure('Gagal menghitung transaksi'));
+    }
+  }
+
+  @override
   Future<Either<Failure, TransactionEntity>> checkout(
     List<CartItemEntity> cartItems,
     String paymentMethod,

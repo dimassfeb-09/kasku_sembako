@@ -21,7 +21,7 @@ import '../../../../core/theme/app_colors.dart';
 
 class ProductEditPage extends StatefulWidget {
   final ProductEntity product;
-  const ProductEditPage({Key? key, required this.product}) : super(key: key);
+  const ProductEditPage({super.key, required this.product});
 
   @override
   State<ProductEditPage> createState() => _ProductEditPageState();
@@ -33,7 +33,9 @@ class _ProductEditPageState extends State<ProductEditPage> {
   late final TextEditingController _purchasePriceController;
   late final TextEditingController _sellingPriceController;
   late final TextEditingController _stockController;
+  late final TextEditingController _minStockController;
   late final TextEditingController _customUnitController;
+  bool _trackStock = true;
   String _selectedUnit = 'Pcs';
   final List<String> _commonUnits = const [
     'Pcs',
@@ -69,12 +71,19 @@ class _ProductEditPageState extends State<ProductEditPage> {
     _stockController = TextEditingController(
       text: widget.product.stock.toString(),
     );
+    _minStockController = TextEditingController(
+      text: widget.product.minStock?.toString() ?? '',
+    );
+    _trackStock = widget.product.trackStock;
     String initialUnit = widget.product.unit;
     if (initialUnit.toLowerCase() == 'kg') initialUnit = 'Kilogram';
-    if (initialUnit.toLowerCase() == 'gr' || initialUnit.toLowerCase() == 'g')
+    if (initialUnit.toLowerCase() == 'gr' || initialUnit.toLowerCase() == 'g') {
       initialUnit = 'Gram';
-    if (initialUnit.toLowerCase() == 'ltr' || initialUnit.toLowerCase() == 'l')
+    }
+    if (initialUnit.toLowerCase() == 'ltr' ||
+        initialUnit.toLowerCase() == 'l') {
       initialUnit = 'Liter';
+    }
     if (initialUnit.toLowerCase() == 'bks') initialUnit = 'Bungkus';
     if (initialUnit.toLowerCase() == 'rtg') initialUnit = 'Renteng';
     if (initialUnit.toLowerCase() == 'lsn') initialUnit = 'Lusin';
@@ -109,6 +118,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     _sellingPriceController.dispose();
     _stockController.dispose();
     _customUnitController.dispose();
+    _minStockController.dispose();
     super.dispose();
   }
 
@@ -308,7 +318,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
     final name = _nameController.text.trim();
     final pPrice = double.tryParse(_purchasePriceController.text) ?? 0;
     final sPrice = double.tryParse(_sellingPriceController.text) ?? 0;
-    final stock = int.tryParse(_stockController.text) ?? 0;
+    final stock = _trackStock ? (int.tryParse(_stockController.text) ?? 0) : 0;
+    final minStock = _trackStock
+        ? int.tryParse(_minStockController.text)
+        : null;
     final unit = _selectedUnit == 'Lainnya'
         ? _customUnitController.text.trim()
         : _selectedUnit;
@@ -358,11 +371,13 @@ class _ProductEditPageState extends State<ProductEditPage> {
       name: name,
       purchasePrice: pPrice,
       sellingPrice: sPrice,
-      stock: stock,
+      stock: _trackStock ? stock : 0,
       unit: unit,
       isActive: widget.product.isActive,
       categoryId: _selectedCategoryId,
       imagePath: localImagePath,
+      trackStock: _trackStock,
+      minStock: _trackStock ? minStock : null,
     );
 
     if (mounted) {
@@ -415,7 +430,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
                       color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.primary.withOpacity(0.2),
+                        color: AppColors.primary.withValues(alpha: 0.2),
                         width: 1.5,
                       ),
                     ),
@@ -534,64 +549,118 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        final result = await context.pushNamed<bool>(
-                          'adjust_stock',
-                          extra: widget.product,
-                        );
-                        if (result == true) {
-                          final db = sl<AppDatabase>();
-                          final updatedProduct =
-                              await (db.select(db.products)..where(
-                                    (tbl) => tbl.id.equals(widget.product.id),
-                                  ))
-                                  .getSingleOrNull();
-                          if (updatedProduct != null) {
-                            setState(() {
-                              _stockController.text = updatedProduct.stock
-                                  .toString();
-                            });
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Lacak Stok',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _trackStock
+                                ? 'Stok akan dikurangi saat transaksi'
+                                : 'Produk tanpa stok (jasa, digital, dll)',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _trackStock,
+                      onChanged: (v) => setState(() => _trackStock = v),
+                      activeThumbColor: AppColors.primary,
+                    ),
+                  ],
+                ),
+              ),
+              if (_trackStock) ...[
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final result = await context.pushNamed<bool>(
+                            'adjust_stock',
+                            extra: widget.product,
+                          );
+                          if (result == true) {
+                            final db = sl<AppDatabase>();
+                            final updatedProduct =
+                                await (db.select(db.products)..where(
+                                      (tbl) => tbl.id.equals(widget.product.id),
+                                    ))
+                                    .getSingleOrNull();
+                            if (updatedProduct != null) {
+                              setState(() {
+                                _stockController.text = updatedProduct.stock
+                                    .toString();
+                              });
+                            }
                           }
-                        }
-                      },
-                      child: AbsorbPointer(
-                        child: AppInput(
-                          label: 'Stok',
-                          controller: _stockController,
-                          keyboardType: TextInputType.number,
-                          readOnly: true,
-                          suffixIcon: const Icon(
-                            Icons.edit_rounded,
-                            color: AppColors.primary,
-                            size: 18,
+                        },
+                        child: AbsorbPointer(
+                          child: AppInput(
+                            label: 'Stok',
+                            controller: _stockController,
+                            keyboardType: TextInputType.number,
+                            readOnly: true,
+                            suffixIcon: const Icon(
+                              Icons.edit_rounded,
+                              color: AppColors.primary,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: SearchableDropdown<String>(
-                      label: 'SATUAN',
-                      hint: 'Pilih Satuan',
-                      searchHint: 'Cari Satuan...',
-                      noDataMessage: 'Satuan tidak ada',
-                      items: _commonUnits,
-                      selectedValue: _selectedUnit,
-                      itemToString: (u) => u,
-                      onChanged: (u) {
-                        setState(() {
-                          _selectedUnit = u ?? 'Pcs';
-                        });
-                      },
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AppInput(
+                        label: 'Min. Stok',
+                        controller: _minStockController,
+                        keyboardType: TextInputType.number,
+                        hintText: 'Kosongkan jika tidak ada',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ],
+              const SizedBox(height: 16),
+              SearchableDropdown<String>(
+                label: 'SATUAN',
+                hint: 'Pilih Satuan',
+                searchHint: 'Cari Satuan...',
+                noDataMessage: 'Satuan tidak ada',
+                items: _commonUnits,
+                selectedValue: _selectedUnit,
+                itemToString: (u) => u,
+                onChanged: (u) {
+                  setState(() {
+                    _selectedUnit = u ?? 'Pcs';
+                  });
+                },
               ),
               if (_selectedUnit == 'Lainnya') ...[
                 const SizedBox(height: 16),

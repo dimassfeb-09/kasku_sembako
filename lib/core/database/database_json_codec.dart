@@ -21,6 +21,7 @@ const _tableOrder = [
   'stockHistories',
   'activityLogs',
   'debtPayments',
+  'localCashiers',
 ];
 
 Future<Map<String, dynamic>> exportDbToJson(AppDatabase db) async {
@@ -35,6 +36,7 @@ Future<Map<String, dynamic>> exportDbToJson(AppDatabase db) async {
   final activityLogs = await db.select(db.activityLogs).get();
   final debtPayments = await db.select(db.debtPayments).get();
   final subscriptionCaches = await db.select(db.subscriptionCaches).get();
+  final localCashiers = await db.select(db.localCashiers).get();
 
   return {
     'schemaVersion': db.schemaVersion,
@@ -50,9 +52,8 @@ Future<Map<String, dynamic>> exportDbToJson(AppDatabase db) async {
       'expenses': expenses.map((e) => e.toJson()).toList(),
       'activityLogs': activityLogs.map((e) => e.toJson()).toList(),
       'debtPayments': debtPayments.map((e) => e.toJson()).toList(),
-      'subscriptionCaches': subscriptionCaches
-          .map((e) => e.toJson())
-          .toList(),
+      'subscriptionCaches': subscriptionCaches.map((e) => e.toJson()).toList(),
+      'localCashiers': localCashiers.map((e) => e.toJson()).toList(),
     },
   };
 }
@@ -127,6 +128,8 @@ void _deleteAllFor(Batch batch, AppDatabase db, String key) {
       batch.deleteAll(db.debtPayments);
     case 'subscriptionCaches':
       batch.deleteAll(db.subscriptionCaches);
+    case 'localCashiers':
+      batch.deleteAll(db.localCashiers);
   }
 }
 
@@ -148,10 +151,7 @@ void _insertAllFor(
     case 'transactions':
       batch.insertAll(db.transactions, rows.map(Transaction.fromJson));
     case 'transactionItems':
-      batch.insertAll(
-        db.transactionItems,
-        rows.map(TransactionItem.fromJson),
-      );
+      batch.insertAll(db.transactionItems, rows.map(TransactionItem.fromJson));
     case 'stockHistories':
       batch.insertAll(db.stockHistories, rows.map(StockHistory.fromJson));
     case 'expenses':
@@ -165,5 +165,7 @@ void _insertAllFor(
         db.subscriptionCaches,
         rows.map(SubscriptionCache.fromJson),
       );
+    case 'localCashiers':
+      batch.insertAll(db.localCashiers, rows.map(LocalCashier.fromJson));
   }
 }

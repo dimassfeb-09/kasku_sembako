@@ -22,6 +22,7 @@ type saveProfileRequest struct {
 	BusinessCategory string `json:"businessCategory"`
 	Phone            string `json:"phone"`
 	Address          string `json:"address"`
+	BusinessEmail    string `json:"businessEmail"`
 }
 
 func (h *StoreProfileHandler) Save(c *fiber.Ctx) error {
@@ -37,6 +38,7 @@ func (h *StoreProfileHandler) Save(c *fiber.Ctx) error {
 		BusinessCategory: req.BusinessCategory,
 		Phone:            req.Phone,
 		Address:          req.Address,
+		BusinessEmail:    req.BusinessEmail,
 	})
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to save profile")

@@ -26,15 +26,17 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
     setState(() => _isLoading = true);
     try {
       final list = await _db.select(_db.activityLogs).get();
+      if (!mounted) return;
       setState(() {
         _logs = list..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal memuat log aktivitas: $e')));
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -116,7 +118,7 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                       vertical: 8,
                     ),
                     leading: CircleAvatar(
-                      backgroundColor: color.withOpacity(0.1),
+                      backgroundColor: color.withValues(alpha: 0.1),
                       child: Icon(icon, color: color),
                     ),
                     title: Text(
@@ -181,9 +183,9 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: color.withOpacity(0.3)),
+                        border: Border.all(color: color.withValues(alpha: 0.3)),
                       ),
                       child: Text(
                         log.action,

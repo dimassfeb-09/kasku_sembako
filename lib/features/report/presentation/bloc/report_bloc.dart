@@ -97,13 +97,17 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
     emit(ReportExporting());
     try {
       final headers = ['Tanggal', 'No Struk', 'Kasir', 'Pembayaran', 'Total'];
-      final rows = currentState.transactions.map((t) => [
-        DateFormat('dd/MM/yyyy HH:mm').format(t.createdAt),
-        t.receiptNumber,
-        t.cashierId,
-        t.paymentMethod,
-        t.totalAmount.toStringAsFixed(0),
-      ]).toList();
+      final rows = currentState.transactions
+          .map(
+            (t) => [
+              DateFormat('dd/MM/yyyy HH:mm').format(t.createdAt),
+              t.receiptNumber,
+              t.cashierId,
+              t.paymentMethod,
+              t.totalAmount.toStringAsFixed(0),
+            ],
+          )
+          .toList();
 
       await exportService.exportToCsv(
         headers: headers,

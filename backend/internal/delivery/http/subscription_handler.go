@@ -60,7 +60,7 @@ func (h *SubscriptionHandler) Verify(c *fiber.Ctx) error {
 	sub, err := h.subs.VerifyPurchase(c.Context(), userID, req.ProductID, req.PurchaseToken)
 	if err != nil {
 		if err == domain.ErrPurchaseTokenTaken {
-			return fiber.NewError(fiber.StatusConflict, "purchase already registered to another account")
+			return domain.NewAppError(fiber.StatusConflict, domain.CodePurchaseTokenTaken, "purchase already registered to another account")
 		}
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to verify purchase")
 	}

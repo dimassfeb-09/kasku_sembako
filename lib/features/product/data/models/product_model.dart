@@ -15,6 +15,8 @@ class ProductModel extends ProductEntity {
     required super.unit,
     super.imagePath,
     required super.isActive,
+    super.trackStock,
+    super.minStock,
   });
 
   factory ProductModel.fromDrift(Product product) {
@@ -29,6 +31,8 @@ class ProductModel extends ProductEntity {
       unit: product.unit,
       imagePath: product.imagePath,
       isActive: product.isActive,
+      trackStock: product.trackStock,
+      minStock: product.minStock,
     );
   }
 
@@ -44,6 +48,8 @@ class ProductModel extends ProductEntity {
       unit: unit,
       imagePath: Value(imagePath),
       isActive: Value(isActive),
+      trackStock: Value(trackStock),
+      minStock: Value(minStock),
     );
   }
 }

@@ -9,8 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 class StockProductListItem extends StatelessWidget {
   final ProductEntity product;
 
-  const StockProductListItem({Key? key, required this.product})
-    : super(key: key);
+  const StockProductListItem({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +36,11 @@ class StockProductListItem extends StatelessWidget {
           product.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text('Stok Saat Ini: ${product.stock} ${product.unit}'),
+        subtitle: Text(
+          product.trackStock
+              ? 'Stok Saat Ini: ${product.stock} ${product.unit}'
+              : 'Stok tidak dilacak',
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

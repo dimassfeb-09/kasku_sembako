@@ -1,8 +1,14 @@
 import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/pages/app_intro_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/business_setup_page.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
+import '../../features/auth/presentation/pages/verify_otp_page.dart';
+import '../../features/auth/presentation/pages/reset_password_page.dart';
+import '../../features/auth/presentation/pages/business_profile_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/product/presentation/pages/product_page.dart';
 import '../../features/product/presentation/pages/product_add_page.dart';
@@ -26,7 +32,9 @@ import '../../features/report/presentation/pages/report_page.dart';
 import '../../features/expense/presentation/pages/expense_page.dart';
 import '../../features/settings/presentation/pages/printer_settings_page.dart';
 import '../../features/settings/presentation/pages/backup_page.dart';
+import '../../features/settings/presentation/pages/qris_setting_page.dart';
 import '../../features/settings/presentation/pages/activity_log_page.dart';
+import '../../features/settings/presentation/pages/cashier_management_page.dart';
 import '../../features/transaction/presentation/pages/transaction_history_page.dart';
 import '../../features/debt/presentation/pages/debt_management_page.dart';
 import '../../features/account/presentation/pages/account_login_page.dart';
@@ -43,6 +51,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
+import '../../features/auth/presentation/bloc/password_reset_bloc.dart';
 import '../../features/transaction/presentation/bloc/pos_setup_cubit.dart';
 import '../../di/injection.dart' as di;
 import 'app_shell.dart';
@@ -63,17 +72,41 @@ class AppRouter {
       final authState = context.read<AuthBloc>().state;
       final isLoggingIn = state.matchedLocation == '/login';
       final isSplash = state.matchedLocation == '/';
-      final isOnboarding = state.matchedLocation == '/onboarding';
+      final isIntro = state.matchedLocation == '/intro';
       final isRegister = state.matchedLocation == '/register';
+      final isForgotPassword = state.matchedLocation == '/forgot-password';
+      final isVerifyOtp = state.matchedLocation == '/verify-otp';
+      final isResetPassword = state.matchedLocation == '/reset-password';
+
+      // Steps 2 and 3 are only reachable by carrying the previous step's result
+      // (email, then reset token) in `extra`. A deep link or restart arrives
+      // without it, so send the user back to the start of the flow.
+      final hasHandoff =
+          state.extra is String && (state.extra as String).isNotEmpty;
+      if ((isVerifyOtp || isResetPassword) && !hasHandoff) {
+        return '/forgot-password';
+      }
 
       if (authState is Unauthenticated || authState is AuthInitial) {
-        if (!isSplash && !isOnboarding && !isLoggingIn && !isRegister) {
-          return '/onboarding';
+        if (!isSplash &&
+            !isIntro &&
+            !isLoggingIn &&
+            !isRegister &&
+            !isForgotPassword &&
+            !isVerifyOtp &&
+            !isResetPassword) {
+          return '/login';
         }
       }
 
       if (authState is Authenticated) {
-        if (isSplash || isOnboarding || isLoggingIn || isRegister) {
+        if (isSplash || isIntro) {
+          return '/home';
+        }
+        if (isRegister) {
+          return '/business-setup';
+        }
+        if (isLoggingIn) {
           return '/home';
         }
 
@@ -101,6 +134,11 @@ class AppRouter {
         builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
+        path: '/intro',
+        name: 'intro',
+        builder: (context, state) => const AppIntroPage(),
+      ),
+      GoRoute(
         path: '/onboarding',
         name: 'onboarding',
         builder: (context, state) => const OnboardingPage(),
@@ -109,6 +147,43 @@ class AppRouter {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/business-setup',
+        name: 'business-setup',
+        builder: (context, state) => const BusinessSetupPage(),
+      ),
+      // One bloc for the whole forgot -> verify OTP -> reset flow: the three
+      // pages are steps in a single transaction, so a per-route provider would
+      // hand each step a fresh Initial state.
+      ShellRoute(
+        builder: (context, state, child) => BlocProvider<PasswordResetBloc>(
+          create: (_) => di.sl<PasswordResetBloc>(),
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: '/forgot-password',
+            name: 'forgot-password',
+            builder: (context, state) => const ForgotPasswordPage(),
+          ),
+          GoRoute(
+            path: '/verify-otp',
+            name: 'verify-otp',
+            builder: (context, state) => _safeRoute<String>(
+              state.extra,
+              (email) => VerifyOtpPage(email: email),
+            ),
+          ),
+          GoRoute(
+            path: '/reset-password',
+            name: 'reset-password',
+            builder: (context, state) => _safeRoute<String>(
+              state.extra,
+              (resetToken) => ResetPasswordPage(resetToken: resetToken),
+            ),
+          ),
+        ],
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
@@ -132,7 +207,7 @@ class AppRouter {
                 name: 'pos',
                 builder: (context, state) => BlocProvider<PosSetupCubit>(
                   create: (_) => di.sl<PosSetupCubit>()..load(),
-                  child: const PosPage(),
+                  child: PosPage(),
                 ),
               ),
             ],
@@ -277,6 +352,21 @@ class AppRouter {
                 path: '/settings',
                 name: 'settings',
                 builder: (context, state) => const PrinterSettingsPage(),
+              ),
+              GoRoute(
+                path: '/cashiers',
+                name: 'cashiers',
+                builder: (context, state) => const CashierManagementPage(),
+              ),
+              GoRoute(
+                path: '/business-profile',
+                name: 'business-profile',
+                builder: (context, state) => const BusinessProfilePage(),
+              ),
+              GoRoute(
+                path: '/qris-setting',
+                name: 'qris-setting',
+                builder: (context, state) => const QrisSettingPage(),
               ),
               GoRoute(
                 path: '/backup',

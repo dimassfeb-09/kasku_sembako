@@ -10,25 +10,28 @@ import (
 
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/config"
 	appmiddleware "github.com/dimassfeb-09/kasku_sembako/backend/internal/delivery/http/middleware"
+	"github.com/dimassfeb-09/kasku_sembako/backend/internal/domain"
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/repository/postgres"
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/usecase"
 )
 
 type Dependencies struct {
-	Config            *config.Config
-	AuthUsecase       *usecase.AuthUsecase
-	SubscriptionUC    *usecase.SubscriptionUsecase
-	BackupUC          *usecase.BackupUsecase
-	StoreProfileUC    *usecase.StoreProfileUsecase
-	UserRepo          *postgres.UserRepository
-	SubscriptionRepo  *postgres.SubscriptionRepository
-	BackupRepo        *postgres.BackupRepository
-	StoreProfileRepo  *postgres.StoreProfileRepository
+	Config           *config.Config
+	AuthUsecase      *usecase.AuthUsecase
+	SubscriptionUC   *usecase.SubscriptionUsecase
+	BackupUC         *usecase.BackupUsecase
+	StoreProfileUC   *usecase.StoreProfileUsecase
+	PasswordResetUC  *usecase.PasswordResetUsecase
+	UserRepo         *postgres.UserRepository
+	SubscriptionRepo *postgres.SubscriptionRepository
+	BackupRepo       *postgres.BackupRepository
+	StoreProfileRepo *postgres.StoreProfileRepository
 }
 
 func NewRouter(deps Dependencies) *fiber.App {
 	fiberConfig := fiber.Config{
-		BodyLimit: int(deps.Config.BackupMaxSizeBytes),
+		BodyLimit:    int(deps.Config.BackupMaxSizeBytes),
+		ErrorHandler: JSONErrorHandler,
 	}
 	if len(deps.Config.TrustedProxies) > 0 {
 		fiberConfig.EnableTrustedProxyCheck = true
@@ -44,15 +47,26 @@ func NewRouter(deps Dependencies) *fiber.App {
 	subscriptionHandler := NewSubscriptionHandler(deps.SubscriptionUC)
 	backupHandler := NewBackupHandler(deps.BackupUC)
 	storeProfileHandler := NewStoreProfileHandler(deps.StoreProfileUC)
+	passwordResetHandler := NewPasswordResetHandler(deps.PasswordResetUC)
 	adminHandler := NewAdminHandler(deps.UserRepo, deps.SubscriptionRepo, deps.BackupRepo, deps.StoreProfileRepo)
 
 	requireAuth := appmiddleware.RequireAuth(deps.Config.JWTSecret)
 	requirePro := appmiddleware.RequirePro(deps.SubscriptionUC)
 	requireAdmin := appmiddleware.RequireAdmin()
 
+	// LimitReached is required: the limiter writes its 429 directly rather
+	// than returning an error, so without this it bypasses JSONErrorHandler
+	// and replies text/plain - the exact contract break this router fixes.
 	loginLimiter := limiter.New(limiter.Config{
 		Max:        10,
 		Expiration: 1 * time.Minute,
+		LimitReached: func(c *fiber.Ctx) error {
+			return domain.NewAppError(
+				fiber.StatusTooManyRequests,
+				domain.CodeRateLimited,
+				"too many attempts, please try again later",
+			)
+		},
 	})
 
 	app.Get("/healthz", func(c *fiber.Ctx) error {
@@ -62,7 +76,13 @@ func NewRouter(deps Dependencies) *fiber.App {
 	auth := app.Group("/auth")
 	auth.Post("/register", loginLimiter, authHandler.Register)
 	auth.Post("/login", loginLimiter, authHandler.Login)
+	auth.Post("/refresh", loginLimiter, authHandler.Refresh)
+	auth.Post("/logout", loginLimiter, authHandler.Logout)
 	auth.Get("/me", requireAuth, authHandler.Me)
+	auth.Post("/change-password", requireAuth, authHandler.ChangePassword)
+	auth.Post("/forgot-password", loginLimiter, passwordResetHandler.RequestOTP)
+	auth.Post("/verify-otp", loginLimiter, passwordResetHandler.VerifyOTP)
+	auth.Post("/reset-password", loginLimiter, passwordResetHandler.ResetPassword)
 
 	subscriptions := app.Group("/subscriptions", requireAuth)
 	subscriptions.Post("/verify", subscriptionHandler.Verify)

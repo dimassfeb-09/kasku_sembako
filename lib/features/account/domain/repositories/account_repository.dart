@@ -4,8 +4,10 @@ import '../entities/account_entity.dart';
 
 abstract class AccountRepository {
   Future<Either<Failure, AccountEntity>> register(
+    String name,
     String email,
     String password,
+    String whatsapp,
   );
   Future<Either<Failure, AccountEntity>> login(String email, String password);
   Future<Either<Failure, void>> logout();

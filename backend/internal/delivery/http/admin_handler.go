@@ -74,7 +74,9 @@ func (h *AdminHandler) Stats(c *fiber.Ctx) error {
 
 type userRow struct {
 	ID                 string `json:"id"`
+	Name               string `json:"name"`
 	Email              string `json:"email"`
+	WhatsApp           string `json:"whatsapp"`
 	Role               string `json:"role"`
 	CreatedAt          string `json:"createdAt"`
 	SubscriptionStatus string `json:"subscriptionStatus"`
@@ -94,7 +96,9 @@ func (h *AdminHandler) ListUsers(c *fiber.Ctx) error {
 	for _, u := range users {
 		row := userRow{
 			ID:        u.ID,
+			Name:      u.Name,
 			Email:     u.Email,
+			WhatsApp:  u.WhatsApp,
 			Role:      u.Role,
 			CreatedAt: u.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		}
@@ -185,6 +189,7 @@ type storeRow struct {
 	BusinessCategory string `json:"businessCategory"`
 	Phone            string `json:"phone"`
 	Address          string `json:"address"`
+	BusinessEmail    string `json:"businessEmail"`
 	CreatedAt        string `json:"createdAt"`
 	UpdatedAt        string `json:"updatedAt"`
 }
@@ -207,6 +212,7 @@ func (h *AdminHandler) ListStores(c *fiber.Ctx) error {
 			BusinessCategory: p.BusinessCategory,
 			Phone:            p.Phone,
 			Address:          p.Address,
+			BusinessEmail:    p.BusinessEmail,
 			CreatedAt:        p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 			UpdatedAt:        p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		})

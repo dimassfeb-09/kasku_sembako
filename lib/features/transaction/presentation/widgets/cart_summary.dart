@@ -28,7 +28,7 @@ class CartSummary extends StatelessWidget {
         color: PosColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -88,7 +88,7 @@ class CartSummary extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: hasDiscount
-                              ? PosColors.danger.withOpacity(0.3)
+                              ? PosColors.danger.withValues(alpha: 0.3)
                               : PosColors.border,
                           width: 1.5,
                         ),
@@ -168,7 +168,7 @@ class CartSummary extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: hasTax
-                              ? PosColors.success.withOpacity(0.3)
+                              ? PosColors.success.withValues(alpha: 0.3)
                               : PosColors.border,
                           width: 1.5,
                         ),
@@ -261,7 +261,7 @@ class CartSummary extends StatelessWidget {
                       '${state.cartItems.length} barang dipilih',
                       style: TextStyle(
                         fontSize: 12,
-                        color: PosColors.primary.withOpacity(0.7),
+                        color: PosColors.primary.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

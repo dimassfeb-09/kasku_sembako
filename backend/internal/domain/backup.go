@@ -1,22 +1,23 @@
 package domain
 
-import (
-	"encoding/json"
-	"time"
-)
+import "time"
 
-// Backup is an immutable JSON snapshot of a store's entire local database.
-// Payload is stored/forwarded byte-for-byte (json.RawMessage) rather than
-// unmarshaled into a Go map, since the backend never needs to interpret
-// individual field values — only validate top-level shape and persist the
-// bytes verbatim. Unmarshaling into map[string]interface{} would silently
-// risk precision loss on numeric fields (Go decodes JSON numbers as
-// float64), which this opaque-snapshot design deliberately avoids.
+// Backup is an immutable snapshot of a store's entire local database.
+// Payload is stored/forwarded byte-for-byte rather than unmarshaled into a
+// Go map, since the backend never needs to interpret individual field
+// values — only validate top-level shape and persist the bytes verbatim.
+// Payload is gzip-compressed on the wire and at rest whenever ContentEncoding
+// is "gzip" (the only encoding new uploads use); ContentEncoding is
+// "identity" only for rows written before compression support existed.
 type Backup struct {
-	ID        string
-	UserID    string
-	Payload   json.RawMessage
-	CreatedAt time.Time
+	ID              string
+	UserID          string
+	Payload         []byte
+	ContentHash     string
+	ContentEncoding string
+	SizeBytes       int64
+	DeviceID        string
+	CreatedAt       time.Time
 }
 
 // BackupSummary is the lightweight listing shape (no payload) returned by
@@ -25,4 +26,5 @@ type BackupSummary struct {
 	ID        string
 	CreatedAt time.Time
 	SizeBytes int64
+	DeviceID  string
 }

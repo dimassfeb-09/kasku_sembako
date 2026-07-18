@@ -9,10 +9,12 @@ class RegisterAccountUseCase {
   RegisterAccountUseCase(this.repository);
 
   Future<Either<Failure, AccountEntity>> call(
+    String name,
     String email,
     String password,
+    String whatsapp,
   ) async {
-    return await repository.register(email, password);
+    return await repository.register(name, email, password, whatsapp);
   }
 }
 

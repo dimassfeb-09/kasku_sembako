@@ -15,29 +15,53 @@ class AccountRegisterPage extends StatefulWidget {
 }
 
 class _AccountRegisterPageState extends State<AccountRegisterPage> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _whatsappController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _whatsappController.dispose();
     super.dispose();
   }
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _onRegister() {
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    if (email.isEmpty || password.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email wajib diisi dan kata sandi minimal 8 karakter'),
-        ),
-      );
+    final whatsapp = _whatsappController.text.trim();
+
+    if (name.isEmpty) {
+      _showError('Nama lengkap harus diisi');
       return;
     }
-    context.read<AccountBloc>().add(RegisterSubmittedEvent(email, password));
+    if (email.isEmpty) {
+      _showError('Email harus diisi');
+      return;
+    }
+    if (password.length < 8) {
+      _showError('Kata sandi minimal 8 karakter');
+      return;
+    }
+    if (whatsapp.isEmpty) {
+      _showError('Nomor WhatsApp harus diisi');
+      return;
+    }
+
+    context.read<AccountBloc>().add(
+      RegisterSubmittedEvent(name, email, password, whatsapp),
+    );
   }
 
   @override
@@ -105,6 +129,13 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
                   ),
                   const SizedBox(height: 28),
                   AppInput(
+                    label: 'Nama Lengkap / Nama Bisnis',
+                    controller: _nameController,
+                    prefixIcon: Icons.storefront_outlined,
+                    hintText: 'Contoh: Toko Sembako Makmur',
+                  ),
+                  const SizedBox(height: 18),
+                  AppInput(
                     label: 'Email',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -128,6 +159,14 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
+                  ),
+                  const SizedBox(height: 18),
+                  AppInput(
+                    label: 'WhatsApp',
+                    controller: _whatsappController,
+                    keyboardType: TextInputType.phone,
+                    prefixIcon: Icons.chat_outlined,
+                    hintText: '08xxxxxxxxxx',
                   ),
                   const SizedBox(height: 28),
                   BlocBuilder<AccountBloc, AccountState>(

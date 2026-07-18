@@ -28,8 +28,9 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
 
   @override
   Future<int> countProducts() async {
-    final products = await (db.select(db.products)
-      ..where((p) => p.isActive.equals(true))).get();
+    final products = await (db.select(
+      db.products,
+    )..where((p) => p.isActive.equals(true))).get();
     return products.length;
   }
 
@@ -61,6 +62,8 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
             unit: product.unit,
             imagePath: Value(product.imagePath),
             isActive: Value(product.isActive),
+            trackStock: Value(product.trackStock),
+            minStock: Value(product.minStock),
           ),
         );
 
@@ -84,6 +87,8 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
         unit: Value(product.unit),
         imagePath: Value(product.imagePath),
         isActive: Value(product.isActive),
+        trackStock: Value(product.trackStock),
+        minStock: Value(product.minStock),
       ),
     );
 
@@ -105,9 +110,14 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
       }
     } catch (_) {}
 
-    await (db.update(db.products)..where((p) => p.id.equals(id))).write(
-      const ProductsCompanion(isActive: Value(false)),
-    );
+    await db.transaction(() async {
+      await (db.delete(
+        db.wholesalePrices,
+      )..where((w) => w.productId.equals(id))).go();
+      await (db.update(db.products)..where((p) => p.id.equals(id))).write(
+        const ProductsCompanion(isActive: Value(false)),
+      );
+    });
 
     await logService.log(
       action: 'DELETE_PRODUCT',

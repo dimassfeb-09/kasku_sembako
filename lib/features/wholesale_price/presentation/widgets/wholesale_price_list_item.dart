@@ -12,11 +12,11 @@ class WholesalePriceListItem extends StatelessWidget {
   final String unit;
 
   const WholesalePriceListItem({
-    Key? key,
+    super.key,
     required this.price,
     required this.retailPrice,
     required this.unit,
-  }) : super(key: key);
+  });
 
   Future<bool?> _showConfirmDeleteDialog(BuildContext context) {
     return showDialog<bool>(

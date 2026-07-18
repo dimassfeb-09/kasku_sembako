@@ -33,6 +33,17 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     }, (status) => emit(SubscriptionStatusLoaded(status)));
   }
 
+  /// Debug-only: emit status from local cache without hitting backend.
+  /// Called from the debug panel after toggling the local Pro row, so the
+  /// refresh (which returns the real backend status) doesn't override it.
+  Future<void> loadCachedOnly() async {
+    final result = await getCachedSubscriptionStatusUseCase();
+    result.fold(
+      (failure) => emit(SubscriptionError(failure.message)),
+      (status) => emit(SubscriptionStatusLoaded(status)),
+    );
+  }
+
   Future<void> purchasePro() async {
     final current = state is SubscriptionStatusLoaded
         ? (state as SubscriptionStatusLoaded).status

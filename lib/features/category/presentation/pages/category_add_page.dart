@@ -10,7 +10,7 @@ import '../bloc/category_event_state.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class CategoryAddPage extends StatefulWidget {
-  const CategoryAddPage({Key? key}) : super(key: key);
+  const CategoryAddPage({super.key});
 
   @override
   State<CategoryAddPage> createState() => _CategoryAddPageState();

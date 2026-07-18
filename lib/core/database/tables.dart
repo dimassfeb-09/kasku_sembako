@@ -22,6 +22,8 @@ class Products extends Table {
   TextColumn get unit => text()();
   TextColumn get imagePath => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  BoolColumn get trackStock => boolean().withDefault(const Constant(true))();
+  IntColumn get minStock => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -143,6 +145,28 @@ class SubscriptionCaches extends Table {
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
   DateTimeColumn get expiresAt => dateTime().nullable()();
   DateTimeColumn get lastVerifiedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('HeldCart')
+class HeldCarts extends Table {
+  TextColumn get id => text()();
+  TextColumn get note => text().nullable()();
+  TextColumn get itemsJson => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('LocalCashier')
+class LocalCashiers extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

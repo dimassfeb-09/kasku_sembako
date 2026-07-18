@@ -92,12 +92,22 @@ void main() {
       'emits [Loading, SignedIn] on successful registration',
       build: () {
         when(
-          () => registerUseCase('owner@example.com', 'password123'),
+          () => registerUseCase(
+            'Toko Makmur',
+            'owner@example.com',
+            'password123',
+            '08123456789',
+          ),
         ).thenAnswer((_) async => Right(testAccount));
         return buildBloc();
       },
       act: (bloc) => bloc.add(
-        const RegisterSubmittedEvent('owner@example.com', 'password123'),
+        const RegisterSubmittedEvent(
+          'Toko Makmur',
+          'owner@example.com',
+          'password123',
+          '08123456789',
+        ),
       ),
       expect: () => [isA<AccountLoading>(), AccountSignedIn(testAccount)],
     );
@@ -105,13 +115,18 @@ void main() {
     blocTest<AccountBloc, AccountState>(
       'emits [Loading, Error] when the email is already taken',
       build: () {
-        when(() => registerUseCase(any(), any())).thenAnswer(
+        when(() => registerUseCase(any(), any(), any(), any())).thenAnswer(
           (_) async => const Left(ServerFailure('Email sudah terdaftar.')),
         );
         return buildBloc();
       },
       act: (bloc) => bloc.add(
-        const RegisterSubmittedEvent('owner@example.com', 'password123'),
+        const RegisterSubmittedEvent(
+          'Toko Makmur',
+          'owner@example.com',
+          'password123',
+          '08123456789',
+        ),
       ),
       expect: () => [
         isA<AccountLoading>(),

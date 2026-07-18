@@ -45,8 +45,11 @@ func TestLoad_DefaultsAppliedWhenOptionalVarsUnset(t *testing.T) {
 	if cfg.Port != "8080" {
 		t.Errorf("expected default Port 8080, got %s", cfg.Port)
 	}
-	if cfg.JWTTTL != 30*24*time.Hour {
-		t.Errorf("expected default JWTTTL of 30 days, got %v", cfg.JWTTTL)
+	if cfg.RefreshTokenTTL != 30*24*time.Hour {
+		t.Errorf("expected default RefreshTokenTTL of 30 days, got %v", cfg.RefreshTokenTTL)
+	}
+	if cfg.AccessTokenTTL != 15*time.Minute {
+		t.Errorf("expected default AccessTokenTTL of 15 minutes, got %v", cfg.AccessTokenTTL)
 	}
 	if cfg.BackupMaxSizeBytes != 50*1024*1024 {
 		t.Errorf("expected default BackupMaxSizeBytes of 50MB, got %d", cfg.BackupMaxSizeBytes)
@@ -63,6 +66,7 @@ func TestLoad_CustomValuesOverrideDefaults(t *testing.T) {
 	setRequiredEnv(t)
 	t.Setenv("PORT", "9090")
 	t.Setenv("JWT_TTL_DAYS", "7")
+	t.Setenv("ACCESS_TOKEN_TTL_MINUTES", "5")
 	t.Setenv("BACKUP_MAX_SIZE_MB", "10")
 	t.Setenv("BACKUP_RETENTION_COUNT", "5")
 	t.Setenv("SUBSCRIPTION_STALENESS_HOURS", "1")
@@ -75,8 +79,11 @@ func TestLoad_CustomValuesOverrideDefaults(t *testing.T) {
 	if cfg.Port != "9090" {
 		t.Errorf("expected Port 9090, got %s", cfg.Port)
 	}
-	if cfg.JWTTTL != 7*24*time.Hour {
-		t.Errorf("expected JWTTTL of 7 days, got %v", cfg.JWTTTL)
+	if cfg.RefreshTokenTTL != 7*24*time.Hour {
+		t.Errorf("expected RefreshTokenTTL of 7 days, got %v", cfg.RefreshTokenTTL)
+	}
+	if cfg.AccessTokenTTL != 5*time.Minute {
+		t.Errorf("expected AccessTokenTTL of 5 minutes, got %v", cfg.AccessTokenTTL)
 	}
 	if cfg.BackupMaxSizeBytes != 10*1024*1024 {
 		t.Errorf("expected BackupMaxSizeBytes of 10MB, got %d", cfg.BackupMaxSizeBytes)

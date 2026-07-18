@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remixicon/remixicon.dart';
 import '../../../transaction/domain/entities/transaction_entity.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -44,7 +45,6 @@ class ReportTransactionDetailSheetState
           ),
           child: Column(
             children: [
-              // Handle
               Center(
                 child: Container(
                   margin: const EdgeInsets.only(top: 12, bottom: 16),
@@ -56,7 +56,6 @@ class ReportTransactionDetailSheetState
                   ),
                 ),
               ),
-              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -72,7 +71,7 @@ class ReportTransactionDetailSheetState
                     ),
                     IconButton(
                       icon: const Icon(
-                        Icons.close_rounded,
+                        RemixIcons.close_line,
                         color: AppColors.textSecondary,
                       ),
                       onPressed: () => Navigator.pop(context),
@@ -83,13 +82,11 @@ class ReportTransactionDetailSheetState
                 ),
               ),
               const SizedBox(height: 16),
-              // Content
               Expanded(
                 child: ListView(
                   controller: scrollController,
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                   children: [
-                    // Status Badge
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -152,7 +149,6 @@ class ReportTransactionDetailSheetState
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Summary Profit (Admin view)
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -206,7 +202,6 @@ class ReportTransactionDetailSheetState
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Items list
                     Container(
                       decoration: BoxDecoration(
                         color: AppColors.surface,
@@ -217,7 +212,7 @@ class ReportTransactionDetailSheetState
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: widget.trx.items.length,
-                        separatorBuilder: (_, __) =>
+                        separatorBuilder: (_, _) =>
                             const Divider(color: AppColors.border, height: 1),
                         itemBuilder: (context, i) {
                           final item = widget.trx.items[i];
@@ -262,7 +257,7 @@ class ReportTransactionDetailSheetState
                                 Row(
                                   children: [
                                     const Icon(
-                                      Icons.subdirectory_arrow_right_rounded,
+                                      RemixIcons.arrow_right_s_line,
                                       color: AppColors.textSecondary,
                                       size: 12,
                                     ),
@@ -294,7 +289,6 @@ class ReportTransactionDetailSheetState
                       ),
                     ),
                     const SizedBox(height: 32),
-                    // Void Button
                     if (!widget.isVoided)
                       ReportVoidButton(onVoid: widget.onVoid),
                   ],
@@ -366,11 +360,7 @@ class ReportVoidButton extends StatelessWidget {
             ),
             title: const Row(
               children: [
-                Icon(
-                  Icons.warning_amber_rounded,
-                  color: AppColors.error,
-                  size: 20,
-                ),
+                Icon(RemixIcons.alert_line, color: AppColors.error, size: 20),
                 SizedBox(width: 8),
                 Text(
                   'Konfirmasi Void',
@@ -429,7 +419,11 @@ class ReportVoidButton extends StatelessWidget {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cancel_rounded, color: AppColors.error, size: 18),
+            Icon(
+              RemixIcons.close_circle_line,
+              color: AppColors.error,
+              size: 18,
+            ),
             SizedBox(width: 8),
             Text(
               'Batalkan Transaksi (Void)',

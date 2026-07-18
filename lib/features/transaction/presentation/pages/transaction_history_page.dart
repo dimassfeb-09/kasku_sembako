@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import '../../../report/presentation/bloc/report_bloc.dart';
 import '../../../subscription/presentation/cubit/subscription_cubit.dart';
 import '../../../subscription/presentation/cubit/subscription_state.dart';
@@ -32,7 +31,8 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   void _loadTransactions() {
     final subState = context.read<SubscriptionCubit>().state;
-    final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+    final isPro =
+        subState is SubscriptionStatusLoaded && subState.status.isEntitled;
     var start = _startDate;
     if (!isPro) {
       final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
@@ -46,7 +46,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
-      firstDate: isPro ? DateTime(2020) : DateTime.now().subtract(const Duration(days: 30)),
+      firstDate: isPro
+          ? DateTime(2020)
+          : DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
@@ -72,10 +74,22 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd MMM yyyy');
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Riwayat Transaksi'), elevation: 0),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        title: const Text(
+          'Riwayat Transaksi',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
       body: BlocConsumer<ReportBloc, ReportState>(
         listener: (context, state) {
           if (state is ReportError) {
@@ -92,7 +106,9 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
-          } else if (state is ReportLoaded) {
+          }
+
+          if (state is ReportLoaded) {
             final transactions = state.transactions;
 
             return Column(
@@ -103,53 +119,68 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                   transactionCount: transactions.length,
                   onTapFilterDate: () => _selectDateRange(context),
                 ),
-                const Divider(height: 1, color: AppColors.border),
                 Expanded(
                   child: transactions.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.receipt_long_outlined,
-                                size: 64,
-                                color: AppColors.textMuted,
+                              Container(
+                                width: 72,
+                                height: 72,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 32,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                              SizedBox(height: 12),
-                              Text(
-                                'Riwayat Transaksi Kosong',
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Belum ada transaksi',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Tidak ada transaksi pada periode ini.',
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Transaksi akan muncul di sini\nsetelah Anda melakukan penjualan.',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   color: AppColors.textSecondary,
+                                  height: 1.4,
                                 ),
                               ),
                             ],
                           ),
                         )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          itemCount: transactions.length,
-                          itemBuilder: (context, index) {
-                            final trx = transactions[index];
-                            return TransactionHistoryItem(
-                              transaction: trx,
-                              onTap: () => _showTransactionDetail(context, trx),
-                            );
-                          },
+                      : RefreshIndicator(
+                          onRefresh: () async => _loadTransactions(),
+                          color: AppColors.primary,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            itemCount: transactions.length,
+                            itemBuilder: (context, index) {
+                              final trx = transactions[index];
+                              return TransactionHistoryItem(
+                                transaction: trx,
+                                onTap: () =>
+                                    _showTransactionDetail(context, trx),
+                              );
+                            },
+                          ),
                         ),
                 ),
               ],
             );
           }
+
           return const SizedBox.shrink();
         },
       ),
@@ -175,7 +206,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
             );
             if (confirm == true) {
               if (context.mounted) {
-                Navigator.pop(ctx); // Close sheet
+                Navigator.pop(ctx);
                 context.read<ReportBloc>().add(VoidTransactionEvent(trx.id));
               }
             }

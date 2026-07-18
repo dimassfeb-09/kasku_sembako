@@ -12,8 +12,7 @@ import '../widgets/adjustment_type_card.dart';
 
 class StockAdjustmentPage extends StatefulWidget {
   final ProductEntity product;
-  const StockAdjustmentPage({Key? key, required this.product})
-    : super(key: key);
+  const StockAdjustmentPage({super.key, required this.product});
 
   @override
   State<StockAdjustmentPage> createState() => _StockAdjustmentPageState();
@@ -56,6 +55,28 @@ class _StockAdjustmentPageState extends State<StockAdjustmentPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.product.trackStock) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Penyesuaian Stok: ${widget.product.name}')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline, size: 48, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                const Text(
+                  'Produk ini tidak melacak stok.\nAktifkan "Lacak Stok" di edit produk untuk melakukan penyesuaian.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: Text('Penyesuaian Stok: ${widget.product.name}')),
       body: BlocListener<StockBloc, StockState>(

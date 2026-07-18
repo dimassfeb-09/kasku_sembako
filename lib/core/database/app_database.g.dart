@@ -376,6 +376,32 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _trackStockMeta = const VerificationMeta(
+    'trackStock',
+  );
+  @override
+  late final GeneratedColumn<bool> trackStock = GeneratedColumn<bool>(
+    'track_stock',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("track_stock" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _minStockMeta = const VerificationMeta(
+    'minStock',
+  );
+  @override
+  late final GeneratedColumn<int> minStock = GeneratedColumn<int>(
+    'min_stock',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -388,6 +414,8 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     unit,
     imagePath,
     isActive,
+    trackStock,
+    minStock,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -476,6 +504,18 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('track_stock')) {
+      context.handle(
+        _trackStockMeta,
+        trackStock.isAcceptableOrUnknown(data['track_stock']!, _trackStockMeta),
+      );
+    }
+    if (data.containsKey('min_stock')) {
+      context.handle(
+        _minStockMeta,
+        minStock.isAcceptableOrUnknown(data['min_stock']!, _minStockMeta),
+      );
+    }
     return context;
   }
 
@@ -525,6 +565,14 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      trackStock: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}track_stock'],
+      )!,
+      minStock: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}min_stock'],
+      ),
     );
   }
 
@@ -545,6 +593,8 @@ class Product extends DataClass implements Insertable<Product> {
   final String unit;
   final String? imagePath;
   final bool isActive;
+  final bool trackStock;
+  final int? minStock;
   const Product({
     required this.id,
     required this.barcode,
@@ -556,6 +606,8 @@ class Product extends DataClass implements Insertable<Product> {
     required this.unit,
     this.imagePath,
     required this.isActive,
+    required this.trackStock,
+    this.minStock,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -574,6 +626,10 @@ class Product extends DataClass implements Insertable<Product> {
       map['image_path'] = Variable<String>(imagePath);
     }
     map['is_active'] = Variable<bool>(isActive);
+    map['track_stock'] = Variable<bool>(trackStock);
+    if (!nullToAbsent || minStock != null) {
+      map['min_stock'] = Variable<int>(minStock);
+    }
     return map;
   }
 
@@ -593,6 +649,10 @@ class Product extends DataClass implements Insertable<Product> {
           ? const Value.absent()
           : Value(imagePath),
       isActive: Value(isActive),
+      trackStock: Value(trackStock),
+      minStock: minStock == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minStock),
     );
   }
 
@@ -612,6 +672,8 @@ class Product extends DataClass implements Insertable<Product> {
       unit: serializer.fromJson<String>(json['unit']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      trackStock: serializer.fromJson<bool>(json['trackStock']),
+      minStock: serializer.fromJson<int?>(json['minStock']),
     );
   }
   @override
@@ -628,6 +690,8 @@ class Product extends DataClass implements Insertable<Product> {
       'unit': serializer.toJson<String>(unit),
       'imagePath': serializer.toJson<String?>(imagePath),
       'isActive': serializer.toJson<bool>(isActive),
+      'trackStock': serializer.toJson<bool>(trackStock),
+      'minStock': serializer.toJson<int?>(minStock),
     };
   }
 
@@ -642,6 +706,8 @@ class Product extends DataClass implements Insertable<Product> {
     String? unit,
     Value<String?> imagePath = const Value.absent(),
     bool? isActive,
+    bool? trackStock,
+    Value<int?> minStock = const Value.absent(),
   }) => Product(
     id: id ?? this.id,
     barcode: barcode ?? this.barcode,
@@ -653,6 +719,8 @@ class Product extends DataClass implements Insertable<Product> {
     unit: unit ?? this.unit,
     imagePath: imagePath.present ? imagePath.value : this.imagePath,
     isActive: isActive ?? this.isActive,
+    trackStock: trackStock ?? this.trackStock,
+    minStock: minStock.present ? minStock.value : this.minStock,
   );
   Product copyWithCompanion(ProductsCompanion data) {
     return Product(
@@ -672,6 +740,10 @@ class Product extends DataClass implements Insertable<Product> {
       unit: data.unit.present ? data.unit.value : this.unit,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      trackStock: data.trackStock.present
+          ? data.trackStock.value
+          : this.trackStock,
+      minStock: data.minStock.present ? data.minStock.value : this.minStock,
     );
   }
 
@@ -687,7 +759,9 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('stock: $stock, ')
           ..write('unit: $unit, ')
           ..write('imagePath: $imagePath, ')
-          ..write('isActive: $isActive')
+          ..write('isActive: $isActive, ')
+          ..write('trackStock: $trackStock, ')
+          ..write('minStock: $minStock')
           ..write(')'))
         .toString();
   }
@@ -704,6 +778,8 @@ class Product extends DataClass implements Insertable<Product> {
     unit,
     imagePath,
     isActive,
+    trackStock,
+    minStock,
   );
   @override
   bool operator ==(Object other) =>
@@ -718,7 +794,9 @@ class Product extends DataClass implements Insertable<Product> {
           other.stock == this.stock &&
           other.unit == this.unit &&
           other.imagePath == this.imagePath &&
-          other.isActive == this.isActive);
+          other.isActive == this.isActive &&
+          other.trackStock == this.trackStock &&
+          other.minStock == this.minStock);
 }
 
 class ProductsCompanion extends UpdateCompanion<Product> {
@@ -732,6 +810,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String> unit;
   final Value<String?> imagePath;
   final Value<bool> isActive;
+  final Value<bool> trackStock;
+  final Value<int?> minStock;
   final Value<int> rowid;
   const ProductsCompanion({
     this.id = const Value.absent(),
@@ -744,6 +824,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.unit = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.trackStock = const Value.absent(),
+    this.minStock = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProductsCompanion.insert({
@@ -757,6 +839,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     required String unit,
     this.imagePath = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.trackStock = const Value.absent(),
+    this.minStock = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        barcode = Value(barcode),
@@ -775,6 +859,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<String>? unit,
     Expression<String>? imagePath,
     Expression<bool>? isActive,
+    Expression<bool>? trackStock,
+    Expression<int>? minStock,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -788,6 +874,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (unit != null) 'unit': unit,
       if (imagePath != null) 'image_path': imagePath,
       if (isActive != null) 'is_active': isActive,
+      if (trackStock != null) 'track_stock': trackStock,
+      if (minStock != null) 'min_stock': minStock,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -803,6 +891,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<String>? unit,
     Value<String?>? imagePath,
     Value<bool>? isActive,
+    Value<bool>? trackStock,
+    Value<int?>? minStock,
     Value<int>? rowid,
   }) {
     return ProductsCompanion(
@@ -816,6 +906,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       unit: unit ?? this.unit,
       imagePath: imagePath ?? this.imagePath,
       isActive: isActive ?? this.isActive,
+      trackStock: trackStock ?? this.trackStock,
+      minStock: minStock ?? this.minStock,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -853,6 +945,12 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (trackStock.present) {
+      map['track_stock'] = Variable<bool>(trackStock.value);
+    }
+    if (minStock.present) {
+      map['min_stock'] = Variable<int>(minStock.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -872,6 +970,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('unit: $unit, ')
           ..write('imagePath: $imagePath, ')
           ..write('isActive: $isActive, ')
+          ..write('trackStock: $trackStock, ')
+          ..write('minStock: $minStock, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4801,6 +4901,620 @@ class SubscriptionCachesCompanion extends UpdateCompanion<SubscriptionCache> {
   }
 }
 
+class $HeldCartsTable extends HeldCarts
+    with TableInfo<$HeldCartsTable, HeldCart> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HeldCartsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _itemsJsonMeta = const VerificationMeta(
+    'itemsJson',
+  );
+  @override
+  late final GeneratedColumn<String> itemsJson = GeneratedColumn<String>(
+    'items_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, note, itemsJson, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'held_carts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HeldCart> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('items_json')) {
+      context.handle(
+        _itemsJsonMeta,
+        itemsJson.isAcceptableOrUnknown(data['items_json']!, _itemsJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemsJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HeldCart map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HeldCart(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      itemsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}items_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HeldCartsTable createAlias(String alias) {
+    return $HeldCartsTable(attachedDatabase, alias);
+  }
+}
+
+class HeldCart extends DataClass implements Insertable<HeldCart> {
+  final String id;
+  final String? note;
+  final String itemsJson;
+  final DateTime createdAt;
+  const HeldCart({
+    required this.id,
+    this.note,
+    required this.itemsJson,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['items_json'] = Variable<String>(itemsJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  HeldCartsCompanion toCompanion(bool nullToAbsent) {
+    return HeldCartsCompanion(
+      id: Value(id),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      itemsJson: Value(itemsJson),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory HeldCart.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HeldCart(
+      id: serializer.fromJson<String>(json['id']),
+      note: serializer.fromJson<String?>(json['note']),
+      itemsJson: serializer.fromJson<String>(json['itemsJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'note': serializer.toJson<String?>(note),
+      'itemsJson': serializer.toJson<String>(itemsJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  HeldCart copyWith({
+    String? id,
+    Value<String?> note = const Value.absent(),
+    String? itemsJson,
+    DateTime? createdAt,
+  }) => HeldCart(
+    id: id ?? this.id,
+    note: note.present ? note.value : this.note,
+    itemsJson: itemsJson ?? this.itemsJson,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  HeldCart copyWithCompanion(HeldCartsCompanion data) {
+    return HeldCart(
+      id: data.id.present ? data.id.value : this.id,
+      note: data.note.present ? data.note.value : this.note,
+      itemsJson: data.itemsJson.present ? data.itemsJson.value : this.itemsJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HeldCart(')
+          ..write('id: $id, ')
+          ..write('note: $note, ')
+          ..write('itemsJson: $itemsJson, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, note, itemsJson, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HeldCart &&
+          other.id == this.id &&
+          other.note == this.note &&
+          other.itemsJson == this.itemsJson &&
+          other.createdAt == this.createdAt);
+}
+
+class HeldCartsCompanion extends UpdateCompanion<HeldCart> {
+  final Value<String> id;
+  final Value<String?> note;
+  final Value<String> itemsJson;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const HeldCartsCompanion({
+    this.id = const Value.absent(),
+    this.note = const Value.absent(),
+    this.itemsJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HeldCartsCompanion.insert({
+    required String id,
+    this.note = const Value.absent(),
+    required String itemsJson,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       itemsJson = Value(itemsJson),
+       createdAt = Value(createdAt);
+  static Insertable<HeldCart> custom({
+    Expression<String>? id,
+    Expression<String>? note,
+    Expression<String>? itemsJson,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (note != null) 'note': note,
+      if (itemsJson != null) 'items_json': itemsJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HeldCartsCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? note,
+    Value<String>? itemsJson,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return HeldCartsCompanion(
+      id: id ?? this.id,
+      note: note ?? this.note,
+      itemsJson: itemsJson ?? this.itemsJson,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (itemsJson.present) {
+      map['items_json'] = Variable<String>(itemsJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HeldCartsCompanion(')
+          ..write('id: $id, ')
+          ..write('note: $note, ')
+          ..write('itemsJson: $itemsJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalCashiersTable extends LocalCashiers
+    with TableInfo<$LocalCashiersTable, LocalCashier> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalCashiersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, isActive, sortOrder];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_cashiers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalCashier> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalCashier map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalCashier(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalCashiersTable createAlias(String alias) {
+    return $LocalCashiersTable(attachedDatabase, alias);
+  }
+}
+
+class LocalCashier extends DataClass implements Insertable<LocalCashier> {
+  final String id;
+  final String name;
+  final bool isActive;
+  final int sortOrder;
+  const LocalCashier({
+    required this.id,
+    required this.name,
+    required this.isActive,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['is_active'] = Variable<bool>(isActive);
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  LocalCashiersCompanion toCompanion(bool nullToAbsent) {
+    return LocalCashiersCompanion(
+      id: Value(id),
+      name: Value(name),
+      isActive: Value(isActive),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory LocalCashier.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalCashier(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'isActive': serializer.toJson<bool>(isActive),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  LocalCashier copyWith({
+    String? id,
+    String? name,
+    bool? isActive,
+    int? sortOrder,
+  }) => LocalCashier(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    isActive: isActive ?? this.isActive,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  LocalCashier copyWithCompanion(LocalCashiersCompanion data) {
+    return LocalCashier(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCashier(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isActive: $isActive, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, isActive, sortOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalCashier &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.isActive == this.isActive &&
+          other.sortOrder == this.sortOrder);
+}
+
+class LocalCashiersCompanion extends UpdateCompanion<LocalCashier> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<bool> isActive;
+  final Value<int> sortOrder;
+  final Value<int> rowid;
+  const LocalCashiersCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalCashiersCompanion.insert({
+    required String id,
+    required String name,
+    this.isActive = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<LocalCashier> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<bool>? isActive,
+    Expression<int>? sortOrder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (isActive != null) 'is_active': isActive,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalCashiersCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<bool>? isActive,
+    Value<int>? sortOrder,
+    Value<int>? rowid,
+  }) {
+    return LocalCashiersCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      isActive: isActive ?? this.isActive,
+      sortOrder: sortOrder ?? this.sortOrder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCashiersCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isActive: $isActive, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4820,6 +5534,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DebtPaymentsTable debtPayments = $DebtPaymentsTable(this);
   late final $SubscriptionCachesTable subscriptionCaches =
       $SubscriptionCachesTable(this);
+  late final $HeldCartsTable heldCarts = $HeldCartsTable(this);
+  late final $LocalCashiersTable localCashiers = $LocalCashiersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4836,6 +5552,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     activityLogs,
     debtPayments,
     subscriptionCaches,
+    heldCarts,
+    localCashiers,
   ];
 }
 
@@ -5115,6 +5833,8 @@ typedef $$ProductsTableCreateCompanionBuilder =
       required String unit,
       Value<String?> imagePath,
       Value<bool> isActive,
+      Value<bool> trackStock,
+      Value<int?> minStock,
       Value<int> rowid,
     });
 typedef $$ProductsTableUpdateCompanionBuilder =
@@ -5129,6 +5849,8 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<String> unit,
       Value<String?> imagePath,
       Value<bool> isActive,
+      Value<bool> trackStock,
+      Value<int?> minStock,
       Value<int> rowid,
     });
 
@@ -5274,6 +5996,16 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get trackStock => $composableBuilder(
+    column: $table.trackStock,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minStock => $composableBuilder(
+    column: $table.minStock,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5430,6 +6162,16 @@ class $$ProductsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get trackStock => $composableBuilder(
+    column: $table.trackStock,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minStock => $composableBuilder(
+    column: $table.minStock,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5493,6 +6235,14 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<bool> get trackStock => $composableBuilder(
+    column: $table.trackStock,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get minStock =>
+      $composableBuilder(column: $table.minStock, builder: (column) => column);
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -5636,6 +6386,8 @@ class $$ProductsTableTableManager
                 Value<String> unit = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<bool> trackStock = const Value.absent(),
+                Value<int?> minStock = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProductsCompanion(
                 id: id,
@@ -5648,6 +6400,8 @@ class $$ProductsTableTableManager
                 unit: unit,
                 imagePath: imagePath,
                 isActive: isActive,
+                trackStock: trackStock,
+                minStock: minStock,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5662,6 +6416,8 @@ class $$ProductsTableTableManager
                 required String unit,
                 Value<String?> imagePath = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<bool> trackStock = const Value.absent(),
+                Value<int?> minStock = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProductsCompanion.insert(
                 id: id,
@@ -5674,6 +6430,8 @@ class $$ProductsTableTableManager
                 unit: unit,
                 imagePath: imagePath,
                 isActive: isActive,
+                trackStock: trackStock,
+                minStock: minStock,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8911,6 +9669,362 @@ typedef $$SubscriptionCachesTableProcessedTableManager =
       SubscriptionCache,
       PrefetchHooks Function()
     >;
+typedef $$HeldCartsTableCreateCompanionBuilder =
+    HeldCartsCompanion Function({
+      required String id,
+      Value<String?> note,
+      required String itemsJson,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$HeldCartsTableUpdateCompanionBuilder =
+    HeldCartsCompanion Function({
+      Value<String> id,
+      Value<String?> note,
+      Value<String> itemsJson,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$HeldCartsTableFilterComposer
+    extends Composer<_$AppDatabase, $HeldCartsTable> {
+  $$HeldCartsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemsJson => $composableBuilder(
+    column: $table.itemsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HeldCartsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HeldCartsTable> {
+  $$HeldCartsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemsJson => $composableBuilder(
+    column: $table.itemsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HeldCartsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HeldCartsTable> {
+  $$HeldCartsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get itemsJson =>
+      $composableBuilder(column: $table.itemsJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$HeldCartsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HeldCartsTable,
+          HeldCart,
+          $$HeldCartsTableFilterComposer,
+          $$HeldCartsTableOrderingComposer,
+          $$HeldCartsTableAnnotationComposer,
+          $$HeldCartsTableCreateCompanionBuilder,
+          $$HeldCartsTableUpdateCompanionBuilder,
+          (HeldCart, BaseReferences<_$AppDatabase, $HeldCartsTable, HeldCart>),
+          HeldCart,
+          PrefetchHooks Function()
+        > {
+  $$HeldCartsTableTableManager(_$AppDatabase db, $HeldCartsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HeldCartsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HeldCartsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HeldCartsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> itemsJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HeldCartsCompanion(
+                id: id,
+                note: note,
+                itemsJson: itemsJson,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> note = const Value.absent(),
+                required String itemsJson,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => HeldCartsCompanion.insert(
+                id: id,
+                note: note,
+                itemsJson: itemsJson,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HeldCartsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HeldCartsTable,
+      HeldCart,
+      $$HeldCartsTableFilterComposer,
+      $$HeldCartsTableOrderingComposer,
+      $$HeldCartsTableAnnotationComposer,
+      $$HeldCartsTableCreateCompanionBuilder,
+      $$HeldCartsTableUpdateCompanionBuilder,
+      (HeldCart, BaseReferences<_$AppDatabase, $HeldCartsTable, HeldCart>),
+      HeldCart,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalCashiersTableCreateCompanionBuilder =
+    LocalCashiersCompanion Function({
+      required String id,
+      required String name,
+      Value<bool> isActive,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+typedef $$LocalCashiersTableUpdateCompanionBuilder =
+    LocalCashiersCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<bool> isActive,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+
+class $$LocalCashiersTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalCashiersTable> {
+  $$LocalCashiersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalCashiersTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalCashiersTable> {
+  $$LocalCashiersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalCashiersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalCashiersTable> {
+  $$LocalCashiersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+}
+
+class $$LocalCashiersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalCashiersTable,
+          LocalCashier,
+          $$LocalCashiersTableFilterComposer,
+          $$LocalCashiersTableOrderingComposer,
+          $$LocalCashiersTableAnnotationComposer,
+          $$LocalCashiersTableCreateCompanionBuilder,
+          $$LocalCashiersTableUpdateCompanionBuilder,
+          (
+            LocalCashier,
+            BaseReferences<_$AppDatabase, $LocalCashiersTable, LocalCashier>,
+          ),
+          LocalCashier,
+          PrefetchHooks Function()
+        > {
+  $$LocalCashiersTableTableManager(_$AppDatabase db, $LocalCashiersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalCashiersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalCashiersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalCashiersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalCashiersCompanion(
+                id: id,
+                name: name,
+                isActive: isActive,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<bool> isActive = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalCashiersCompanion.insert(
+                id: id,
+                name: name,
+                isActive: isActive,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalCashiersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalCashiersTable,
+      LocalCashier,
+      $$LocalCashiersTableFilterComposer,
+      $$LocalCashiersTableOrderingComposer,
+      $$LocalCashiersTableAnnotationComposer,
+      $$LocalCashiersTableCreateCompanionBuilder,
+      $$LocalCashiersTableUpdateCompanionBuilder,
+      (
+        LocalCashier,
+        BaseReferences<_$AppDatabase, $LocalCashiersTable, LocalCashier>,
+      ),
+      LocalCashier,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8937,4 +10051,8 @@ class $AppDatabaseManager {
       $$DebtPaymentsTableTableManager(_db, _db.debtPayments);
   $$SubscriptionCachesTableTableManager get subscriptionCaches =>
       $$SubscriptionCachesTableTableManager(_db, _db.subscriptionCaches);
+  $$HeldCartsTableTableManager get heldCarts =>
+      $$HeldCartsTableTableManager(_db, _db.heldCarts);
+  $$LocalCashiersTableTableManager get localCashiers =>
+      $$LocalCashiersTableTableManager(_db, _db.localCashiers);
 }

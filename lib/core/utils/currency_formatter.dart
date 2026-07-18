@@ -10,4 +10,3 @@ extension RupiahExtension on num {
     return format.format(this);
   }
 }
-

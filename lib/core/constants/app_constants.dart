@@ -3,10 +3,29 @@ class AppConstants {
   static const String sessionKey = 'USER_SESSION_KEY';
   static const String currentUserIdKey = 'CURRENT_USER_ID';
 
+  // Set once the 3-step app intro stepper has been shown, so it only
+  // appears on the very first launch after install — not on every logout.
+  static const String hasSeenAppIntroKey = 'HAS_SEEN_APP_INTRO';
+
+  // Set once the business profile (owner, toko, kategori, alamat, telepon)
+  // has been filled in post-registration. If false on login, the app
+  // redirects to /business-setup before allowing /home.
+  static const String isBusinessSetupComplete = 'IS_BUSINESS_SETUP_COMPLETE';
+
+  /// One-time remediation marker. StoreProfileRemoteDataSource.get() used to
+  /// return an all-blank model instead of null for "no profile yet", so
+  /// devices were wrongly flagged [isBusinessSetupComplete]. Each device
+  /// re-verifies against the server exactly once; see
+  /// resolveBusinessSetupComplete.
+  static const String businessSetupVerifiedKey = 'BUSINESS_SETUP_VERIFIED_V2';
+
+  static const String qrisImagePathKey = 'QRIS_IMAGE_PATH';
+
   // Cloud account (Pro subscription) secure storage keys.
   // Separate from the local PIN session above: this represents the store's
   // cloud identity, not a per-cashier login.
   static const String accountAccessTokenKey = 'ACCOUNT_ACCESS_TOKEN';
+  static const String accountRefreshTokenKey = 'ACCOUNT_REFRESH_TOKEN';
   static const String accountIdKey = 'ACCOUNT_ID';
   static const String accountEmailKey = 'ACCOUNT_EMAIL';
   static const String accountCreatedAtKey = 'ACCOUNT_CREATED_AT';

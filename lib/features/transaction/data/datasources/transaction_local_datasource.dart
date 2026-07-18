@@ -10,6 +10,7 @@ import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/transaction_item_entity.dart';
 
 abstract class TransactionLocalDataSource {
+  Future<int> countToday();
   Future<TransactionEntity> saveTransaction(
     List<CartItemEntity> cartItems,
     String paymentMethod,
@@ -40,6 +41,27 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
     final timestamp =
         '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
     return 'TRX-$timestamp';
+  }
+
+  @override
+  Future<int> countToday() async {
+    final todayStart = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    final todayEnd = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+      23,
+      59,
+      59,
+    );
+    final query = db.select(db.transactions)
+      ..where((t) => t.createdAt.isBetweenValues(todayStart, todayEnd));
+    final rows = await query.get();
+    return rows.length;
   }
 
   @override
@@ -109,41 +131,41 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
               ),
             );
 
-        // Update Stock
-        final productQuery = db.select(db.products)
-          ..where((p) => p.id.equals(cartItem.product.id));
-        final productData = await productQuery.getSingleOrNull();
-        if (productData == null) {
-          throw Exception(
-            'Produk "${cartItem.product.name}" tidak ditemukan di database.',
-          );
-        }
-
-        final newStock = productData.stock - cartItem.quantity;
-        if (newStock < 0) {
-          throw Exception(
-            'Stok produk "${cartItem.product.name}" tidak mencukupi (Tersedia: ${productData.stock}, Diminta: ${cartItem.quantity}).',
-          );
-        }
-
-        await (db.update(db.products)
-              ..where((p) => p.id.equals(cartItem.product.id)))
-            .write(ProductsCompanion(stock: Value(newStock)));
-
-        // Add Stock History
-        await db
-            .into(db.stockHistories)
-            .insert(
-              StockHistoriesCompanion.insert(
-                id: const Uuid().v4(),
-                productId: cartItem.product.id,
-                type: 'OUT',
-                qty: cartItem.quantity,
-                notes: Value('Terjual via transaksi $receiptNumber'),
-                userId: cashierId,
-                createdAt: now,
-              ),
+        if (cartItem.product.trackStock) {
+          final productQuery = db.select(db.products)
+            ..where((p) => p.id.equals(cartItem.product.id));
+          final productData = await productQuery.getSingleOrNull();
+          if (productData == null) {
+            throw Exception(
+              'Produk "${cartItem.product.name}" tidak ditemukan di database.',
             );
+          }
+
+          final newStock = productData.stock - cartItem.quantity;
+          if (newStock < 0) {
+            throw Exception(
+              'Stok produk "${cartItem.product.name}" tidak mencukupi (Tersedia: ${productData.stock}, Diminta: ${cartItem.quantity}).',
+            );
+          }
+
+          await (db.update(db.products)
+                ..where((p) => p.id.equals(cartItem.product.id)))
+              .write(ProductsCompanion(stock: Value(newStock)));
+
+          await db
+              .into(db.stockHistories)
+              .insert(
+                StockHistoriesCompanion.insert(
+                  id: const Uuid().v4(),
+                  productId: cartItem.product.id,
+                  type: 'OUT',
+                  qty: cartItem.quantity,
+                  notes: Value('Terjual via transaksi $receiptNumber'),
+                  userId: cashierId,
+                  createdAt: now,
+                ),
+              );
+        }
 
         transactionItems.add(
           TransactionItemEntity(
@@ -285,16 +307,16 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
       final items = await itemsQuery.get();
 
       for (var item in items) {
-        // Restore stock
         final productQuery = db.select(db.products)
           ..where((p) => p.id.equals(item.productId));
         final product = await productQuery.getSingle();
+
+        if (!product.trackStock) continue;
 
         await (db.update(db.products)
               ..where((p) => p.id.equals(item.productId)))
             .write(ProductsCompanion(stock: Value(product.stock + item.qty)));
 
-        // Record stock history IN
         await db
             .into(db.stockHistories)
             .insert(

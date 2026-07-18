@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ import '../bloc/backup_bloc.dart';
 import '../bloc/backup_event.dart';
 import '../bloc/backup_state.dart';
 import '../widgets/backup_schedule_sheet.dart';
+import '../widgets/cloud_backup_picker_sheet.dart';
 
 typedef _C = AppColors;
 
@@ -56,7 +58,8 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final backupFileName = 'kasirku_backup_$timestamp.json';
       final backupFile = await _writeJsonFile(
-        p.join(tempDir.path, backupFileName), json,
+        p.join(tempDir.path, backupFileName),
+        json,
       );
       await Share.shareXFiles([
         XFile(backupFile.path),
@@ -106,7 +109,8 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
       }
 
       await _applyRestoreJson(
-        decoded, sourceDescription: p.basename(pickedPath),
+        decoded,
+        sourceDescription: p.basename(pickedPath),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -119,17 +123,49 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
     blocContext.read<BackupBloc>().add(UploadCloudBackupRequested(json));
   }
 
+  Future<void> _browseCloudBackups(BuildContext blocContext) async {
+    blocContext.read<BackupBloc>().add(ListCloudBackupsRequested());
+  }
+
+  /// True if local data looks newer than the backup being restored, so the
+  /// confirm dialog can warn before it gets silently overwritten - e.g. a
+  /// backup from another device being restored onto a device with newer
+  /// local transactions.
+  Future<bool> _localDataLooksNewerThan(Map<String, dynamic> json) async {
+    final exportedAtRaw = json['exportedAt'];
+    final exportedAt = exportedAtRaw is String
+        ? DateTime.tryParse(exportedAtRaw)
+        : null;
+    if (exportedAt == null) return false;
+
+    final db = sl<AppDatabase>();
+    final latestLog =
+        await (db.select(db.activityLogs)
+              ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+              ..limit(1))
+            .getSingleOrNull();
+    if (latestLog == null) return false;
+
+    return latestLog.createdAt.isAfter(exportedAt);
+  }
+
   Future<void> _applyRestoreJson(
     Map<String, dynamic> json, {
     required String sourceDescription,
   }) async {
     if (!mounted) return;
+    final localIsNewer = await _localDataLooksNewerThan(json);
+    if (!mounted) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Konfirmasi Restore'),
-        content: const Text(
-          'Seluruh data transaksi dan stok saat ini akan terhapus dan digantikan oleh data dari berkas backup.',
+        content: Text(
+          localIsNewer
+              ? 'Data di perangkat ini tampak lebih baru dari cadangan yang dipilih. '
+                    'Seluruh data transaksi dan stok saat ini akan terhapus dan digantikan '
+                    'oleh data dari cadangan ini. Tetap lanjutkan?'
+              : 'Seluruh data transaksi dan stok saat ini akan terhapus dan digantikan oleh data dari berkas backup.',
         ),
         actions: [
           TextButton(
@@ -149,15 +185,16 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
     try {
       await sl<ActivityLogService>().log(
         action: 'RESTORE',
-        description: 'Memulai pemulihan database dari berkas: $sourceDescription.',
+        description:
+            'Memulai pemulihan database dari berkas: $sourceDescription.',
       );
       await importDbFromJson(sl<AppDatabase>(), json);
       if (!mounted) return;
       context.read<PosBloc>().add(ClearCartEvent());
       context.go('/home');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data telah dipulihkan.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Data telah dipulihkan.')));
     } on InvalidBackupFormatException catch (e) {
       if (!mounted) return;
       _showError(e.message);
@@ -168,9 +205,9 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: _C.error),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: _C.error));
   }
 
   @override
@@ -195,9 +232,28 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                 backgroundColor: _C.success,
               ),
             );
+          } else if (state is CloudBackupUploadSkipped) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Tidak ada perubahan sejak cadangan terakhir — tidak perlu diunggah ulang.',
+                ),
+              ),
+            );
+          } else if (state is BackupsListLoaded) {
+            final blocContext = context;
+            final selected = await showCloudBackupPicker(
+              context,
+              state.backups,
+            );
+            if (selected == null || !blocContext.mounted) return;
+            blocContext.read<BackupBloc>().add(
+              DownloadCloudBackupByIdRequested(selected.id),
+            );
           } else if (state is CloudBackupDownloadSuccess) {
             await _applyRestoreJson(
-              state.payload, sourceDescription: 'cadangan cloud',
+              state.payload,
+              sourceDescription: 'cadangan cloud',
             );
           }
         },
@@ -210,7 +266,10 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                 children: [
                   _HeroSection(),
                   const SizedBox(height: 24),
-                  _SectionLabel(icon: RemixIcons.hard_drive_2_line, label: 'Lokal'),
+                  _SectionLabel(
+                    icon: RemixIcons.hard_drive_2_line,
+                    label: 'Lokal',
+                  ),
                   const SizedBox(height: 12),
                   _ActionCard(
                     icon: RemixIcons.upload_cloud_2_line,
@@ -233,12 +292,17 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                   BlocBuilder<SubscriptionCubit, SubscriptionState>(
                     builder: (context, subState) {
                       final status = subState is SubscriptionStatusLoaded
-                          ? subState.status : null;
+                          ? subState.status
+                          : null;
                       final isPro = status?.isEntitled ?? false;
                       return BlocBuilder<BackupBloc, BackupState>(
                         builder: (context, backupState) {
-                          final isUploading = backupState is CloudBackupUploading;
-                          final isDownloading = backupState is CloudBackupDownloading;
+                          final isUploading =
+                              backupState is CloudBackupUploading;
+                          final isBrowsing = backupState is BackupsListLoading;
+                          final isDownloading =
+                              backupState is CloudBackupDownloading ||
+                              isBrowsing;
                           final isBusy = isUploading || isDownloading;
 
                           return Column(
@@ -248,15 +312,28 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                                 icon: RemixIcons.cloud_line,
                                 label: 'Cloud',
                                 trailing: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                                      colors: [
+                                        Color(0xFFF59E0B),
+                                        Color(0xFFD97706),
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: const Text('PRO', style: TextStyle(
-                                    fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+                                  child: const Text(
+                                    'PRO',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -265,7 +342,9 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                                 iconBg: const Color(0xFFF0FDFA),
                                 iconColor: const Color(0xFF0D9488),
                                 title: 'Backup ke Cloud',
-                                subtitle: isPro ? 'Unggah data terbaru' : 'Upgrade ke Pro untuk mengaktifkan',
+                                subtitle: isPro
+                                    ? 'Unggah data terbaru'
+                                    : 'Upgrade ke Pro untuk mengaktifkan',
                                 enabled: isPro,
                                 isLoading: isUploading,
                                 onTap: () => _uploadCloudBackup(context),
@@ -276,10 +355,12 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                                 iconBg: const Color(0xFFF0FDFA),
                                 iconColor: const Color(0xFF0D9488),
                                 title: 'Pulihkan dari Cloud',
-                                subtitle: isPro ? 'Unduh cadangan terbaru' : 'Upgrade ke Pro untuk mengaktifkan',
+                                subtitle: isPro
+                                    ? 'Pilih & pulihkan cadangan'
+                                    : 'Upgrade ke Pro untuk mengaktifkan',
                                 enabled: isPro,
                                 isLoading: isDownloading,
-                                onTap: () => context.read<BackupBloc>().add(DownloadCloudBackupRequested()),
+                                onTap: () => _browseCloudBackups(context),
                               ),
                               if (isPro) ...[
                                 const SizedBox(height: 24),
@@ -289,7 +370,8 @@ class _BackupPageBodyState extends State<_BackupPageBody> {
                                 const SizedBox(height: 16),
                                 AppButton(
                                   text: 'Upgrade ke Pro',
-                                  onPressed: () => context.push('/subscription/upgrade'),
+                                  onPressed: () =>
+                                      context.push('/subscription/upgrade'),
                                 ),
                               ],
                             ],
@@ -326,24 +408,40 @@ class _HeroSection extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 48, height: 48,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(RemixIcons.shield_check_line,
-              color: Color(0xFF16A34A), size: 24),
+            child: const Icon(
+              RemixIcons.shield_check_line,
+              color: Color(0xFF16A34A),
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Data tetap aman',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.textPrimary)),
+                Text(
+                  'Data tetap aman',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: _C.textPrimary,
+                  ),
+                ),
                 SizedBox(height: 4),
-                Text('Cadangkan secara berkala agar aman dari kehilangan data.',
-                  style: TextStyle(fontSize: 12.5, color: _C.textSecondary, height: 1.4)),
+                Text(
+                  'Cadangkan secara berkala agar aman dari kehilangan data.',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: _C.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
@@ -365,13 +463,16 @@ class _SectionLabel extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: _C.textMuted),
         const SizedBox(width: 8),
-        Text(label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.textMuted,
-            letterSpacing: 0.5)),
-        if (trailing != null) ...[
-          const Spacer(),
-          trailing!,
-        ],
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: _C.textMuted,
+            letterSpacing: 0.5,
+          ),
+        ),
+        if (trailing != null) ...[const Spacer(), trailing!],
       ],
     );
   }
@@ -420,38 +521,62 @@ class _ActionCard extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    width: 44, height: 44,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
-                      color: effectiveEnabled ? iconBg : const Color(0xFFF1F5F9),
+                      color: effectiveEnabled
+                          ? iconBg
+                          : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: isLoading
-                        ? const Center(child: SizedBox(
-                            width: 20, height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          ))
-                        : Icon(icon, size: 22,
-                            color: effectiveEnabled ? iconColor : _C.textMuted),
+                        ? const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            icon,
+                            size: 22,
+                            color: effectiveEnabled ? iconColor : _C.textMuted,
+                          ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title,
+                        Text(
+                          title,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: effectiveEnabled ? _C.textPrimary : _C.textMuted,
-                          )),
+                            color: effectiveEnabled
+                                ? _C.textPrimary
+                                : _C.textMuted,
+                          ),
+                        ),
                         const SizedBox(height: 3),
-                        Text(subtitle,
-                          style: const TextStyle(fontSize: 12, color: _C.textSecondary)),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: _C.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   if (effectiveEnabled)
-                    const Icon(RemixIcons.arrow_right_s_line, size: 20, color: _C.textMuted),
+                    const Icon(
+                      RemixIcons.arrow_right_s_line,
+                      size: 20,
+                      color: _C.textMuted,
+                    ),
                 ],
               ),
             ),
@@ -461,5 +586,3 @@ class _ActionCard extends StatelessWidget {
     );
   }
 }
-
-

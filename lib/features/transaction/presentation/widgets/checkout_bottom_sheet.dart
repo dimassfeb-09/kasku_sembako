@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../customer/domain/entities/customer_entity.dart';
@@ -25,11 +29,20 @@ class _CheckoutBottomSheetContentState
   String paymentMethod = 'CASH';
   double cashReceived = 0.0;
   late final TextEditingController cashController;
+  final _qrisStorage = const FlutterSecureStorage();
+  String? _qrisImagePath;
 
   @override
   void initState() {
     super.initState();
     cashController = TextEditingController();
+    _loadQrisImage();
+  }
+
+  Future<void> _loadQrisImage() async {
+    final path = await _qrisStorage.read(key: AppConstants.qrisImagePathKey);
+    if (!mounted) return;
+    setState(() => _qrisImagePath = path);
   }
 
   @override
@@ -203,52 +216,48 @@ class _CheckoutBottomSheetContentState
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: _cashSuggestions(state.total)
-                          .map((suggestion) {
-                            final isSelected = cashReceived == suggestion;
+                      children: _cashSuggestions(state.total).map((suggestion) {
+                        final isSelected = cashReceived == suggestion;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: ActionChip(
-                                label: Text(
-                                  suggestion.toRupiah(),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? _C.white
-                                        : _C.textSecondary,
-                                  ),
-                                ),
-                                backgroundColor: isSelected
-                                    ? _C.primary
-                                    : _C.surface,
-                                side: BorderSide(
-                                  color: isSelected
-                                      ? Colors.transparent
-                                      : _C.border,
-                                  width: 1,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      cashReceived = 0.0;
-                                      cashController.clear();
-                                    } else {
-                                      cashReceived = suggestion;
-                                      cashController.text = suggestion % 1 == 0
-                                          ? suggestion.toInt().toString()
-                                          : suggestion.toString();
-                                    }
-                                  });
-                                },
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ActionChip(
+                            label: Text(
+                              suggestion.toRupiah(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? _C.white : _C.textSecondary,
                               ),
-                            );
-                          })
-                          .toList(),
+                            ),
+                            backgroundColor: isSelected
+                                ? _C.primary
+                                : _C.surface,
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Colors.transparent
+                                  : _C.border,
+                              width: 1,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                if (isSelected) {
+                                  cashReceived = 0.0;
+                                  cashController.clear();
+                                } else {
+                                  cashReceived = suggestion;
+                                  cashController.text = suggestion % 1 == 0
+                                      ? suggestion.toInt().toString()
+                                      : suggestion.toString();
+                                }
+                              });
+                            },
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -290,6 +299,51 @@ class _CheckoutBottomSheetContentState
                     ),
                   ),
                 ],
+                if (paymentMethod == 'QRIS') ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Scan QRIS',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (_qrisImagePath != null &&
+                      File(_qrisImagePath!).existsSync())
+                    GestureDetector(
+                      onTap: () => _showQrisFullscreen(),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _C.borderLight),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.file(
+                          File(_qrisImagePath!),
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: _C.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _C.borderLight),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'QRIS belum diatur',
+                          style: TextStyle(fontSize: 12, color: _C.textMuted),
+                        ),
+                      ),
+                    ),
+                ],
                 if (paymentMethod == 'HUTANG') ...[
                   const SizedBox(height: 16),
                   const Text(
@@ -311,7 +365,7 @@ class _CheckoutBottomSheetContentState
                         color: _C.successLight,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _C.success.withOpacity(0.3),
+                          color: _C.success.withValues(alpha: 0.3),
                           width: 1.5,
                         ),
                       ),
@@ -406,7 +460,7 @@ class _CheckoutBottomSheetContentState
                         color: _C.dangerLight,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _C.danger.withOpacity(0.3),
+                          color: _C.danger.withValues(alpha: 0.3),
                           width: 1.5,
                         ),
                       ),
@@ -537,6 +591,54 @@ class _CheckoutBottomSheetContentState
       },
     );
   }
+
+  void _showQrisFullscreen() {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(24),
+        child: GestureDetector(
+          onTap: () => Navigator.pop(ctx),
+          child: Container(
+            decoration: BoxDecoration(
+              color: _C.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ),
+                if (_qrisImagePath != null &&
+                    File(_qrisImagePath!).existsSync())
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(_qrisImagePath!),
+                      height: MediaQuery.of(ctx).size.height * 0.5,
+                      width: double.infinity,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Scan QRIS ini untuk membayar',
+                  style: TextStyle(fontSize: 13, color: _C.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 List<double> _cashSuggestions(double total) {
@@ -551,7 +653,9 @@ List<double> _cashSuggestions(double total) {
     if (base50 + 20000 >= total) suggestions.add((base50 + 20000).toDouble());
     if (base50 + 40000 >= total) suggestions.add((base50 + 40000).toDouble());
     final targetPay10kChange = total + 10000;
-    if (targetPay10kChange % 20000 == 0 || targetPay10kChange % 50000 == 0) suggestions.add(targetPay10kChange);
+    if (targetPay10kChange % 20000 == 0 || targetPay10kChange % 50000 == 0) {
+      suggestions.add(targetPay10kChange);
+    }
     final targetPay20kChange = total + 20000;
     if (targetPay20kChange % 50000 == 0) suggestions.add(targetPay20kChange);
   }

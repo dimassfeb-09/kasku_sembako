@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../di/injection.dart';
 import '../../../../core/services/export_service.dart';
+import '../../../../shared/widgets/barcode_scanner_sheet.dart';
 import '../../../subscription/presentation/cubit/subscription_cubit.dart';
 import '../../../subscription/presentation/cubit/subscription_state.dart';
 import '../../../subscription/presentation/utils/pro_gate.dart';
@@ -13,7 +14,7 @@ import '../widgets/product_list_item.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ProductPage extends StatefulWidget {
-  const ProductPage({Key? key}) : super(key: key);
+  const ProductPage({super.key});
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -26,6 +27,27 @@ class _ProductPageState extends State<ProductPage> {
     context.read<ProductBloc>().add(LoadProductsEvent());
   }
 
+  Future<void> _scanBarcode() async {
+    final code = await showBarcodeScanner(context);
+    if (code != null && mounted) {
+      final state = context.read<ProductBloc>().state;
+      if (state is ProductLoaded) {
+        final found = state.products.where((p) => p.barcode == code).toList();
+        if (found.isNotEmpty && mounted) {
+          context.push('/products/edit', extra: found.first);
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Produk dengan barcode $code tidak ditemukan'),
+              backgroundColor: AppColors.danger,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _exportCsv(BuildContext context) {
     final subState = context.read<SubscriptionCubit>().state;
     if (subState is! SubscriptionStatusLoaded || !subState.status.isEntitled) {
@@ -35,16 +57,28 @@ class _ProductPageState extends State<ProductPage> {
     final state = context.read<ProductBloc>().state;
     if (state is! ProductLoaded || state.products.isEmpty) return;
     sl<ExportService>().exportToCsv(
-      headers: ['Kode', 'Nama', 'Kategori', 'Harga Beli', 'Harga Jual', 'Stok', 'Satuan'],
-      rows: state.products.map((p) => [
-        p.barcode,
-        p.name,
-        p.categoryId ?? '',
-        p.purchasePrice.toStringAsFixed(0),
-        p.sellingPrice.toStringAsFixed(0),
-        p.stock.toString(),
-        p.unit,
-      ]).toList(),
+      headers: [
+        'Kode',
+        'Nama',
+        'Kategori',
+        'Harga Beli',
+        'Harga Jual',
+        'Stok',
+        'Satuan',
+      ],
+      rows: state.products
+          .map(
+            (p) => [
+              p.barcode,
+              p.name,
+              p.categoryId ?? '',
+              p.purchasePrice.toStringAsFixed(0),
+              p.sellingPrice.toStringAsFixed(0),
+              p.stock.toString(),
+              p.unit,
+            ],
+          )
+          .toList(),
       fileName: 'produk.csv',
     );
   }
@@ -71,6 +105,14 @@ class _ProductPageState extends State<ProductPage> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.qr_code_scanner_rounded,
+              color: AppColors.textSecondary,
+              size: 22,
+            ),
+            onPressed: _scanBarcode,
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
@@ -91,8 +133,9 @@ class _ProductPageState extends State<ProductPage> {
                 size: 24,
               ),
               onPressed: () {
+                final bloc = context.read<ProductBloc>();
                 context.push('/products/add').then((_) {
-                  context.read<ProductBloc>().add(LoadProductsEvent());
+                  bloc.add(LoadProductsEvent());
                 });
               },
             ),
@@ -224,10 +267,9 @@ class _ProductPageState extends State<ProductPage> {
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
                         onPressed: () {
+                          final bloc = context.read<ProductBloc>();
                           context.push('/products/add').then((_) {
-                            context.read<ProductBloc>().add(
-                              LoadProductsEvent(),
-                            );
+                            bloc.add(LoadProductsEvent());
                           });
                         },
                         icon: const Icon(Icons.add_rounded, size: 18),
@@ -255,12 +297,23 @@ class _ProductPageState extends State<ProductPage> {
                 ),
               );
             }
+            final activeProducts = state.products
+                .where((p) => p.isActive)
+                .toList();
+            if (activeProducts.isEmpty) {
+              return const Center(
+                child: Text(
+                  'Tidak ada produk aktif',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              );
+            }
             return ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: state.products.length,
+              itemCount: activeProducts.length,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final product = state.products[index];
+                final product = activeProducts[index];
                 return ProductListItem(product: product);
               },
             );

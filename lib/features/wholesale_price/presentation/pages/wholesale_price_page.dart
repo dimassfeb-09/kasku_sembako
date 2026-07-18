@@ -10,11 +10,10 @@ import '../../domain/entities/wholesale_price_entity.dart';
 import '../bloc/wholesale_price_bloc.dart';
 import '../bloc/wholesale_price_event_state.dart';
 import '../widgets/wholesale_price_list_item.dart';
-import '../widgets/wholesale_empty_state.dart';
 
 class WholesalePricePage extends StatefulWidget {
   final ProductEntity product;
-  const WholesalePricePage({Key? key, required this.product}) : super(key: key);
+  const WholesalePricePage({super.key, required this.product});
 
   @override
   State<WholesalePricePage> createState() => _WholesalePricePageState();
@@ -258,7 +257,7 @@ class _WholesalePricePageState extends State<WholesalePricePage> {
                   border: Border.all(color: AppColors.borderLight, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: Colors.black.withValues(alpha: 0.02),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -428,7 +427,7 @@ class _WholesalePricePageState extends State<WholesalePricePage> {
                     return const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
-                        child: WholesaleEmptyState(),
+                        child: _WholesaleEmptyState(),
                       ),
                     );
                   }
@@ -459,6 +458,57 @@ class _WholesalePricePageState extends State<WholesalePricePage> {
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _WholesaleEmptyState extends StatelessWidget {
+  const _WholesaleEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.sell_outlined,
+              color: AppColors.textMuted,
+              size: 64,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Belum Ada Harga Grosir',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Atur potongan harga khusus berdasarkan kuantitas beli untuk menarik pelanggan grosir.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

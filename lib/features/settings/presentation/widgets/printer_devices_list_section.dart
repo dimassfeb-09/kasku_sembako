@@ -7,7 +7,7 @@ typedef _C = AppColors;
 
 class PrinterDevicesListSection extends StatelessWidget {
   final List<BluetoothInfo> devices;
-  final String? connectedMacAddress;
+  final List<String> savedMacs;
   final bool bluetoothOn;
   final ValueChanged<String> onConnect;
   final VoidCallback onScan;
@@ -15,7 +15,7 @@ class PrinterDevicesListSection extends StatelessWidget {
   const PrinterDevicesListSection({
     super.key,
     required this.devices,
-    required this.connectedMacAddress,
+    required this.savedMacs,
     required this.bluetoothOn,
     required this.onConnect,
     required this.onScan,
@@ -36,17 +36,28 @@ class PrinterDevicesListSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36, height: 36,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: _C.primaryLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(RemixIcons.bluetooth_line, color: _C.primary, size: 18),
+                child: const Icon(
+                  RemixIcons.bluetooth_line,
+                  color: _C.primary,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
               const Expanded(
-                child: Text('Pilih Printer Bluetooth',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _C.textPrimary)),
+                child: Text(
+                  'Pilih Printer Bluetooth',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _C.textPrimary,
+                  ),
+                ),
               ),
               GestureDetector(
                 onTap: onScan,
@@ -56,7 +67,11 @@ class PrinterDevicesListSection extends StatelessWidget {
                     color: _C.primaryLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(RemixIcons.refresh_line, size: 16, color: _C.primary),
+                  child: const Icon(
+                    RemixIcons.refresh_line,
+                    size: 16,
+                    color: _C.primary,
+                  ),
                 ),
               ),
             ],
@@ -66,13 +81,15 @@ class PrinterDevicesListSection extends StatelessWidget {
             _EmptyState(
               icon: RemixIcons.bluetooth_line,
               title: 'Bluetooth tidak aktif',
-              subtitle: 'Aktifkan Bluetooth di pengaturan HP, lalu pindai ulang.',
+              subtitle:
+                  'Aktifkan Bluetooth di pengaturan HP, lalu pindai ulang.',
             )
           else if (devices.isEmpty)
             _EmptyState(
               icon: RemixIcons.bluetooth_line,
               title: 'Tidak ada perangkat ter-pairing',
-              subtitle: 'Pairing printer thermal di pengaturan Bluetooth HP Anda, lalu pindai ulang.',
+              subtitle:
+                  'Pairing printer thermal di pengaturan Bluetooth HP Anda, lalu pindai ulang.',
             )
           else
             ListView.separated(
@@ -85,22 +102,25 @@ class PrinterDevicesListSection extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final device = devices[index];
-                final isConnected = device.macAdress == connectedMacAddress;
+                final isSaved = savedMacs.contains(device.macAdress);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Row(
                     children: [
                       Container(
-                        width: 40, height: 40,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: isConnected ? _C.primaryLight : _C.background,
+                          color: isSaved ? _C.primaryLight : _C.background,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
-                          isConnected ? RemixIcons.bluetooth_connect_line : RemixIcons.printer_line,
+                          isSaved
+                              ? RemixIcons.bluetooth_connect_line
+                              : RemixIcons.printer_line,
                           size: 20,
-                          color: isConnected ? _C.primary : _C.textSecondary,
+                          color: isSaved ? _C.primary : _C.textSecondary,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -109,37 +129,67 @@ class PrinterDevicesListSection extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              device.name.isEmpty ? 'Printer Thermal' : device.name,
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _C.textPrimary),
+                              device.name.isEmpty
+                                  ? 'Printer Thermal'
+                                  : device.name,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _C.textPrimary,
+                              ),
                             ),
                             const SizedBox(height: 2),
-                            Text(device.macAdress,
-                              style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: _C.textSecondary)),
+                            Text(
+                              device.macAdress,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                                color: _C.textSecondary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      if (isConnected)
+                      if (isSaved)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: _C.successLight,
+                            color: _C.primaryLight,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text('Aktif',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _C.success)),
+                          child: const Text(
+                            'Tersimpan',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: _C.primary,
+                            ),
+                          ),
                         )
                       else
                         GestureDetector(
                           onTap: () => onConnect(device.macAdress),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: _C.primaryLight,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text('Hubungkan',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _C.primary)),
+                            child: const Text(
+                              'Hubungkan',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _C.primary,
+                              ),
+                            ),
                           ),
                         ),
                     ],
@@ -157,7 +207,11 @@ class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  const _EmptyState({required this.icon, required this.title, required this.subtitle});
+  const _EmptyState({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -167,13 +221,21 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(icon, size: 32, color: _C.textMuted.withValues(alpha: 0.5)),
           const SizedBox(height: 12),
-          Text(title,
+          Text(
+            title,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _C.textSecondary)),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _C.textSecondary,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(subtitle,
+          Text(
+            subtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: _C.textMuted)),
+            style: const TextStyle(fontSize: 11, color: _C.textMuted),
+          ),
         ],
       ),
     );

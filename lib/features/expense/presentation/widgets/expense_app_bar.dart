@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ExpenseAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onBack;
-  const ExpenseAppBar({super.key, required this.onBack});
+  final DateTime startDate;
+  final DateTime endDate;
+  final VoidCallback onSelectDateRange;
+
+  const ExpenseAppBar({
+    super.key,
+    required this.onBack,
+    required this.startDate,
+    required this.endDate,
+    required this.onSelectDateRange,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd MMM yy');
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.white,
       elevation: 0,
+      scrolledUnderElevation: 0,
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
@@ -18,28 +31,49 @@ class ExpenseAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         onPressed: onBack,
       ),
-      title: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Pengeluaran',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.3,
-            ),
-          ),
-          Text(
-            'Operasional Toko',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+      title: const Text(
+        'Pengeluaran',
+        style: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 18,
+          color: AppColors.textPrimary,
+        ),
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: InkWell(
+            onTap: onSelectDateRange,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.calendar_today_rounded,
+                    size: 13,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -53,36 +87,16 @@ class ExpenseFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.primary, // Teal
-          borderRadius: BorderRadius.circular(12), // 12px soft rounded corners
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x330D9488), // Ambient teal shadow
-              blurRadius: 16,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.add_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 8),
-            Text(
-              'Catat Pengeluaran',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
+    return FloatingActionButton.extended(
+      onPressed: onTap,
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      icon: const Icon(Icons.add_rounded, size: 20),
+      label: const Text(
+        'Catat Pengeluaran',
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
       ),
     );
   }

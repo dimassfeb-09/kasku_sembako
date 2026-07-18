@@ -73,20 +73,18 @@ class ExpenseDarkTextField extends StatelessWidget {
             ),
             prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 18),
             filled: true,
-            fillColor: const Color(0xFFF8FAFC), // Slate 50 Background fill
+            fillColor: AppColors.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12), // 12px corners
-              borderSide: const BorderSide(
-                color: Color(0xFFE2E8F0),
-              ), // Slate 200 border
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -135,7 +133,7 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0), // Slate 200
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -178,12 +176,12 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.primary
-                          : const Color(0xFFF8FAFC), // Teal or Slate 50
+                          : AppColors.background,
                       borderRadius: BorderRadius.circular(20), // Pill chip
                       border: Border.all(
                         color: isSelected
                             ? AppColors.primary
-                            : const Color(0xFFE2E8F0), // Slate 200
+                            : AppColors.border,
                       ),
                     ),
                     child: Row(
@@ -248,9 +246,7 @@ class AddExpenseSheetState extends State<AddExpenseSheet> {
                     onPressed: widget.onCancel,
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: const BorderSide(
-                        color: Color(0xFFE2E8F0),
-                      ), // Slate 200
+                      side: const BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12), // 12px corners
                       ),

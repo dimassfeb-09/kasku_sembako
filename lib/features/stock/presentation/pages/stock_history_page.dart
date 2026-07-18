@@ -9,7 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 
 class StockHistoryPage extends StatefulWidget {
   final ProductEntity product;
-  const StockHistoryPage({Key? key, required this.product}) : super(key: key);
+  const StockHistoryPage({super.key, required this.product});
 
   @override
   State<StockHistoryPage> createState() => _StockHistoryPageState();
@@ -32,12 +32,18 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
             return const Center(child: CircularProgressIndicator());
           } else if (state is StockHistoryLoaded) {
             final subState = context.read<SubscriptionCubit>().state;
-            final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
+            final isPro =
+                subState is SubscriptionStatusLoaded &&
+                subState.status.isEntitled;
 
             var histories = List.of(state.histories);
             if (!isPro) {
-              final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-              histories = histories.where((h) => h.createdAt.isAfter(oneMonthAgo)).toList();
+              final oneMonthAgo = DateTime.now().subtract(
+                const Duration(days: 30),
+              );
+              histories = histories
+                  .where((h) => h.createdAt.isAfter(oneMonthAgo))
+                  .toList();
             }
 
             if (histories.isEmpty) {
@@ -76,7 +82,7 @@ class _StockHistoryPageState extends State<StockHistoryPage> {
                       vertical: 4,
                     ),
                     leading: CircleAvatar(
-                      backgroundColor: color.withOpacity(0.1),
+                      backgroundColor: color.withValues(alpha: 0.1),
                       child: Icon(
                         isAddition ? Icons.arrow_downward : Icons.arrow_upward,
                         color: color,

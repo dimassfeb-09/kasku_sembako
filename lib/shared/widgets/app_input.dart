@@ -11,6 +11,7 @@ class AppInput extends StatelessWidget {
   final bool readOnly;
   final String? hintText;
   final int? maxLines;
+  final String? Function(String?)? validator;
 
   const AppInput({
     super.key,
@@ -23,6 +24,7 @@ class AppInput extends StatelessWidget {
     this.readOnly = false,
     this.hintText,
     this.maxLines = 1,
+    this.validator,
   });
 
   @override
@@ -40,12 +42,13 @@ class AppInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
           readOnly: readOnly,
           maxLines: maxLines,
+          validator: validator,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
@@ -63,7 +66,7 @@ class AppInput extends StatelessWidget {
                 : null,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: const Color(0xFFF8FAFC), // Slate 50 background fill
+            fillColor: const Color(0xFFF8FAFC),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -83,6 +86,7 @@ class AppInput extends StatelessWidget {
                 width: 1.5,
               ),
             ),
+            errorStyle: const TextStyle(fontSize: 11, color: AppColors.danger),
           ),
         ),
       ],

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_error_mapper.dart';
 import '../models/subscription_status_model.dart';
 
 abstract class SubscriptionRemoteDataSource {
@@ -47,22 +47,15 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
     }
   }
 
-  Exception _mapDioException(DioException e) {
-    if (e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout) {
-      return const NetworkException('Tidak dapat terhubung ke server.');
-    }
-    if (e.response?.statusCode == 401) {
-      return const ServerException(
-        'Silakan masuk ke akun toko terlebih dahulu.',
-      );
-    }
-    if (e.response?.statusCode == 409) {
-      return const ServerException(
-        'Pembelian ini sudah terdaftar pada akun lain.',
-      );
-    }
-    return ServerException(e.message ?? 'Gagal memverifikasi langganan.');
-  }
+  Exception _mapDioException(DioException e) => mapDioException(
+    e,
+    codeMessages: const {
+      'TOKEN_MISSING': 'Silakan masuk ke akun toko terlebih dahulu.',
+      'TOKEN_INVALID': 'Silakan masuk ke akun toko terlebih dahulu.',
+      'UNAUTHORIZED': 'Silakan masuk ke akun toko terlebih dahulu.',
+      'PURCHASE_TOKEN_TAKEN': 'Pembelian ini sudah terdaftar pada akun lain.',
+      'VALIDATION_FAILED': 'Permintaan tidak valid.',
+    },
+    fallback: 'Gagal memverifikasi langganan.',
+  );
 }

@@ -14,3 +14,12 @@ class UploadCloudBackupRequested extends BackupEvent {
 }
 
 class DownloadCloudBackupRequested extends BackupEvent {}
+
+class ListCloudBackupsRequested extends BackupEvent {}
+
+class DownloadCloudBackupByIdRequested extends BackupEvent {
+  final String id;
+  const DownloadCloudBackupByIdRequested(this.id);
+  @override
+  List<Object> get props => [id];
+}

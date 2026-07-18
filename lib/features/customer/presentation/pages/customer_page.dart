@@ -39,12 +39,16 @@ class _CustomerPageState extends State<CustomerPage> {
     if (state is! CustomerLoaded || state.customers.isEmpty) return;
     sl<ExportService>().exportToCsv(
       headers: ['Nama', 'Telepon', 'Catatan', 'Total Hutang'],
-      rows: state.customers.map((c) => [
-        c.name,
-        c.phone ?? '',
-        c.notes ?? '',
-        c.debtAmount.toStringAsFixed(0),
-      ]).toList(),
+      rows: state.customers
+          .map(
+            (c) => [
+              c.name,
+              c.phone ?? '',
+              c.notes ?? '',
+              c.debtAmount.toStringAsFixed(0),
+            ],
+          )
+          .toList(),
       fileName: 'pelanggan.csv',
     );
   }
@@ -84,8 +88,9 @@ class _CustomerPageState extends State<CustomerPage> {
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onPressed: () {
+          final bloc = context.read<CustomerBloc>();
           context.push('/customers/add').then((_) {
-            context.read<CustomerBloc>().add(LoadCustomersEvent());
+            bloc.add(LoadCustomersEvent());
           });
         },
         tooltip: 'Tambah Pelanggan',

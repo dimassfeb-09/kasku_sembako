@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../core/database/app_database.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_theme.dart';
 import '../di/injection.dart' as di;
@@ -45,15 +46,16 @@ class App extends StatelessWidget {
           create: (_) => di.sl<SubscriptionCubit>(),
         ),
         BlocProvider<PosBloc>(
-          create: (ctx) {
-            final subState = ctx.read<SubscriptionCubit>().state;
-            final isPro = subState is SubscriptionStatusLoaded && subState.status.isEntitled;
-            return PosBloc(
-              checkoutUseCase: di.sl(),
-              getWholesalePricesUseCase: di.sl(),
-              isWholesaleAllowed: isPro,
-            );
-          },
+          create: (ctx) => PosBloc(
+            checkoutUseCase: di.sl(),
+            getWholesalePricesUseCase: di.sl(),
+            database: di.sl<AppDatabase>(),
+            isWholesaleAllowed: () {
+              final subState = ctx.read<SubscriptionCubit>().state;
+              return subState is SubscriptionStatusLoaded &&
+                  subState.status.isEntitled;
+            },
+          ),
         ),
         BlocProvider<PrinterBloc>(create: (_) => di.sl<PrinterBloc>()),
         BlocProvider<ReportBloc>(create: (_) => di.sl<ReportBloc>()),

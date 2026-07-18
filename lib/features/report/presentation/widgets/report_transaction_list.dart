@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remixicon/remixicon.dart';
 import 'report_app_bar.dart';
 import 'report_transaction_detail_sheet.dart';
 import '../../../transaction/domain/entities/transaction_entity.dart';
@@ -22,41 +23,37 @@ class ReportListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             '$length Transaksi',
             style: const TextStyle(
-              color: AppColors.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
             ),
           ),
           Row(
             children: [
               ReportExportButton(
-                icon: Icons.picture_as_pdf_rounded,
+                icon: RemixIcons.file_pdf_line,
                 label: 'PDF',
                 color: AppColors.error,
                 onTap: onExportPdf,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               ReportExportButton(
-                icon: Icons.grid_on_rounded,
+                icon: RemixIcons.grid_line,
                 label: 'Excel',
                 color: AppColors.success,
                 onTap: onExportExcel,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               ReportExportButton(
-                icon: Icons.table_chart_rounded,
+                icon: RemixIcons.table_line,
                 label: 'CSV',
                 color: AppColors.primary,
                 onTap: onExportCsv,
@@ -79,31 +76,31 @@ class ReportEmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
-              Icons.receipt_long_rounded,
-              color: AppColors.textSecondary,
-              size: 36,
+              RemixIcons.receipt_line,
+              size: 28,
+              color: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           const Text(
-            'Tidak ada transaksi',
+            'Belum ada transaksi',
             style: TextStyle(
-              color: AppColors.textPrimary,
               fontSize: 15,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
           const Text(
             'Tidak ada data pada periode yang dipilih',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -124,7 +121,7 @@ class ReportTransactionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(bottom: 16),
       itemCount: transactions.length,
       itemBuilder: (context, index) {
         final trx = transactions[index];
@@ -167,133 +164,136 @@ class ReportTransactionTile extends StatelessWidget {
     final isVoided = trx.status == 'VOID';
     final dateStr = DateFormat('dd MMM · HH:mm').format(trx.createdAt);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isVoided
-                ? AppColors.error.withValues(alpha: 0.2)
-                : AppColors.border,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isVoided ? AppColors.borderLight : AppColors.border,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ),
-        child: Row(
-          children: [
-            // Icon
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isVoided
-                    ? AppColors.error.withValues(alpha: 0.1)
-                    : AppColors.background,
-                shape: BoxShape.circle,
-                border: Border.all(
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
                   color: isVoided
-                      ? AppColors.error.withValues(alpha: 0.3)
-                      : AppColors.border,
+                      ? AppColors.errorLight
+                      : AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isVoided
+                      ? RemixIcons.close_circle_line
+                      : RemixIcons.receipt_line,
+                  color: isVoided ? AppColors.error : AppColors.primary,
+                  size: 18,
                 ),
               ),
-              child: Icon(
-                isVoided ? Icons.cancel_rounded : Icons.receipt_long_rounded,
-                color: isVoided ? AppColors.error : AppColors.primary,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        trx.receiptNumber,
-                        style: TextStyle(
-                          color: isVoided
-                              ? AppColors.textSecondary
-                              : AppColors.textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          decoration: isVoided
-                              ? TextDecoration.lineThrough
-                              : null,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          trx.receiptNumber,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: isVoided
+                                ? AppColors.textMuted
+                                : AppColors.textPrimary,
+                            decoration: isVoided
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
                         ),
-                      ),
-                      if (isVoided) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'VOID',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
+                        if (isVoided) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1,
                             ),
+                            decoration: BoxDecoration(
+                              color: AppColors.errorLight,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: const Text(
+                              'VOID',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.error,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          RemixIcons.time_line,
+                          size: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          dateStr,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Icon(
+                          RemixIcons.shopping_bag_line,
+                          size: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${trx.items.length} item',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_rounded,
-                        color: AppColors.textSecondary,
-                        size: 12,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateStr,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Icon(
-                        Icons.shopping_bag_outlined,
-                        color: AppColors.textSecondary,
-                        size: 12,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${trx.items.length} item',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            // Amount
-            Text(
-              trx.totalAmount.toRupiah(),
-              style: TextStyle(
-                color: isVoided ? AppColors.textSecondary : AppColors.success,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                decoration: isVoided ? TextDecoration.lineThrough : null,
+              Text(
+                trx.totalAmount.toRupiah(),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: isVoided ? AppColors.textMuted : AppColors.success,
+                  decoration: isVoided ? TextDecoration.lineThrough : null,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

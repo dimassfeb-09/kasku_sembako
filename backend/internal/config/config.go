@@ -19,10 +19,16 @@ const minJWTSecretLength = 32
 // something like `godotenv` or your process manager to inject env vars.
 // See .env.example for the full list of keys.
 type Config struct {
-	Port                         string
-	DatabaseURL                  string
-	JWTSecret                    string
-	JWTTTL                       time.Duration
+	Port        string
+	DatabaseURL string
+	JWTSecret   string
+	// AccessTokenTTL is how long an issued JWT access token stays valid
+	// before a client must exchange its refresh token for a new one.
+	// Short on purpose - RefreshTokenTTL is what keeps the user logged in.
+	AccessTokenTTL time.Duration
+	// RefreshTokenTTL is how long a refresh token (and thus a logged-in
+	// session) stays valid before the user must log in again.
+	RefreshTokenTTL              time.Duration
 	AdminEmail                   string
 	GooglePackageName            string
 	GoogleServiceAccountJSONPath string
@@ -37,6 +43,15 @@ type Config struct {
 	// service, or rate limiting collapses every client behind an unconfigured
 	// proxy into a single shared bucket (or, if misconfigured, becomes spoofable).
 	TrustedProxies []string
+
+	// SMTP config for sending transactional emails (OTP, etc.).
+	// If SMTPHost is empty, emails are logged instead of sent.
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUser     string
+	SMTPPass     string
+	SMTPFrom     string
+	SMTPFromName string
 }
 
 func Load() (*Config, error) {
@@ -71,7 +86,13 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid JWT_TTL_DAYS: %w", err)
 	}
-	cfg.JWTTTL = time.Duration(ttlDays) * 24 * time.Hour
+	cfg.RefreshTokenTTL = time.Duration(ttlDays) * 24 * time.Hour
+
+	accessTTLMinutes, err := strconv.Atoi(getEnv("ACCESS_TOKEN_TTL_MINUTES", "15"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid ACCESS_TOKEN_TTL_MINUTES: %w", err)
+	}
+	cfg.AccessTokenTTL = time.Duration(accessTTLMinutes) * time.Minute
 
 	maxMB, err := strconv.ParseInt(getEnv("BACKUP_MAX_SIZE_MB", "50"), 10, 64)
 	if err != nil {
@@ -90,6 +111,17 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("invalid SUBSCRIPTION_STALENESS_HOURS: %w", err)
 	}
 	cfg.SubscriptionStalenessTTL = time.Duration(stalenessHours) * time.Hour
+
+	smtpPort, err := strconv.Atoi(getEnv("SMTP_PORT", "587"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid SMTP_PORT: %w", err)
+	}
+	cfg.SMTPPort = smtpPort
+	cfg.SMTPHost = os.Getenv("SMTP_HOST")
+	cfg.SMTPUser = os.Getenv("SMTP_USER")
+	cfg.SMTPPass = os.Getenv("SMTP_PASS")
+	cfg.SMTPFrom = getEnv("SMTP_FROM", "noreply@kasirku.app")
+	cfg.SMTPFromName = getEnv("SMTP_FROM_NAME", "KasirKu")
 
 	return cfg, nil
 }

@@ -1,13 +1,26 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_error_mapper.dart';
 import '../models/account_model.dart';
 
 abstract class AccountRemoteDataSource {
-  Future<AccountModel> register(String email, String password);
+  /// [name] and [whatsapp] are required by POST /auth/register even though
+  /// they aren't part of [AccountModel] - the endpoint is shared with the
+  /// auth feature, which does surface them.
+  Future<AccountModel> register(
+    String name,
+    String email,
+    String password,
+    String whatsapp,
+  );
   Future<AccountModel> login(String email, String password);
   Future<AccountModel> me();
+
+  /// Revokes the current refresh token server-side. Best-effort by design -
+  /// callers should still clear local session state even if this fails
+  /// (e.g. no network), since the user's intent to log out is local.
+  Future<void> logout();
 }
 
 class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
@@ -17,26 +30,33 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   AccountRemoteDataSourceImpl({required this.dio, required this.secureStorage});
 
   @override
-  Future<AccountModel> register(String email, String password) async {
-    return _authRequest('/auth/register', email, password);
+  Future<AccountModel> register(
+    String name,
+    String email,
+    String password,
+    String whatsapp,
+  ) async {
+    return _authRequest('/auth/register', {
+      'name': name,
+      'email': email,
+      'password': password,
+      'whatsapp': whatsapp,
+    });
   }
 
   @override
   Future<AccountModel> login(String email, String password) async {
-    return _authRequest('/auth/login', email, password);
+    return _authRequest('/auth/login', {'email': email, 'password': password});
   }
 
   Future<AccountModel> _authRequest(
     String path,
-    String email,
-    String password,
+    Map<String, dynamic> body,
   ) async {
     try {
-      final response = await dio.post(
-        path,
-        data: {'email': email, 'password': password},
-      );
+      final response = await dio.post(path, data: body);
       final token = response.data['token'] as String;
+      final refreshToken = response.data['refreshToken'] as String? ?? '';
       final userJson = response.data['user'] as Map<String, dynamic>;
       final account = AccountModel.fromJson(userJson);
 
@@ -44,6 +64,12 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         key: AppConstants.accountAccessTokenKey,
         value: token,
       );
+      if (refreshToken.isNotEmpty) {
+        await secureStorage.write(
+          key: AppConstants.accountRefreshTokenKey,
+          value: refreshToken,
+        );
+      }
       await secureStorage.write(
         key: AppConstants.accountIdKey,
         value: account.id,
@@ -73,22 +99,30 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     }
   }
 
-  Exception _mapDioException(DioException e) {
-    if (e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout) {
-      return const NetworkException('Tidak dapat terhubung ke server.');
+  @override
+  Future<void> logout() async {
+    final refreshToken = await secureStorage.read(
+      key: AppConstants.accountRefreshTokenKey,
+    );
+    if (refreshToken == null || refreshToken.isEmpty) return;
+
+    try {
+      await dio.post('/auth/logout', data: {'refreshToken': refreshToken});
+    } on DioException {
+      // Best-effort: the server-side token still expires on its own, and
+      // the caller clears local session state regardless of this outcome.
     }
-    final status = e.response?.statusCode;
-    final message = (e.response?.data is Map)
-        ? (e.response?.data['message']?.toString() ?? e.message)
-        : e.message;
-    if (status == 401) {
-      return ServerException(message ?? 'Email atau kata sandi salah.');
-    }
-    if (status == 409) {
-      return ServerException(message ?? 'Email sudah terdaftar.');
-    }
-    return ServerException(message ?? 'Terjadi kesalahan pada server.');
   }
+
+  Exception _mapDioException(DioException e) => mapDioException(
+    e,
+    codeMessages: const {
+      'VALIDATION_FAILED': 'Permintaan tidak valid.',
+      'INVALID_CREDENTIALS': 'Email atau kata sandi salah.',
+      'EMAIL_TAKEN': 'Email sudah terdaftar.',
+      'TOKEN_MISSING': 'Sesi berakhir. Silakan masuk kembali.',
+      'TOKEN_INVALID': 'Sesi berakhir. Silakan masuk kembali.',
+      'RATE_LIMITED': 'Terlalu banyak percobaan. Coba lagi beberapa saat.',
+    },
+  );
 }

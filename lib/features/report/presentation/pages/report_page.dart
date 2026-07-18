@@ -14,29 +14,14 @@ class ReportPage extends StatefulWidget {
   State<ReportPage> createState() => _ReportPageState();
 }
 
-class _ReportPageState extends State<ReportPage>
-    with SingleTickerProviderStateMixin {
+class _ReportPageState extends State<ReportPage> {
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _endDate = DateTime.now();
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
-    _animController.forward();
     _loadReport();
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
   }
 
   void _loadReport() {
@@ -66,7 +51,6 @@ class _ReportPageState extends State<ReportPage>
         _startDate = picked.start;
         _endDate = picked.end;
       });
-      _animController.forward(from: 0);
       _loadReport();
     }
   }
@@ -90,35 +74,29 @@ class _ReportPageState extends State<ReportPage>
                 backgroundColor: AppColors.success,
               ),
             );
-          } else if (state is ReportExportError) {
+          } else if (state is ReportExportError || state is ReportError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          } else if (state is ReportError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
+                content: Text(
+                  state is ReportError
+                      ? state.message
+                      : (state as ReportExportError).message,
+                ),
                 backgroundColor: AppColors.error,
               ),
             );
           }
         },
-        buildWhen: (previous, current) {
-          // Prevent UI rebuild when only exporting state
-          return current is! ReportExporting &&
-              current is! ReportExportSuccess &&
-              current is! ReportExportError;
-        },
+        buildWhen: (previous, current) =>
+            current is! ReportExporting &&
+            current is! ReportExportSuccess &&
+            current is! ReportExportError,
         builder: (context, state) {
           if (state is ReportLoading) return const ReportLoadingWidget();
-          if (state is ReportError)
+          if (state is ReportError) {
             return ReportErrorState(message: state.message);
-          if (state is ReportLoaded) {
-            return ReportLoadedContent(state: state, fadeAnimation: _fadeAnim);
           }
+          if (state is ReportLoaded) return ReportLoadedContent(state: state);
           return const SizedBox.shrink();
         },
       ),

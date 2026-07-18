@@ -27,37 +27,44 @@ func (r *BackupRepository) CountAll(ctx context.Context) (int, error) {
 
 func (r *BackupRepository) Create(ctx context.Context, b *domain.Backup) error {
 	const q = `
-		INSERT INTO backups (user_id, payload)
-		VALUES ($1, $2)
+		INSERT INTO backups (user_id, payload, content_hash, content_encoding, size_bytes, device_id)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at`
-	return r.pool.QueryRow(ctx, q, b.UserID, b.Payload).Scan(&b.ID, &b.CreatedAt)
+	return r.pool.QueryRow(ctx, q, b.UserID, b.Payload, b.ContentHash, b.ContentEncoding, b.SizeBytes, nullIfEmpty(b.DeviceID)).
+		Scan(&b.ID, &b.CreatedAt)
 }
 
 func (r *BackupRepository) FindLatestByUserID(ctx context.Context, userID string) (*domain.Backup, error) {
 	const q = `
-		SELECT id, user_id, payload, created_at
+		SELECT id, user_id, payload, content_hash, content_encoding, size_bytes, COALESCE(device_id, ''), created_at
 		FROM backups
 		WHERE user_id = $1
 		ORDER BY created_at DESC
 		LIMIT 1`
-	b := &domain.Backup{}
-	err := r.pool.QueryRow(ctx, q, userID).Scan(&b.ID, &b.UserID, &b.Payload, &b.CreatedAt)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, domain.ErrNotFound
-		}
-		return nil, err
-	}
-	return b, nil
+	return r.scanOne(ctx, q, userID)
+}
+
+func (r *BackupRepository) FindByUserIDAndHash(ctx context.Context, userID, contentHash string) (*domain.Backup, error) {
+	const q = `
+		SELECT id, user_id, payload, content_hash, content_encoding, size_bytes, COALESCE(device_id, ''), created_at
+		FROM backups
+		WHERE user_id = $1 AND content_hash = $2`
+	return r.scanOne(ctx, q, userID, contentHash)
 }
 
 func (r *BackupRepository) FindByID(ctx context.Context, id, userID string) (*domain.Backup, error) {
 	const q = `
-		SELECT id, user_id, payload, created_at
+		SELECT id, user_id, payload, content_hash, content_encoding, size_bytes, COALESCE(device_id, ''), created_at
 		FROM backups
 		WHERE id = $1 AND user_id = $2`
+	return r.scanOne(ctx, q, id, userID)
+}
+
+func (r *BackupRepository) scanOne(ctx context.Context, q string, args ...any) (*domain.Backup, error) {
 	b := &domain.Backup{}
-	err := r.pool.QueryRow(ctx, q, id, userID).Scan(&b.ID, &b.UserID, &b.Payload, &b.CreatedAt)
+	err := r.pool.QueryRow(ctx, q, args...).Scan(
+		&b.ID, &b.UserID, &b.Payload, &b.ContentHash, &b.ContentEncoding, &b.SizeBytes, &b.DeviceID, &b.CreatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domain.ErrNotFound
@@ -69,7 +76,7 @@ func (r *BackupRepository) FindByID(ctx context.Context, id, userID string) (*do
 
 func (r *BackupRepository) ListByUserID(ctx context.Context, userID string) ([]*domain.BackupSummary, error) {
 	const q = `
-		SELECT id, created_at, octet_length(payload::text)
+		SELECT id, created_at, size_bytes, COALESCE(device_id, '')
 		FROM backups
 		WHERE user_id = $1
 		ORDER BY created_at DESC`
@@ -82,7 +89,7 @@ func (r *BackupRepository) ListByUserID(ctx context.Context, userID string) ([]*
 	var result []*domain.BackupSummary
 	for rows.Next() {
 		s := &domain.BackupSummary{}
-		if err := rows.Scan(&s.ID, &s.CreatedAt, &s.SizeBytes); err != nil {
+		if err := rows.Scan(&s.ID, &s.CreatedAt, &s.SizeBytes, &s.DeviceID); err != nil {
 			return nil, err
 		}
 		result = append(result, s)
@@ -124,4 +131,11 @@ func (r *BackupRepository) Delete(ctx context.Context, id, userID string) error 
 		return domain.ErrNotFound
 	}
 	return nil
+}
+
+func nullIfEmpty(s string) any {
+	if s == "" {
+		return nil
+	}
+	return s
 }

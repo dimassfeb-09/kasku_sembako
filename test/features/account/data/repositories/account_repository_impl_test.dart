@@ -37,12 +37,19 @@ void main() {
   group('register', () {
     test('returns Right(account) on success', () async {
       when(
-        () => remoteDataSource.register('owner@example.com', 'password123'),
+        () => remoteDataSource.register(
+          'Toko Makmur',
+          'owner@example.com',
+          'password123',
+          '08123456789',
+        ),
       ).thenAnswer((_) async => testAccount);
 
       final result = await repository.register(
+        'Toko Makmur',
         'owner@example.com',
         'password123',
+        '08123456789',
       );
 
       expect(result, Right<Failure, dynamic>(testAccount));
@@ -50,12 +57,14 @@ void main() {
 
     test('maps NetworkException to NetworkFailure', () async {
       when(
-        () => remoteDataSource.register(any(), any()),
+        () => remoteDataSource.register(any(), any(), any(), any()),
       ).thenThrow(const NetworkException('Tidak dapat terhubung ke server.'));
 
       final result = await repository.register(
+        'Toko Makmur',
         'owner@example.com',
         'password123',
+        '08123456789',
       );
 
       expect(result, isA<Left<Failure, dynamic>>());
@@ -67,12 +76,14 @@ void main() {
 
     test('maps ServerException to ServerFailure', () async {
       when(
-        () => remoteDataSource.register(any(), any()),
+        () => remoteDataSource.register(any(), any(), any(), any()),
       ).thenThrow(const ServerException('Email sudah terdaftar.'));
 
       final result = await repository.register(
+        'Toko Makmur',
         'owner@example.com',
         'password123',
+        '08123456789',
       );
 
       result.fold(
@@ -108,6 +119,10 @@ void main() {
   });
 
   group('logout', () {
+    setUp(() {
+      when(() => remoteDataSource.logout()).thenAnswer((_) async {});
+    });
+
     test('clears all cached account keys and returns Right(null)', () async {
       when(
         () => secureStorage.delete(key: any(named: 'key')),
@@ -118,6 +133,9 @@ void main() {
       expect(result, const Right<Failure, void>(null));
       verify(
         () => secureStorage.delete(key: AppConstants.accountAccessTokenKey),
+      ).called(1);
+      verify(
+        () => secureStorage.delete(key: AppConstants.accountRefreshTokenKey),
       ).called(1);
       verify(
         () => secureStorage.delete(key: AppConstants.accountIdKey),

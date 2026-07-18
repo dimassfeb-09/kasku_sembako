@@ -4,6 +4,7 @@ import '../entities/transaction_entity.dart';
 import '../entities/cart_item_entity.dart';
 
 abstract class TransactionRepository {
+  Future<Either<Failure, int>> countToday();
   Future<Either<Failure, TransactionEntity>> checkout(
     List<CartItemEntity> cartItems,
     String paymentMethod,

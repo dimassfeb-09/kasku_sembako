@@ -28,6 +28,18 @@ enum BackupInterval {
   bool get hasTimePicker => this != BackupInterval.hourly;
 }
 
+enum BackupResultStatus { success, skippedUnchanged, error, authExpired }
+
+/// Outcome of the most recent backup attempt (scheduled or manual),
+/// surfaced in the UI so failures are visible instead of silently swallowed.
+class BackupResult {
+  final BackupResultStatus status;
+  final DateTime at;
+  final String? message;
+
+  const BackupResult({required this.status, required this.at, this.message});
+}
+
 class BackupSchedule {
   final bool enabled;
   final BackupInterval interval;

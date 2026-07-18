@@ -51,8 +51,9 @@ class _CategoryPageState extends State<CategoryPage> {
                 size: 24,
               ),
               onPressed: () {
+                final bloc = context.read<CategoryBloc>();
                 context.push('/categories/add').then((_) {
-                  context.read<CategoryBloc>().add(LoadCategoriesEvent());
+                  bloc.add(LoadCategoriesEvent());
                 });
               },
               tooltip: 'Tambah Kategori',

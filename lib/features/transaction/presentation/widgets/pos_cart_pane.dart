@@ -47,7 +47,7 @@ class PosCartPane extends StatelessWidget {
                     : ListView.separated(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         itemCount: state.cartItems.length,
-                        separatorBuilder: (_, __) => Container(
+                        separatorBuilder: (_, _) => Container(
                           height: 1,
                           margin: const EdgeInsets.symmetric(horizontal: 16),
                           color: _C.border,

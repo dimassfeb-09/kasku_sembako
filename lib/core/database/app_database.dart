@@ -22,21 +22,34 @@ part 'app_database.g.dart';
     ActivityLogs,
     DebtPayments,
     SubscriptionCaches,
+    HeldCarts,
+    LocalCashiers,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
+  AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          await m.createTable(subscriptionCaches);
+        }
+        if (from < 3) {
+          await m.createTable(heldCarts);
+        }
+        if (from < 4) {
+          await m.createTable(localCashiers);
+        }
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');

@@ -39,7 +39,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     Emitter<AccountState> emit,
   ) async {
     emit(AccountLoading());
-    final result = await registerAccountUseCase(event.email, event.password);
+    final result = await registerAccountUseCase(
+      event.name,
+      event.email,
+      event.password,
+      event.whatsapp,
+    );
     result.fold(
       (failure) => emit(AccountError(failure.message)),
       (account) => emit(AccountSignedIn(account)),

@@ -67,6 +67,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final product = await billingLocalDataSource.queryProProduct();
       await billingLocalDataSource.buyPro(product);
       return const Right(null);
+    } on AuthException catch (e) {
+      return Left(ServerFailure(e.message));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
@@ -120,6 +122,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       // Offline: fall back to whatever is cached rather than failing —
       // the entity's own isEntitled grace window handles staleness.
       return getCachedStatus();
+    } on AuthException catch (e) {
+      return Left(ServerFailure(e.message));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {

@@ -5,6 +5,7 @@ import 'package:workmanager/workmanager.dart';
 import 'app/app.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/backup_dispatcher.dart';
+import 'core/services/stock_alert_service.dart';
 import 'di/injection.dart' as di;
 import 'features/subscription/domain/repositories/subscription_repository.dart';
 
@@ -32,6 +33,15 @@ void main() async {
   // purchase completed while the app was backgrounded/killed is still
   // caught as soon as the app reopens (see plan: purchase flow step 3).
   di.sl<SubscriptionRepository>();
+
+  // Stock alert notification service
+  di.sl<StockAlertService>().init();
+  Workmanager().registerPeriodicTask(
+    stockAlertTaskKey,
+    stockAlertTaskKey,
+    frequency: const Duration(minutes: 15),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
+  );
 
   runApp(const App());
 }

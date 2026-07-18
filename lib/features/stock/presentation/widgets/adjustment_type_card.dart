@@ -41,7 +41,7 @@ class AdjustmentTypeCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: activeColor.withOpacity(0.08),
+                    color: activeColor.withValues(alpha: 0.08),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -75,7 +75,7 @@ class AdjustmentTypeCard extends StatelessWidget {
                 fontSize: 10,
                 height: 1.2,
                 color: isSelected
-                    ? activeColor.withOpacity(0.8)
+                    ? activeColor.withValues(alpha: 0.8)
                     : AppColors.textSecondary,
               ),
             ),

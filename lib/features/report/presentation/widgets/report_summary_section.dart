@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../transaction/domain/entities/transaction_entity.dart';
+import 'package:remixicon/remixicon.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 
@@ -22,48 +21,45 @@ class ReportSummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top metrics row
           Row(
             children: [
-              ReportMetricTile(
-                label: 'Total Omset',
-                value: totalOmset.toRupiah(),
-                icon: Icons.trending_up_rounded,
-                accent: AppColors.success,
+              Expanded(
                 flex: 2,
+                child: _MetricCard(
+                  icon: RemixIcons.line_chart_line,
+                  label: 'Total Omset',
+                  value: totalOmset.toRupiah(),
+                  color: AppColors.success,
+                ),
               ),
               const SizedBox(width: 10),
-              ReportMetricTile(
-                label: 'Transaksi',
-                value: '$totalTrx nota',
-                icon: Icons.receipt_long_rounded,
-                accent: AppColors.primary,
-                flex: 1,
+              Expanded(
+                child: _MetricCard(
+                  icon: RemixIcons.receipt_line,
+                  label: 'Transaksi',
+                  value: '$totalTrx',
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(width: 10),
-              ReportMetricTile(
-                label: 'Dibatalkan',
-                value: '$voidCount void',
-                icon: Icons.cancel_outlined,
-                accent: voidCount > 0
-                    ? AppColors.error
-                    : AppColors.textSecondary,
-                flex: 1,
+              Expanded(
+                child: _MetricCard(
+                  icon: RemixIcons.close_circle_line,
+                  label: 'Batal',
+                  value: '$voidCount',
+                  color: voidCount > 0
+                      ? AppColors.error
+                      : AppColors.textSecondary,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          // Profit bar
-          ReportProfitBar(
+          _ProfitCard(
             totalOmset: totalOmset,
             totalHpp: totalHpp,
             totalProfit: totalProfit,
@@ -74,13 +70,80 @@ class ReportSummarySection extends StatelessWidget {
   }
 }
 
-class ReportProfitBar extends StatelessWidget {
+class _MetricCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _MetricCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 16, color: color),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: -0.3,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfitCard extends StatelessWidget {
   final double totalOmset;
   final double totalHpp;
   final double totalProfit;
 
-  const ReportProfitBar({
-    super.key,
+  const _ProfitCard({
     required this.totalOmset,
     required this.totalHpp,
     required this.totalProfit,
@@ -94,11 +157,18 @@ class ReportProfitBar extends StatelessWidget {
     final isProfit = totalProfit >= 0;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,27 +179,27 @@ class ReportProfitBar extends StatelessWidget {
               const Text(
                 'Laba Bersih',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
                 ),
               ),
               Row(
                 children: [
                   Icon(
                     isProfit
-                        ? Icons.arrow_upward_rounded
-                        : Icons.arrow_downward_rounded,
-                    color: isProfit ? AppColors.success : AppColors.error,
+                        ? RemixIcons.arrow_up_line
+                        : RemixIcons.arrow_down_line,
                     size: 14,
+                    color: isProfit ? AppColors.success : AppColors.error,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${(ratio * 100).toStringAsFixed(1)}% margin',
+                    '${(ratio * 100).toStringAsFixed(1)}%',
                     style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                       color: isProfit ? AppColors.success : AppColors.error,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -140,52 +210,39 @@ class ReportProfitBar extends StatelessWidget {
           Text(
             totalProfit.toRupiah(),
             style: TextStyle(
-              color: isProfit ? AppColors.success : AppColors.error,
               fontSize: 22,
               fontWeight: FontWeight.w800,
+              color: isProfit ? AppColors.success : AppColors.error,
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 10),
-          // Progress bar
+          const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(3),
             child: Stack(
               children: [
-                Container(height: 6, color: AppColors.border),
+                Container(height: 5, color: AppColors.borderLight),
                 FractionallySizedBox(
                   widthFactor: ratio,
                   child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: isProfit
-                            ? [
-                                AppColors.success.withValues(alpha: 0.6),
-                                AppColors.success,
-                              ]
-                            : [
-                                AppColors.error.withValues(alpha: 0.6),
-                                AppColors.error,
-                              ],
-                      ),
-                    ),
+                    height: 5,
+                    color: isProfit ? AppColors.success : AppColors.error,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ReportLabeledDot(
-                color: AppColors.primary,
-                label: 'HPP: ${totalHpp.toRupiah()}',
-              ),
-              ReportLabeledDot(
+              _Dot(
                 color: AppColors.success,
                 label: 'Omset: ${totalOmset.toRupiah()}',
+              ),
+              const SizedBox(width: 16),
+              _Dot(
+                color: AppColors.primary,
+                label: 'HPP: ${totalHpp.toRupiah()}',
               ),
             ],
           ),
@@ -195,77 +252,10 @@ class ReportProfitBar extends StatelessWidget {
   }
 }
 
-class ReportMetricTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color accent;
-  final int flex;
-
-  const ReportMetricTile({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.accent,
-    required this.flex,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: accent, size: 13),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: TextStyle(
-                color: accent,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ReportLabeledDot extends StatelessWidget {
+class _Dot extends StatelessWidget {
   final Color color;
   final String label;
-
-  const ReportLabeledDot({super.key, required this.color, required this.label});
+  const _Dot({required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -273,18 +263,14 @@ class ReportLabeledDot extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 7,
-          height: 7,
+          width: 6,
+          height: 6,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
         ),
       ],
     );

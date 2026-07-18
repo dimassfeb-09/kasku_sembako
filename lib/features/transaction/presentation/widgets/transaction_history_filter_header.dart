@@ -21,89 +21,70 @@ class TransactionHistoryFilterHeader extends StatelessWidget {
     final dateFormat = DateFormat('dd MMM yyyy');
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: AppColors.white,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          Expanded(
-            child: InkWell(
-              onTap: onTapFilterDate,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.calendar_today_rounded,
-                      size: 16,
-                      color: AppColors.primary,
+          InkWell(
+            onTap: onTapFilterDate,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.calendar_today_rounded,
+                    size: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Filter Tanggal',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(
-                      Icons.arrow_drop_down_rounded,
-                      color: AppColors.textSecondary,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.expand_more_rounded,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '$transactionCount',
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.primary,
-                    height: 1.0,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(width: 4),
                 const Text(
-                  'Transaksi',
+                  'transaksi',
                   style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.primary,
                   ),
                 ),

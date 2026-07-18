@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/config"
 	httpDelivery "github.com/dimassfeb-09/kasku_sembako/backend/internal/delivery/http"
+	"github.com/dimassfeb-09/kasku_sembako/backend/internal/platform/email"
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/platform/playdeveloper"
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/repository/postgres"
 	"github.com/dimassfeb-09/kasku_sembako/backend/internal/usecase"
@@ -35,6 +37,8 @@ func main() {
 	subscriptionRepo := postgres.NewSubscriptionRepository(pool)
 	backupRepo := postgres.NewBackupRepository(pool)
 	storeProfileRepo := postgres.NewStoreProfileRepository(pool)
+	passwordResetRepo := postgres.NewPasswordResetRepository(pool)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(pool)
 
 	var playClient *playdeveloper.Client
 	if cfg.GoogleServiceAccountJSONPath != "" && cfg.GooglePackageName != "" {
@@ -46,21 +50,32 @@ func main() {
 		log.Println("warning: GOOGLE_APPLICATION_CREDENTIALS/GOOGLE_PLAY_PACKAGE_NAME not set — /subscriptions endpoints will fail until configured")
 	}
 
-	authUC := usecase.NewAuthUsecase(userRepo, cfg.JWTSecret, cfg.JWTTTL, cfg.AdminEmail)
+	emailCfg := email.Config{
+		Host:     cfg.SMTPHost,
+		Port:     cfg.SMTPPort,
+		User:     cfg.SMTPUser,
+		Pass:     cfg.SMTPPass,
+		From:     cfg.SMTPFrom,
+		FromName: cfg.SMTPFromName,
+	}
+
+	authUC := usecase.NewAuthUsecase(userRepo, refreshTokenRepo, cfg.JWTSecret, cfg.AccessTokenTTL, cfg.RefreshTokenTTL, cfg.AdminEmail)
 	subscriptionUC := usecase.NewSubscriptionUsecase(subscriptionRepo, playClient, cfg.SubscriptionStalenessTTL)
 	backupUC := usecase.NewBackupUsecase(backupRepo, cfg.BackupRetentionCount)
 	storeProfileUC := usecase.NewStoreProfileUsecase(storeProfileRepo)
+	passwordResetUC := usecase.NewPasswordResetUsecase(userRepo, passwordResetRepo, emailCfg, cfg.JWTSecret, 10*time.Minute, 5*time.Minute)
 
 	app := httpDelivery.NewRouter(httpDelivery.Dependencies{
-		Config:            cfg,
-		AuthUsecase:       authUC,
-		SubscriptionUC:    subscriptionUC,
-		BackupUC:          backupUC,
-		StoreProfileUC:    storeProfileUC,
-		UserRepo:          userRepo,
-		SubscriptionRepo:  subscriptionRepo,
-		BackupRepo:        backupRepo,
-		StoreProfileRepo:  storeProfileRepo,
+		Config:           cfg,
+		AuthUsecase:      authUC,
+		SubscriptionUC:   subscriptionUC,
+		BackupUC:         backupUC,
+		StoreProfileUC:   storeProfileUC,
+		PasswordResetUC:  passwordResetUC,
+		UserRepo:         userRepo,
+		SubscriptionRepo: subscriptionRepo,
+		BackupRepo:       backupRepo,
+		StoreProfileRepo: storeProfileRepo,
 	})
 
 	log.Printf("listening on :%s", cfg.Port)

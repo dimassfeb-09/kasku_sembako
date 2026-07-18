@@ -11,6 +11,8 @@ class ProductEntity extends Equatable {
   final String unit;
   final String? imagePath;
   final bool isActive;
+  final bool trackStock;
+  final int? minStock;
 
   const ProductEntity({
     required this.id,
@@ -23,6 +25,8 @@ class ProductEntity extends Equatable {
     required this.unit,
     this.imagePath,
     required this.isActive,
+    this.trackStock = true,
+    this.minStock,
   });
 
   @override
@@ -37,5 +41,37 @@ class ProductEntity extends Equatable {
     unit,
     imagePath,
     isActive,
+    trackStock,
+    minStock,
   ];
+
+  ProductEntity copyWith({
+    String? id,
+    String? barcode,
+    String? name,
+    String? categoryId,
+    double? purchasePrice,
+    double? sellingPrice,
+    int? stock,
+    String? unit,
+    String? imagePath,
+    bool? isActive,
+    bool? trackStock,
+    int? minStock,
+  }) {
+    return ProductEntity(
+      id: id ?? this.id,
+      barcode: barcode ?? this.barcode,
+      name: name ?? this.name,
+      categoryId: categoryId ?? this.categoryId,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
+      sellingPrice: sellingPrice ?? this.sellingPrice,
+      stock: stock ?? this.stock,
+      unit: unit ?? this.unit,
+      imagePath: imagePath ?? this.imagePath,
+      isActive: isActive ?? this.isActive,
+      trackStock: trackStock ?? this.trackStock,
+      minStock: minStock ?? this.minStock,
+    );
+  }
 }

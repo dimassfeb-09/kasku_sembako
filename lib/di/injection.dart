@@ -13,8 +13,13 @@ import '../features/auth/data/datasources/store_profile_remote_datasource.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/domain/repositories/store_profile_repository.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/data/repositories/password_reset_repository_impl.dart';
 import '../features/auth/data/repositories/store_profile_repository_impl.dart';
+import '../features/auth/data/datasources/password_reset_remote_datasource.dart';
+import '../features/auth/domain/repositories/password_reset_repository.dart';
 import '../features/auth/domain/usecases/auth_usecases.dart';
+import '../features/auth/domain/usecases/password_reset_usecases.dart';
+import '../features/auth/presentation/bloc/password_reset_bloc.dart';
 import '../features/auth/domain/usecases/store_profile_usecases.dart';
 
 import '../features/product/data/datasources/product_local_datasource.dart';
@@ -72,6 +77,7 @@ import '../features/expense/presentation/bloc/expense_bloc.dart';
 import '../core/services/export_service.dart';
 import '../core/services/printer_service.dart';
 import '../core/services/activity_log_service.dart';
+import '../core/services/stock_alert_service.dart';
 import '../features/settings/presentation/bloc/printer_bloc.dart';
 
 import 'package:dio/dio.dart';
@@ -89,6 +95,7 @@ import '../features/subscription/domain/repositories/subscription_repository.dar
 import '../features/subscription/data/repositories/subscription_repository_impl.dart';
 import '../features/subscription/domain/usecases/subscription_usecases.dart';
 import '../features/subscription/presentation/cubit/subscription_cubit.dart';
+import '../features/subscription/presentation/cubit/subscription_state.dart';
 
 import '../features/settings/data/datasources/cloud_backup_remote_datasource.dart';
 import '../features/settings/domain/repositories/cloud_backup_repository.dart';
@@ -124,20 +131,22 @@ Future<void> init() async {
   sl.registerLazySingleton<ActivityLogService>(
     () => ActivityLogService(sl<AppDatabase>(), sl<FlutterSecureStorage>()),
   );
-  sl.registerLazySingleton<Dio>(
-    () => buildDio(sl<FlutterSecureStorage>()),
+  sl.registerLazySingleton<StockAlertService>(
+    () => StockAlertService(sl<AppDatabase>()),
   );
+  sl.registerLazySingleton<Dio>(() => buildDio(sl<FlutterSecureStorage>()));
 
   // Datasources
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(
-      dio: sl(),
-      secureStorage: sl(),
-    ),
+    () => AuthRemoteDataSourceImpl(dio: sl(), secureStorage: sl()),
   );
 
   sl.registerLazySingleton<StoreProfileRemoteDataSource>(
     () => StoreProfileRemoteDataSourceImpl(dio: sl()),
+  );
+
+  sl.registerLazySingleton<PasswordResetRemoteDataSource>(
+    () => PasswordResetRemoteDataSourceImpl(dio: sl<Dio>()),
   );
   sl.registerLazySingleton<ProductLocalDataSource>(
     () => ProductLocalDataSourceImpl(
@@ -197,13 +206,23 @@ Future<void> init() async {
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
-        remoteDataSource: sl<AuthRemoteDataSource>(),
-        secureStorage: sl()),
+      remoteDataSource: sl<AuthRemoteDataSource>(),
+      secureStorage: sl(),
+      database: sl<AppDatabase>(),
+      backupRepository: sl<CloudBackupRepository>(),
+    ),
   );
 
   sl.registerLazySingleton<StoreProfileRepository>(
     () => StoreProfileRepositoryImpl(
-        remoteDataSource: sl<StoreProfileRemoteDataSource>()),
+      remoteDataSource: sl<StoreProfileRemoteDataSource>(),
+    ),
+  );
+
+  sl.registerLazySingleton<PasswordResetRepository>(
+    () => PasswordResetRepositoryImpl(
+      remoteDataSource: sl<PasswordResetRemoteDataSource>(),
+    ),
   );
   sl.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(localDataSource: sl()),
@@ -245,6 +264,7 @@ Future<void> init() async {
   sl.registerLazySingleton<CloudBackupRepository>(
     () => CloudBackupRepositoryImpl(
       remoteDataSource: sl<CloudBackupRemoteDataSource>(),
+      localDataSource: sl<BackupScheduleLocalDataSource>(),
     ),
   );
 
@@ -253,6 +273,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetSessionUseCase(sl()));
+  sl.registerLazySingleton(() => RestoreFromCloudUseCase(sl()));
+  sl.registerLazySingleton(() => ChangePasswordUseCase(sl()));
+
+  sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
+  sl.registerLazySingleton(() => VerifyOtpUseCase(sl()));
+  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
 
   sl.registerLazySingleton(() => SaveStoreProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetStoreProfileUseCase(sl()));
@@ -301,6 +327,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => UploadCloudBackupUseCase(sl()));
   sl.registerLazySingleton(() => DownloadCloudBackupUseCase(sl()));
+  sl.registerLazySingleton(() => DownloadBackupByIdUseCase(sl()));
   sl.registerLazySingleton(() => ListBackupsUseCase(sl()));
   sl.registerLazySingleton(() => DeleteBackupUseCase(sl()));
 
@@ -311,6 +338,14 @@ Future<void> init() async {
       loginUseCase: sl(),
       logoutUseCase: sl(),
       getSessionUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => PasswordResetBloc(
+      forgotPasswordUseCase: sl(),
+      verifyOtpUseCase: sl(),
+      resetPasswordUseCase: sl(),
     ),
   );
 
@@ -359,7 +394,16 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-    () => PosBloc(checkoutUseCase: sl(), getWholesalePricesUseCase: sl()),
+    () => PosBloc(
+      checkoutUseCase: sl(),
+      getWholesalePricesUseCase: sl(),
+      database: sl<AppDatabase>(),
+      isPro: () {
+        final subCubit = sl<SubscriptionCubit>();
+        final state = subCubit.state;
+        return state is SubscriptionStatusLoaded && state.status.isEntitled;
+      },
+    ),
   );
 
   sl.registerFactory(
@@ -407,15 +451,17 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerLazySingleton<BackupScheduleLocalDataSource>(
+    () => BackupScheduleLocalDataSource(sl()),
+  );
+
   sl.registerFactory(
     () => BackupBloc(
       uploadCloudBackupUseCase: sl(),
       downloadCloudBackupUseCase: sl(),
+      downloadBackupByIdUseCase: sl(),
+      listBackupsUseCase: sl(),
     ),
-  );
-
-  sl.registerLazySingleton<BackupScheduleLocalDataSource>(
-    () => BackupScheduleLocalDataSource(sl()),
   );
 
   sl.registerLazySingleton<BackupSchedulerService>(

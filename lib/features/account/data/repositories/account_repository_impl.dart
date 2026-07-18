@@ -18,14 +18,23 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<Either<Failure, AccountEntity>> register(
+    String name,
     String email,
     String password,
+    String whatsapp,
   ) async {
     try {
-      final account = await remoteDataSource.register(email, password);
+      final account = await remoteDataSource.register(
+        name,
+        email,
+        password,
+        whatsapp,
+      );
       return Right(account);
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(ServerFailure(e.message));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
@@ -43,6 +52,8 @@ class AccountRepositoryImpl implements AccountRepository {
       return Right(account);
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
+    } on AuthException catch (e) {
+      return Left(ServerFailure(e.message));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
@@ -52,8 +63,11 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<Either<Failure, void>> logout() async {
+    await remoteDataSource.logout();
+
     try {
       await secureStorage.delete(key: AppConstants.accountAccessTokenKey);
+      await secureStorage.delete(key: AppConstants.accountRefreshTokenKey);
       await secureStorage.delete(key: AppConstants.accountIdKey);
       await secureStorage.delete(key: AppConstants.accountEmailKey);
       await secureStorage.delete(key: AppConstants.accountCreatedAtKey);

@@ -20,6 +20,7 @@ class BackupScheduleSheet extends StatefulWidget {
 class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
   bool _loading = true;
   BackupSchedule _schedule = const BackupSchedule();
+  BackupResult? _lastResult;
   bool _saving = false;
 
   @override
@@ -31,14 +32,20 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
   Future<void> _load() async {
     final ds = BackupScheduleLocalDataSource(sl());
     final schedule = await ds.load();
+    final lastResult = await ds.readLastResult();
     if (!mounted) return;
     setState(() {
       _schedule = schedule;
+      _lastResult = lastResult;
       _loading = false;
     });
   }
 
   Future<void> _save() async {
+    if (!isProEntitled(context)) {
+      await showProUpsell(context, fitur: 'Auto Backup');
+      return;
+    }
     setState(() => _saving = true);
     try {
       final ds = BackupScheduleLocalDataSource(sl());
@@ -65,44 +72,68 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
         border: Border.all(color: _C.borderLight),
       ),
       child: _loading
-          ? const Center(child: Padding(
-              padding: EdgeInsets.all(24),
-              child: CircularProgressIndicator(),
-            ))
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Container(
-                      width: 36, height: 36,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: const Color(0xFFF0FDF4),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(RemixIcons.clockwise_2_line, color: Color(0xFF16A34A), size: 18),
+                      child: const Icon(
+                        RemixIcons.clockwise_2_line,
+                        color: Color(0xFF16A34A),
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
-                      child: Text('Auto Backup',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _C.textPrimary)),
+                      child: Text(
+                        'Auto Backup',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _C.textPrimary,
+                        ),
+                      ),
                     ),
                     if (!isPro)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF3D6),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: const Color(0xFFFFE5A3)),
                         ),
-                        child: const Text('PRO', style: TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF995500))),
+                        child: const Text(
+                          'PRO',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF995500),
+                          ),
+                        ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text('Cadangan otomatis berkala ke cloud.',
-                  style: TextStyle(fontSize: 12, color: _C.textSecondary)),
+                const Text(
+                  'Cadangan otomatis berkala ke cloud.',
+                  style: TextStyle(fontSize: 12, color: _C.textSecondary),
+                ),
                 const SizedBox(height: 20),
                 _buildToggle(),
                 if (_schedule.enabled) ...[
@@ -117,9 +148,9 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
                     _buildTimePicker(),
                   ],
                 ],
-                if (_schedule.lastRun != null) ...[
+                if (_lastResult != null) ...[
                   const SizedBox(height: 16),
-                  _buildLastRun(),
+                  _buildLastResult(),
                 ],
                 if (_schedule.enabled) ...[
                   const SizedBox(height: 20),
@@ -132,11 +163,23 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       child: _saving
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Text('Simpan Jadwal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Simpan Jadwal',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
                     ),
                   ),
                 ],
@@ -157,17 +200,29 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
       ),
       child: Row(
         children: [
-          Icon(_schedule.enabled ? RemixIcons.checkbox_circle_fill : RemixIcons.checkbox_blank_circle_line,
-            size: 20, color: _schedule.enabled ? _C.success : _C.textMuted),
+          Icon(
+            _schedule.enabled
+                ? RemixIcons.checkbox_circle_fill
+                : RemixIcons.checkbox_blank_circle_line,
+            size: 20,
+            color: _schedule.enabled ? _C.success : _C.textMuted,
+          ),
           const SizedBox(width: 12),
           const Expanded(
-            child: Text('Aktifkan Auto Backup',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _C.textPrimary)),
+            child: Text(
+              'Aktifkan Auto Backup',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _C.textPrimary,
+              ),
+            ),
           ),
           Switch(
             value: _schedule.enabled,
-            activeColor: _C.primary,
-            onChanged: (v) => setState(() => _schedule = _schedule.copyWith(enabled: v)),
+            activeThumbColor: _C.primary,
+            onChanged: (v) =>
+                setState(() => _schedule = _schedule.copyWith(enabled: v)),
           ),
         ],
       ),
@@ -178,8 +233,14 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Interval',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.textSecondary)),
+        const Text(
+          'Interval',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: _C.textSecondary,
+          ),
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -195,20 +256,27 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
                 );
               }),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: selected ? _C.primaryLight : _C.background,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: selected ? _C.primary.withValues(alpha: 0.3) : _C.borderLight,
+                    color: selected
+                        ? _C.primary.withValues(alpha: 0.3)
+                        : _C.borderLight,
                   ),
                 ),
-                child: Text(interval.label,
+                child: Text(
+                  interval.label,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: selected ? _C.primary : _C.textSecondary,
-                  )),
+                  ),
+                ),
               ),
             );
           }).toList(),
@@ -222,8 +290,14 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(isMonthly ? 'Tanggal' : 'Hari',
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.textSecondary)),
+        Text(
+          isMonthly ? 'Tanggal' : 'Hari',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: _C.textSecondary,
+          ),
+        ),
         const SizedBox(height: 8),
         isMonthly ? _buildMonthDays() : _buildWeekDays(),
       ],
@@ -238,23 +312,29 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
         final dayNum = i + 1;
         final selected = _schedule.day == dayNum;
         return GestureDetector(
-          onTap: () => setState(() => _schedule = _schedule.copyWith(day: dayNum)),
+          onTap: () =>
+              setState(() => _schedule = _schedule.copyWith(day: dayNum)),
           child: Container(
-            width: 42, height: 42,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: selected ? _C.primaryLight : _C.background,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: selected ? _C.primary.withValues(alpha: 0.3) : _C.borderLight,
+                color: selected
+                    ? _C.primary.withValues(alpha: 0.3)
+                    : _C.borderLight,
               ),
             ),
             child: Center(
-              child: Text(days[i],
+              child: Text(
+                days[i],
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: selected ? _C.primary : _C.textSecondary,
-                )),
+                ),
+              ),
             ),
           ),
         );
@@ -270,23 +350,29 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
         final dayNum = i + 1;
         final selected = _schedule.day == dayNum;
         return GestureDetector(
-          onTap: () => setState(() => _schedule = _schedule.copyWith(day: dayNum)),
+          onTap: () =>
+              setState(() => _schedule = _schedule.copyWith(day: dayNum)),
           child: Container(
-            width: 38, height: 38,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: selected ? _C.primaryLight : _C.background,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: selected ? _C.primary.withValues(alpha: 0.3) : _C.borderLight,
+                color: selected
+                    ? _C.primary.withValues(alpha: 0.3)
+                    : _C.borderLight,
               ),
             ),
             child: Center(
-              child: Text('$dayNum',
+              child: Text(
+                '$dayNum',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: selected ? _C.primary : _C.textSecondary,
-                )),
+                ),
+              ),
             ),
           ),
         );
@@ -298,8 +384,14 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Waktu',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.textSecondary)),
+        const Text(
+          'Waktu',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: _C.textSecondary,
+          ),
+        ),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () => _pickTime(context),
@@ -313,13 +405,25 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(RemixIcons.alarm_line, size: 18, color: _C.textSecondary),
+                const Icon(
+                  RemixIcons.alarm_line,
+                  size: 18,
+                  color: _C.textSecondary,
+                ),
                 const SizedBox(width: 8),
-                Text(_schedule.time,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _C.textPrimary)),
+                Text(
+                  _schedule.time,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: _C.textPrimary,
+                  ),
+                ),
                 const SizedBox(width: 4),
-                const Text('WIB',
-                  style: TextStyle(fontSize: 11, color: _C.textMuted)),
+                const Text(
+                  'WIB',
+                  style: TextStyle(fontSize: 11, color: _C.textMuted),
+                ),
               ],
             ),
           ),
@@ -346,14 +450,40 @@ class _BackupScheduleSheetState extends State<BackupScheduleSheet> {
     }
   }
 
-  Widget _buildLastRun() {
-    final formatted = DateFormat('dd MMM yyyy HH:mm').format(_schedule.lastRun!);
+  Widget _buildLastResult() {
+    final result = _lastResult!;
+    final formatted = DateFormat('dd MMM yyyy HH:mm').format(result.at);
+
+    final IconData icon;
+    final Color color;
+    final String label;
+    switch (result.status) {
+      case BackupResultStatus.success:
+        icon = RemixIcons.check_line;
+        color = _C.success;
+        label = 'Berhasil: $formatted';
+      case BackupResultStatus.skippedUnchanged:
+        icon = RemixIcons.check_line;
+        color = _C.success;
+        label = 'Tidak ada perubahan: $formatted';
+      case BackupResultStatus.authExpired:
+        icon = RemixIcons.error_warning_line;
+        color = const Color(0xFFD97706);
+        label = 'Sesi berakhir - masuk kembali untuk melanjutkan ($formatted)';
+      case BackupResultStatus.error:
+        icon = RemixIcons.error_warning_line;
+        color = _C.error;
+        label = 'Gagal: $formatted';
+    }
+
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(RemixIcons.check_line, size: 14, color: _C.success),
+        Icon(icon, size: 14, color: color),
         const SizedBox(width: 6),
-        Text('Terakhir: $formatted',
-          style: const TextStyle(fontSize: 11, color: _C.textSecondary)),
+        Expanded(
+          child: Text(label, style: TextStyle(fontSize: 11, color: color)),
+        ),
       ],
     );
   }

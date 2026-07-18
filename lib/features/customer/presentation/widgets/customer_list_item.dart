@@ -12,7 +12,7 @@ import '../../../../core/utils/currency_formatter.dart';
 class CustomerListItem extends StatelessWidget {
   final CustomerEntity customer;
 
-  const CustomerListItem({Key? key, required this.customer}) : super(key: key);
+  const CustomerListItem({super.key, required this.customer});
 
   Future<bool?> _showConfirmDeleteDialog(BuildContext context) {
     return showDialog<bool>(

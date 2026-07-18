@@ -7,7 +7,9 @@ class UploadCloudBackupUseCase {
 
   UploadCloudBackupUseCase(this.repository);
 
-  Future<Either<Failure, void>> call(Map<String, dynamic> payload) async {
+  Future<Either<Failure, UploadOutcome>> call(
+    Map<String, dynamic> payload,
+  ) async {
     return await repository.uploadBackup(payload);
   }
 }
@@ -17,9 +19,19 @@ class DownloadCloudBackupUseCase {
 
   DownloadCloudBackupUseCase(this.repository);
 
-  /// Returns the downloaded backup's JSON payload.
+  /// Returns the downloaded latest backup's JSON payload.
   Future<Either<Failure, Map<String, dynamic>>> call() async {
     return await repository.downloadLatestBackup();
+  }
+}
+
+class DownloadBackupByIdUseCase {
+  final CloudBackupRepository repository;
+
+  DownloadBackupByIdUseCase(this.repository);
+
+  Future<Either<Failure, Map<String, dynamic>>> call(String id) async {
+    return await repository.downloadBackupById(id);
   }
 }
 

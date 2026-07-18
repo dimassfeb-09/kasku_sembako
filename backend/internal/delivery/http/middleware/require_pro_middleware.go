@@ -22,13 +22,13 @@ func RequirePro(subs *usecase.SubscriptionUsecase) fiber.Handler {
 		sub, err := subs.GetStatus(c.Context(), userID)
 		if err != nil {
 			if err == domain.ErrNotFound || errors.Is(err, domain.ErrSubscriptionNotPro) {
-				return fiber.NewError(fiber.StatusPaymentRequired, "no active Pro subscription")
+				return domain.NewAppError(fiber.StatusPaymentRequired, domain.CodeProRequired, "no active Pro subscription")
 			}
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to verify subscription status")
 		}
 
 		if !sub.IsActive(time.Now()) {
-			return fiber.NewError(fiber.StatusPaymentRequired, "no active Pro subscription")
+			return domain.NewAppError(fiber.StatusPaymentRequired, domain.CodeProRequired, "no active Pro subscription")
 		}
 
 		return c.Next()

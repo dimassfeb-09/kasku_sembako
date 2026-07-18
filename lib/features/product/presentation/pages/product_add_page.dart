@@ -23,7 +23,7 @@ import '../../../../shared/widgets/searchable_dropdown.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ProductAddPage extends StatefulWidget {
-  const ProductAddPage({Key? key}) : super(key: key);
+  const ProductAddPage({super.key});
 
   @override
   State<ProductAddPage> createState() => _ProductAddPageState();
@@ -36,6 +36,8 @@ class _ProductAddPageState extends State<ProductAddPage> {
   final _sellingPriceController = TextEditingController();
   final _stockController = TextEditingController();
   final _customUnitController = TextEditingController();
+  final _minStockController = TextEditingController();
+  bool _trackStock = true;
   String _selectedUnit = 'Pcs';
   final List<String> _commonUnits = const [
     'Pcs',
@@ -59,16 +61,20 @@ class _ProductAddPageState extends State<ProductAddPage> {
   @override
   void initState() {
     super.initState();
+    _generateBarcode();
     _loadCategories();
+  }
+
+  void _generateBarcode() {
+    final ts = DateTime.now().millisecondsSinceEpoch.toString();
+    _barcodeController.text = ts.substring(ts.length - 13);
   }
 
   Future<void> _loadCategories() async {
     final getCategories = sl<GetCategoriesUseCase>();
     final result = await getCategories();
     result.fold((failure) => null, (categories) {
-      setState(() {
-        _categories = categories;
-      });
+      setState(() => _categories = categories);
     });
   }
 
@@ -79,6 +85,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
     _purchasePriceController.dispose();
     _sellingPriceController.dispose();
     _stockController.dispose();
+    _minStockController.dispose();
     _customUnitController.dispose();
     super.dispose();
   }
@@ -187,11 +194,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
                       maxHeight: 800,
                       imageQuality: 85,
                     );
-                    if (image != null) {
-                      setState(() {
-                        _imagePath = image.path;
-                      });
-                    }
+                    if (image != null) setState(() => _imagePath = image.path);
                   },
                 ),
                 const SizedBox(height: 8),
@@ -224,11 +227,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
                       maxHeight: 800,
                       imageQuality: 85,
                     );
-                    if (image != null) {
-                      setState(() {
-                        _imagePath = image.path;
-                      });
-                    }
+                    if (image != null) setState(() => _imagePath = image.path);
                   },
                 ),
                 if (_imagePath != null) ...[
@@ -257,9 +256,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
                     ),
                     onTap: () {
                       Navigator.pop(context);
-                      setState(() {
-                        _imagePath = null;
-                      });
+                      setState(() => _imagePath = null);
                     },
                   ),
                 ],
@@ -276,7 +273,10 @@ class _ProductAddPageState extends State<ProductAddPage> {
     final name = _nameController.text.trim();
     final pPrice = double.tryParse(_purchasePriceController.text) ?? 0;
     final sPrice = double.tryParse(_sellingPriceController.text) ?? 0;
-    final stock = int.tryParse(_stockController.text) ?? 0;
+    final stock = _trackStock ? (int.tryParse(_stockController.text) ?? 0) : 0;
+    final minStock = _trackStock
+        ? int.tryParse(_minStockController.text)
+        : null;
     final unit = _selectedUnit == 'Lainnya'
         ? _customUnitController.text.trim()
         : _selectedUnit;
@@ -285,7 +285,6 @@ class _ProductAddPageState extends State<ProductAddPage> {
       _showStyledSnackBar('Mohon lengkapi semua field wajib', isError: true);
       return;
     }
-
     if (pPrice <= 0 || sPrice <= 0) {
       _showStyledSnackBar(
         'Harga beli dan harga jual harus lebih besar dari 0',
@@ -293,7 +292,6 @@ class _ProductAddPageState extends State<ProductAddPage> {
       );
       return;
     }
-
     if (sPrice < pPrice) {
       _showStyledSnackBar(
         'Harga jual tidak boleh kurang dari harga beli',
@@ -303,13 +301,11 @@ class _ProductAddPageState extends State<ProductAddPage> {
     }
 
     final subState = context.read<SubscriptionCubit>().state;
-    if (subState is SubscriptionStatusLoaded && !subState.status.isEntitled) {
+    if (subState is! SubscriptionStatusLoaded || !subState.status.isEntitled) {
       final countResult = await sl<ProductRepository>().countProducts();
       final count = countResult.fold((_) => 0, (c) => c);
       if (count >= 20) {
-        if (mounted) {
-          showProUpsell(context, fitur: 'Menambah produk');
-        }
+        if (mounted) showProUpsell(context, fitur: 'Menambah produk');
         return;
       }
     }
@@ -340,11 +336,11 @@ class _ProductAddPageState extends State<ProductAddPage> {
       isActive: true,
       categoryId: _selectedCategoryId,
       imagePath: localImagePath,
+      trackStock: _trackStock,
+      minStock: minStock,
     );
 
-    if (mounted) {
-      context.read<ProductBloc>().add(AddProductEvent(entity));
-    }
+    if (mounted) context.read<ProductBloc>().add(AddProductEvent(entity));
   }
 
   @override
@@ -352,19 +348,14 @@ class _ProductAddPageState extends State<ProductAddPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        shape: const Border(
-          bottom: BorderSide(color: AppColors.borderLight, width: 1),
-        ),
         title: const Text(
           'Tambah Produk',
           style: TextStyle(
-            fontFamily: 'Inter',
             fontSize: 18,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
@@ -378,166 +369,258 @@ class _ProductAddPageState extends State<ProductAddPage> {
           }
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.primary.withOpacity(0.2),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: _imagePath != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.file(
-                              File(_imagePath!),
-                              width: 120,
-                              height: 120,
-                              fit: BoxFit.cover,
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.borderLight, width: 1),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x0A000000),
+                    offset: Offset(0, 4),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                                width: 1.5,
+                              ),
                             ),
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.add_a_photo_rounded,
-                                  size: 24,
-                                  color: AppColors.primary,
+                            child: _imagePath != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.file(
+                                      File(_imagePath!),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_a_photo_rounded,
+                                        size: 24,
+                                        color: AppColors.primary,
+                                      ),
+                                      SizedBox(height: 6),
+                                      Text(
+                                        'Tambah Foto',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                          if (_imagePath != null)
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: GestureDetector(
+                                onTap: () => setState(() => _imagePath = null),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.danger,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 12,
+                                    color: AppColors.white,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  AppInput(
+                    label: 'Barcode',
+                    controller: _barcodeController,
+                    hintText: 'Otomatis dibuat, bisa diedit',
+                    suffixIcon: IconButton(
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
+                      onPressed: _generateBarcode,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  AppInput(
+                    label: 'Nama Produk',
+                    controller: _nameController,
+                    hintText: 'Contoh: Minyak Goreng Bimoli 1L',
+                  ),
+                  const SizedBox(height: 16),
+                  SearchableDropdown<CategoryEntity>(
+                    label: 'KATEGORI',
+                    hint: 'Pilih Kategori (Opsional)',
+                    searchHint: 'Cari Kategori...',
+                    noDataMessage: 'Kategori tidak ada',
+                    items: _categories,
+                    selectedValue: _selectedCategoryId != null
+                        ? _categories.firstWhere(
+                            (c) => c.id == _selectedCategoryId,
+                          )
+                        : null,
+                    itemToString: (category) => category.name,
+                    onChanged: (category) =>
+                        setState(() => _selectedCategoryId = category?.id),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AppInput(
+                          label: 'Harga Beli',
+                          controller: _purchasePriceController,
+                          keyboardType: TextInputType.number,
+                          hintText: 'Rp 0',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: AppInput(
+                          label: 'Harga Jual',
+                          controller: _sellingPriceController,
+                          keyboardType: TextInputType.number,
+                          hintText: 'Rp 0',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               const Text(
-                                'Tambah Foto',
+                                'Lacak Stok',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 12,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.primary,
+                                ),
+                              ),
+                              Text(
+                                _trackStock
+                                    ? 'Stok akan dikurangi saat transaksi'
+                                    : 'Produk tanpa stok (jasa, digital, dll)',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
                           ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 28),
-              AppInput(
-                label: 'Barcode',
-                controller: _barcodeController,
-                hintText: 'Scan atau ketik kode barcode',
-              ),
-              const SizedBox(height: 16),
-              AppInput(
-                label: 'Nama Produk',
-                controller: _nameController,
-                hintText: 'Contoh: Minyak Goreng Bimoli 1L',
-              ),
-              const SizedBox(height: 16),
-              SearchableDropdown<CategoryEntity>(
-                label: 'KATEGORI',
-                hint: 'Pilih Kategori (Opsional)',
-                searchHint: 'Cari Kategori...',
-                noDataMessage: 'Kategori tidak ada',
-                items: _categories,
-                selectedValue: _selectedCategoryId != null
-                    ? _categories.firstWhere((c) => c.id == _selectedCategoryId)
-                    : null,
-                itemToString: (category) => category.name,
-                onChanged: (category) {
-                  setState(() {
-                    _selectedCategoryId = category?.id;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Harga Beli',
-                      controller: _purchasePriceController,
-                      keyboardType: TextInputType.number,
-                      hintText: 'Rp 0',
+                        ),
+                        Switch(
+                          value: _trackStock,
+                          onChanged: (v) => setState(() => _trackStock = v),
+                          activeThumbColor: AppColors.primary,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Harga Jual',
-                      controller: _sellingPriceController,
-                      keyboardType: TextInputType.number,
-                      hintText: 'Rp 0',
+                  if (_trackStock) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: AppInput(
+                            label: 'Stok Awal',
+                            controller: _stockController,
+                            keyboardType: TextInputType.number,
+                            hintText: '0',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppInput(
+                            label: 'Min. Stok',
+                            controller: _minStockController,
+                            keyboardType: TextInputType.number,
+                            hintText: 'Kosongkan jika tidak ada',
+                          ),
+                        ),
+                      ],
                     ),
+                  ],
+                  const SizedBox(height: 16),
+                  SearchableDropdown<String>(
+                    label: 'SATUAN',
+                    hint: 'Pilih Satuan',
+                    searchHint: 'Cari Satuan...',
+                    noDataMessage: 'Satuan tidak ada',
+                    items: _commonUnits,
+                    selectedValue: _selectedUnit,
+                    itemToString: (u) => u,
+                    onChanged: (u) =>
+                        setState(() => _selectedUnit = u ?? 'Pcs'),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Stok Awal',
-                      controller: _stockController,
-                      keyboardType: TextInputType.number,
-                      hintText: '0',
+                  if (_selectedUnit == 'Lainnya') ...[
+                    const SizedBox(height: 16),
+                    AppInput(
+                      label: 'Tulis Satuan Kustom',
+                      controller: _customUnitController,
+                      hintText: 'Contoh: Meter, Box, Ikat',
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: SearchableDropdown<String>(
-                      label: 'SATUAN',
-                      hint: 'Pilih Satuan',
-                      searchHint: 'Cari Satuan...',
-                      noDataMessage: 'Satuan tidak ada',
-                      items: _commonUnits,
-                      selectedValue: _selectedUnit,
-                      itemToString: (u) => u,
-                      onChanged: (u) {
-                        setState(() {
-                          _selectedUnit = u ?? 'Pcs';
-                        });
-                      },
+                  ],
+                  const SizedBox(height: 28),
+                  BlocBuilder<ProductBloc, ProductState>(
+                    builder: (context, state) => AppButton(
+                      text: 'Tambah Produk',
+                      isLoading: state is ProductLoading,
+                      onPressed: _onSave,
                     ),
                   ),
                 ],
               ),
-              if (_selectedUnit == 'Lainnya') ...[
-                const SizedBox(height: 16),
-                AppInput(
-                  label: 'Tulis Satuan Kustom',
-                  controller: _customUnitController,
-                  hintText: 'Contoh: Meter, Box, Ikat',
-                ),
-              ],
-              const SizedBox(height: 36),
-              BlocBuilder<ProductBloc, ProductState>(
-                builder: (context, state) {
-                  return AppButton(
-                    text: 'Tambah Produk',
-                    isLoading: state is ProductLoading,
-                    onPressed: _onSave,
-                  );
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),

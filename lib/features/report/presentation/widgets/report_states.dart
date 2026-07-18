@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../transaction/domain/entities/transaction_entity.dart';
+import 'package:remixicon/remixicon.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/currency_formatter.dart';
 
 class ReportLoadingWidget extends StatelessWidget {
   const ReportLoadingWidget({super.key});
@@ -36,7 +34,7 @@ class ReportErrorState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(
-            Icons.error_outline_rounded,
+            RemixIcons.error_warning_line,
             color: AppColors.error,
             size: 48,
           ),

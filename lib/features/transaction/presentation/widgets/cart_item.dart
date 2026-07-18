@@ -167,7 +167,9 @@ class CartItem extends StatelessWidget {
                             child: Icon(
                               Icons.edit_rounded,
                               size: 8,
-                              color: PosColors.textSecondary.withOpacity(0.5),
+                              color: PosColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                         ],

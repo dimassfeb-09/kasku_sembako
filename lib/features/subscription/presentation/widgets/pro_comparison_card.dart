@@ -27,11 +27,14 @@ class ProComparisonCard extends StatelessWidget {
 }
 
 const _features = [
+  _F('Transaksi per Hari', 'Maks 30', '∞ Tak terbatas'),
   _F('Produk', 'Maks 20', '∞ Tak terbatas'),
   _F('Riwayat Transaksi', '30 hari', '∞ Selamanya'),
   _F('Riwayat Stok', '30 hari', '∞ Selamanya'),
+  _F('Karyawan', '1 orang', '∞ Tak terbatas'),
   _F('Laporan & Export Data', '—', '✓'),
-  _F('Backup Cloud', '—', '✓'),
+  _F('Backup Cloud', '—', '✓ (manual & terjadwal)'),
+  _F('Pemulihan Data dari Cloud', '—', '✓'),
   _F('Kustom Struk (Logo, dll)', '—', '✓'),
   _F('Harga Grosir', '—', '✓'),
   _F('Void / Cetak Ulang Struk', '—', '✓'),
@@ -58,12 +61,20 @@ class _Header extends StatelessWidget {
         children: [
           const Text(
             'Bandingkan Fitur',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _C.textPrimary),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: _C.textPrimary,
+            ),
           ),
           const Spacer(),
           _HBadge(label: 'Free', color: _C.textMuted, bg: _C.borderLight),
           const SizedBox(width: 10),
-          _HBadge(label: 'Pro', color: Color(0xFF995500), bg: Color(0xFFFFF3D6)),
+          _HBadge(
+            label: 'Pro',
+            color: Color(0xFF995500),
+            bg: Color(0xFFFFF3D6),
+          ),
           const SizedBox(width: 2),
         ],
       ),
@@ -81,9 +92,19 @@ class _HBadge extends StatelessWidget {
     return Container(
       width: 72,
       padding: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
-      child: Text(label, textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -97,22 +118,21 @@ class _FeatureRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: _C.borderLight.withValues(alpha: 0.6))),
+        border: Border(
+          top: BorderSide(color: _C.borderLight.withValues(alpha: 0.6)),
+        ),
       ),
       child: Row(
         children: [
           Expanded(
             flex: 4,
-            child: Text(f.label, style: const TextStyle(fontSize: 12.5, color: _C.textPrimary)),
+            child: Text(
+              f.label,
+              style: const TextStyle(fontSize: 12.5, color: _C.textPrimary),
+            ),
           ),
-          Expanded(
-            flex: 2,
-            child: _Cell(value: f.free, isPro: false),
-          ),
-          Expanded(
-            flex: 2,
-            child: _ProCell(value: f.pro),
-          ),
+          Expanded(flex: 2, child: _Cell(value: f.free, isPro: false)),
+          Expanded(flex: 2, child: _ProCell(value: f.pro)),
         ],
       ),
     );
@@ -141,7 +161,13 @@ class _Cell extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: isPro ? FontWeight.w700 : FontWeight.w500,
-          color: isCheck ? _C.success : isCross ? _C.textMuted : isPro ? const Color(0xFF995500) : _C.textSecondary,
+          color: isCheck
+              ? _C.success
+              : isCross
+              ? _C.textMuted
+              : isPro
+              ? const Color(0xFF995500)
+              : _C.textSecondary,
         ),
       ),
     );

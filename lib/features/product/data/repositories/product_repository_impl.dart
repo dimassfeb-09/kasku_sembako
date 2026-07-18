@@ -76,6 +76,8 @@ class ProductRepositoryImpl implements ProductRepository {
         unit: product.unit,
         imagePath: product.imagePath,
         isActive: product.isActive,
+        trackStock: product.trackStock,
+        minStock: product.minStock,
       );
       await localDataSource.insertProduct(productModel);
       return const Right(null);
@@ -111,6 +113,8 @@ class ProductRepositoryImpl implements ProductRepository {
         unit: product.unit,
         imagePath: product.imagePath,
         isActive: product.isActive,
+        trackStock: product.trackStock,
+        minStock: product.minStock,
       );
       await localDataSource.updateProduct(productModel);
       return const Right(null);

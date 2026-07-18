@@ -8,8 +8,13 @@ class RegisterUseCase {
 
   RegisterUseCase(this.repository);
 
-  Future<Either<Failure, UserEntity>> call(String email, String password) async {
-    return await repository.register(email, password);
+  Future<Either<Failure, UserEntity>> call(
+    String name,
+    String email,
+    String password,
+    String whatsapp,
+  ) async {
+    return await repository.register(name, email, password, whatsapp);
   }
 }
 
@@ -18,7 +23,10 @@ class LoginUseCase {
 
   LoginUseCase(this.repository);
 
-  Future<Either<Failure, UserEntity>> call(String email, String password) async {
+  Future<Either<Failure, UserEntity>> call(
+    String email,
+    String password,
+  ) async {
     return await repository.login(email, password);
   }
 }
@@ -40,5 +48,28 @@ class GetSessionUseCase {
 
   Future<Either<Failure, UserEntity?>> call() async {
     return await repository.getCachedSession();
+  }
+}
+
+class RestoreFromCloudUseCase {
+  final AuthRepository repository;
+
+  RestoreFromCloudUseCase(this.repository);
+
+  Future<Either<Failure, void>> call() async {
+    return await repository.restoreFromCloud();
+  }
+}
+
+class ChangePasswordUseCase {
+  final AuthRepository repository;
+
+  ChangePasswordUseCase(this.repository);
+
+  Future<Either<Failure, void>> call(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    return await repository.changePassword(currentPassword, newPassword);
   }
 }
